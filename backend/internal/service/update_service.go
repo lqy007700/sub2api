@@ -637,12 +637,13 @@ func (s *UpdateService) saveToCache(ctx context.Context, info *UpdateInfo) {
 	_ = s.cache.SetUpdateInfo(ctx, string(data), time.Duration(updateCacheTTL)*time.Second)
 }
 
-// compareVersions compares two semantic versions
+// compareVersions orders upstream versions, then this fork's numeric revision.
+// The lqy007700 suffix identifies a release revision rather than a preview channel.
 func compareVersions(current, latest string) int {
 	currentParts := parseVersion(current)
 	latestParts := parseVersion(latest)
 
-	for i := 0; i < 3; i++ {
+	for i := range currentParts {
 		if currentParts[i] < latestParts[i] {
 			return -1
 		}
@@ -653,16 +654,20 @@ func compareVersions(current, latest string) int {
 	return 0
 }
 
-func parseVersion(v string) [3]int {
+func parseVersion(v string) [4]int {
 	v = strings.TrimPrefix(v, "v")
-	if idx := strings.IndexByte(v, '-'); idx != -1 {
-		v = v[:idx]
-	}
-	parts := strings.Split(v, ".")
-	result := [3]int{0, 0, 0}
+	v, _, _ = strings.Cut(v, "+")
+	base, suffix, _ := strings.Cut(v, "-")
+	parts := strings.Split(base, ".")
+	result := [4]int{}
 	for i := 0; i < len(parts) && i < 3; i++ {
 		if parsed, err := strconv.Atoi(parts[i]); err == nil {
 			result[i] = parsed
+		}
+	}
+	if revision, ok := strings.CutPrefix(suffix, "lqy007700."); ok {
+		if parsed, err := strconv.Atoi(revision); err == nil && parsed >= 0 {
+			result[3] = parsed
 		}
 	}
 	return result

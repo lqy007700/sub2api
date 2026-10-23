@@ -69,6 +69,58 @@ func TestUpdateServiceUsesForkReleasesForUpdatesAndRollback(t *testing.T) {
 	require.Equal(t, "lqy007700/sub2api", client.recentRepo)
 }
 
+func TestUpdateServiceChecksForkRevisionUpdates(t *testing.T) {
+	for _, tc := range []struct {
+		current string
+		latest  string
+		update  bool
+	}{
+		{"0.2.17-lqy007700.1", "v0.2.18-lqy007700.2", true},
+		{"0.2.18-lqy007700.1", "v0.2.18-lqy007700.2", true},
+		{"0.2.18-lqy007700.2", "v0.2.18-lqy007700.3", true},
+		{"v0.2.18-lqy007700.2", "v0.2.18-lqy007700.10", true},
+		{"0.2.18-lqy007700.10", "v0.2.18-lqy007700.2", false},
+		{"0.2.18-lqy007700.2", "v0.2.18-lqy007700.2", false},
+		{"0.2.18", "v0.2.18-lqy007700.1", true},
+		{"0.2.18-lqy007700.99", "v0.2.19-lqy007700.1", true},
+		{"0.2.19-lqy007700.1", "v0.2.18-lqy007700.99", false},
+		{"0.2.18-lqy007700.2+build1", "v0.2.18-lqy007700.3+build2", true},
+	} {
+		t.Run(tc.current+"_to_"+tc.latest, func(t *testing.T) {
+			svc := NewUpdateService(&updateServiceCacheStub{}, &updateServiceGitHubClientStub{
+				release: &GitHubRelease{TagName: tc.latest},
+			}, tc.current, "release")
+			info, err := svc.CheckUpdate(context.Background(), true)
+			require.NoError(t, err)
+			require.Equal(t, tc.update, info.HasUpdate)
+			require.Empty(t, info.Warning)
+
+			cached, err := svc.CheckUpdate(context.Background(), false)
+			require.NoError(t, err)
+			require.True(t, cached.Cached)
+			require.Equal(t, tc.update, cached.HasUpdate)
+		})
+	}
+}
+
+func TestUpdateServiceListRollbackVersionsOrdersForkRevisions(t *testing.T) {
+	svc := newRollbackTestService("0.2.18-lqy007700.3", []*GitHubRelease{
+		{TagName: "v0.2.18-lqy007700.1"},
+		{TagName: "v0.2.18-lqy007700.10"},
+		{TagName: "v0.2.18-lqy007700.3"},
+		{TagName: "v0.2.17-lqy007700.99"},
+		{TagName: "v0.2.18"},
+		{TagName: "v0.2.18-lqy007700.2"},
+	})
+	versions, err := svc.ListRollbackVersions(context.Background())
+	require.NoError(t, err)
+	require.Equal(t, []RollbackVersion{
+		{Version: "0.2.18-lqy007700.2"},
+		{Version: "0.2.18-lqy007700.1"},
+		{Version: "0.2.18"},
+	}, versions)
+}
+
 func TestUpdateServicePerformUpdateNoUpdateReturnsSentinel(t *testing.T) {
 	svc := NewUpdateService(
 		&updateServiceCacheStub{},

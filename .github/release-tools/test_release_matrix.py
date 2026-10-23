@@ -88,6 +88,8 @@ class ReleaseMatrixTest(unittest.TestCase):
                 self.assertFalse(data['dockers'])
                 self.assertEqual(data['release']['header'], original['release']['header'])
                 self.assertEqual(data['release']['footer'], original['release']['footer'])
+                self.assertIs(data['release']['prerelease'], False)
+                self.assertEqual(data['release']['make_latest'], 'true')
                 if simple:
                     self.assertTrue(data['checksum']['disable'])
                     self.assertTrue(data['release']['skip_upload'])

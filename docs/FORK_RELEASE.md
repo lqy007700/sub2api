@@ -14,9 +14,11 @@
 
 当前主分支后续发布只生成 Linux amd64 产物，不再构建 Linux arm64、macOS 或 Windows，也不再提供 Apple container 部署入口。Ubuntu 服务器运行 `uname -m` 应返回 `x86_64`；`aarch64` 服务器无法使用这些原生产物。
 
-版本号沿用 `v<官方版本>-lqy007700.<修订号>`，例如 `v0.2.18-lqy007700.2`。同一官方版本再次发布时递增最后的修订号；合并下一官方版本后从 `.1` 开始。该格式含语义版本预发布后缀，GoReleaser 的 `prerelease: auto` 会将其标为 GitHub **Pre-release**。
+版本号沿用 `v<官方版本>-lqy007700.<修订号>`，例如 `v0.2.18-lqy007700.3`。同一官方版本再次发布时递增最后的修订号；合并下一官方版本后从 `.1` 开始。`lqy007700.N` 表示本分支的正式修订号；GoReleaser 显式配置 `prerelease: false` 和 `make_latest: "true"`，避免根据连字符后缀自动判定为预发布。
 
-**默认安装器与后台自动更新查询 GitHub 的最新正式 Release，该接口排除 Pre-release。** 因此沿用此版本格式时，部署应明确指定镜像版本，二进制安装应传入 `install --version vX.Y.Z-lqy007700.N`。只存在预发布时，不带版本的安装或默认更新检查可能查不到可用版本。本文保留现有版本命名与更新策略，不修改历史发布状态。
+**默认安装器与后台自动更新查询 GitHub 的最新正式 Release。** 正式发布必须能通过 `https://api.github.com/repos/lqy007700/sub2api/releases/latest` 查询，并包含 Linux amd64 安装包和校验文件。后台先比较官方版本，再按数字比较本分支修订号，例如 `.10` 高于 `.2`。
+
+`0.2.18-lqy007700.2` 及更早构建会忽略 fork 修订号差异。同一官方版本内首次升级到包含修复的 `.3` 时，需要手动更新镜像，或显式安装指定版本；升级后后台可正确发现后续修订。页面手动刷新会跳过默认 20 分钟的更新缓存。
 
 ## 首次发布前的设置
 
@@ -39,8 +41,8 @@ GitHub Release 安装包和校验和需要能匿名下载。`UPDATE_GITHUB_TOKEN
 
 ```bash
 # 仅示例：先提交并推送准备发布的代码，再创建标签。
-git tag -a v0.2.18-lqy007700.2 -m "v0.2.18-lqy007700.2" -m "合并官方 v0.2.18；保留隐藏倍率；仅发布 Linux amd64。"
-git push origin v0.2.18-lqy007700.2
+git tag -a v0.2.18-lqy007700.3 -m "v0.2.18-lqy007700.3" -m "合并官方 v0.2.18；保留隐藏倍率；仅发布 Linux amd64。"
+git push origin v0.2.18-lqy007700.3
 ```
 
 标签推送触发 Release。也可手动运行工作流，填写已存在的版本标签并关闭 `dry_run`。准备任务锁定标签对应的源码提交，写入构建用 VERSION；发布说明读取附注标签正文，成功后再同步默认分支的版本文件。
@@ -53,7 +55,7 @@ git push origin v0.2.18-lqy007700.2
 
 每次只构建一份 Linux amd64 镜像并直接标记各个标签，不需要 QEMU 或跨架构清单合并。
 
-`simple_release=true` 或仓库变量 `SIMPLE_RELEASE=true` 仍表示**仅镜像发布**：只发布 Linux amd64 GHCR 镜像和 Release 说明，不上传二进制或校验和，也不推送 DockerHub。默认完整模式同样只有 amd64，但保留安装器和指定版本升级需要的安装包。预发布也会更新镜像的移动标签，生产部署建议固定具体版本或摘要。
+`simple_release=true` 或仓库变量 `SIMPLE_RELEASE=true` 仍表示**仅镜像发布**：只发布 Linux amd64 GHCR 镜像和 Release 说明，不上传二进制或校验和，也不推送 DockerHub。默认完整模式同样只有 amd64，但保留安装器和指定版本升级需要的安装包。发布会更新镜像的移动标签，生产部署建议固定具体版本或摘要。
 
 ## 部署本仓库的版本
 
@@ -63,11 +65,11 @@ git push origin v0.2.18-lqy007700.2
 # Docker 部署准备：在空部署目录执行，随后检查生成的 .env。
 curl -fsSL https://raw.githubusercontent.com/lqy007700/sub2api/main/deploy/docker-deploy.sh | bash
 # 将 Compose 中 sub2api 的 image 固定为以下地址，然后启动：
-# ghcr.io/lqy007700/sub2api:0.2.18-lqy007700.2
+# ghcr.io/lqy007700/sub2api:0.2.18-lqy007700.3
 docker compose up -d
 
 # Ubuntu / Linux amd64 二进制安装，需要 PostgreSQL、Redis 与 root 权限。
-curl -fsSL https://raw.githubusercontent.com/lqy007700/sub2api/main/deploy/install.sh | sudo bash -s -- install --version v0.2.18-lqy007700.2
+curl -fsSL https://raw.githubusercontent.com/lqy007700/sub2api/main/deploy/install.sh | sudo bash -s -- install --version v0.2.18-lqy007700.3
 ```
 
 ## 升级及从上游部署迁移
@@ -87,7 +89,7 @@ docker compose -f docker-compose.local.yml up -d sub2api
 Linux amd64 二进制切换到指定版本：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lqy007700/sub2api/main/deploy/install.sh | sudo bash -s -- install --version v0.2.18-lqy007700.2
+curl -fsSL https://raw.githubusercontent.com/lqy007700/sub2api/main/deploy/install.sh | sudo bash -s -- install --version v0.2.18-lqy007700.3
 ```
 
 已经运行的上游二进制仍使用原来编译进去的更新源。先安装或部署一次本分支构建的版本，之后后台的版本查询与回退列表才来自本仓库。默认自动更新仍只查询最新正式 Release；Simple Release 不提供二进制在线升级需要的资源。
