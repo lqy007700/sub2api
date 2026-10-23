@@ -209,7 +209,7 @@ Nginx drops headers containing underscores by default (e.g. `session_id`), which
 
 ## Deployment
 
-This fork installs and upgrades from [lqy007700/sub2api releases](https://github.com/lqy007700/sub2api/releases) and uses `ghcr.io/lqy007700/sub2api:latest` for container deployments. Publish your fork's artifacts first; see [Fork release and upgrade guide](docs/FORK_RELEASE.md) for setup and migration.
+This fork supports Ubuntu/Linux amd64 (x86_64) deployments only. It installs and upgrades from [lqy007700/sub2api releases](https://github.com/lqy007700/sub2api/releases) and uses `ghcr.io/lqy007700/sub2api:latest` for container deployments. Publish your fork's artifacts first; see [Fork release and upgrade guide](docs/FORK_RELEASE.md) for setup and migration.
 
 ### Method 1: Script Installation (Recommended)
 
@@ -217,7 +217,7 @@ One-click installation script that downloads pre-built binaries from GitHub Rele
 
 #### Prerequisites
 
-- Linux server (amd64 or arm64)
+- Ubuntu server (Linux amd64/x86_64 only)
 - PostgreSQL 15+ (installed and running)
 - Redis 7+ (installed and running)
 - Root privileges
@@ -282,7 +282,7 @@ curl -sSL https://raw.githubusercontent.com/lqy007700/sub2api/main/deploy/instal
 
 ### Method 2: Docker Compose (Recommended)
 
-Deploy with Docker Compose, including PostgreSQL and Redis containers.
+Deploy on an Ubuntu amd64/x86_64 server with Docker Compose, including PostgreSQL and Redis containers.
 
 #### Prerequisites
 
@@ -447,23 +447,7 @@ rm -rf data/ postgres_data/ redis_data/
 
 ---
 
-### Method 3: Apple container (macOS)
-
-Apple-silicon Macs running macOS 26 can run the full Sub2API, PostgreSQL, and Redis stack with Apple `container` 1.1.0 or newer:
-
-```bash
-git clone https://github.com/lqy007700/sub2api.git
-cd sub2api/deploy
-./apple-container.sh init
-./apple-container.sh up
-./apple-container.sh status
-```
-
-This is an operator-managed local workflow; Docker Compose remains the recommended production path. See [deploy/APPLE_CONTAINER.md](deploy/APPLE_CONTAINER.md) for lifecycle commands, persistence, upgrades, and runtime limitations.
-
----
-
-### Method 4: Build from Source
+### Method 3: Build from Source
 
 Build and run from source code for development or customization.
 
@@ -649,7 +633,7 @@ gateway:
     force_http: true
 ```
 
-For Compose and Apple container deployments, the equivalent `.env` setting is:
+For Compose deployments, the equivalent `.env` setting is:
 
 ```bash
 GATEWAY_OPENAI_WS_FORCE_HTTP=true

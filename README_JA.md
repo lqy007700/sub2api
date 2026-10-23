@@ -210,7 +210,7 @@ Nginx はデフォルトでアンダースコアを含むヘッダー（例: `se
 
 ## デプロイ
 
-この fork のインストールと更新は [lqy007700/sub2api Releases](https://github.com/lqy007700/sub2api/releases) を参照し、コンテナは `ghcr.io/lqy007700/sub2api:latest` を使用します。先にこのリポジトリの成果物を公開してください。権限設定と移行手順は [Fork リリース・更新ガイド](docs/FORK_RELEASE.md) を参照してください。
+この fork は Ubuntu/Linux amd64（x86_64）のデプロイのみをサポートします。インストールと更新は [lqy007700/sub2api Releases](https://github.com/lqy007700/sub2api/releases) を参照し、コンテナは `ghcr.io/lqy007700/sub2api:latest` を使用します。先にこのリポジトリの成果物を公開してください。権限設定と移行手順は [Fork リリース・更新ガイド](docs/FORK_RELEASE.md) を参照してください。
 
 ### 方法1: スクリプトによるインストール（推奨）
 
@@ -218,7 +218,7 @@ GitHub Releases からビルド済みバイナリをダウンロードするワ�
 
 #### 前提条件
 
-- Linux サーバー（amd64 または arm64）
+- Ubuntu サーバー（Linux amd64/x86_64 のみ）
 - PostgreSQL 15+（インストール済みかつ稼働中）
 - Redis 7+（インストール済みかつ稼働中）
 - root 権限
@@ -283,7 +283,7 @@ curl -sSL https://raw.githubusercontent.com/lqy007700/sub2api/main/deploy/instal
 
 ### 方法2: Docker Compose（推奨）
 
-PostgreSQL と Redis のコンテナを含む Docker Compose でデプロイします。
+Ubuntu amd64/x86_64 サーバーに、PostgreSQL と Redis のコンテナを含む Docker Compose でデプロイします。
 
 #### 前提条件
 
@@ -448,23 +448,7 @@ rm -rf data/ postgres_data/ redis_data/
 
 ---
 
-### 方法3: Apple container（macOS）
-
-Apple シリコン搭載 Mac と macOS 26 では、Apple `container` 1.1.0 以降を使用して Sub2API、PostgreSQL、Redis の完全なスタックを実行できます:
-
-```bash
-git clone https://github.com/lqy007700/sub2api.git
-cd sub2api/deploy
-./apple-container.sh init
-./apple-container.sh up
-./apple-container.sh status
-```
-
-これはローカル開発および手動運用向けです。本番環境では引き続き Docker Compose を推奨します。ライフサイクル、永続化、アップグレード、制限については [deploy/APPLE_CONTAINER.md](deploy/APPLE_CONTAINER.md) を参照してください。
-
----
-
-### 方法4: ソースからビルド
+### 方法3: ソースからビルド
 
 開発やカスタマイズのためにソースコードからビルドして実行します。
 

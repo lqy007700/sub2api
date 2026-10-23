@@ -432,28 +432,17 @@ detect_platform() {
     OS=$(uname -s | tr '[:upper:]' '[:lower:]')
     ARCH=$(uname -m)
 
+    if [ "$OS" != "linux" ]; then
+        print_error "$(msg 'unsupported_os'): $OS (requires Linux amd64/x86_64)" >&2
+        exit 1
+    fi
+
     case "$ARCH" in
-        x86_64)
+        x86_64|amd64)
             ARCH="amd64"
             ;;
-        aarch64|arm64)
-            ARCH="arm64"
-            ;;
         *)
-            print_error "$(msg 'unsupported_arch'): $ARCH"
-            exit 1
-            ;;
-    esac
-
-    case "$OS" in
-        linux)
-            OS="linux"
-            ;;
-        darwin)
-            OS="darwin"
-            ;;
-        *)
-            print_error "$(msg 'unsupported_os'): $OS"
+            print_error "$(msg 'unsupported_arch'): $ARCH (requires Linux amd64/x86_64)" >&2
             exit 1
             ;;
     esac
@@ -606,7 +595,7 @@ validate_version() {
 # Get current installed version
 get_current_version() {
     if [ -f "$INSTALL_DIR/sub2api" ]; then
-        # Use grep -E for better compatibility (works on macOS and Linux)
+        # Use extended regular expressions to extract the installed version.
         "$INSTALL_DIR/sub2api" --version 2>/dev/null | grep -oE 'v?[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo "unknown"
     else
         echo "not_installed"
@@ -1030,6 +1019,9 @@ uninstall() {
 
 # Main
 main() {
+    # Reject unsupported hosts before prompts, privilege checks, or network requests.
+    detect_platform
+
     # Parse flags first
     local target_version=""
     local positional_args=()
@@ -1084,7 +1076,6 @@ main() {
     case "${1:-}" in
         upgrade|update)
             check_root
-            detect_platform
             check_dependencies
             if [ -n "$target_version" ]; then
                 # Upgrade to specific version
@@ -1098,7 +1089,6 @@ main() {
         install)
             # Install with optional version
             check_root
-            detect_platform
             check_dependencies
             if [ -n "$target_version" ]; then
                 # Install specific version (fresh install or rollback)
@@ -1150,7 +1140,6 @@ main() {
                 exit 1
             fi
             check_root
-            detect_platform
             check_dependencies
             install_version "$target_version"
             exit 0
@@ -1193,7 +1182,6 @@ main() {
 
     # Default: Fresh install with latest version
     check_root
-    detect_platform
     check_dependencies
 
     if [ -n "$target_version" ]; then

@@ -52,18 +52,25 @@ class ReleaseMatrixTest(unittest.TestCase):
             (directory / f"manifest-{target['goos']}-{target['goarch']}.json").write_text(json.dumps(metadata))
         return argparse.Namespace(input='release-input', version='9.8.7', sha='a' * 40, simple=simple, output='contexts')
 
-    def test_full_and_simple_matrix_match_existing_targets(self):
-        full = release.targets()
-        self.assertEqual(len(full), 5)
-        self.assertNotIn({'goos': 'windows', 'goarch': 'arm64'}, full)
-        self.assertEqual(release.targets(True), [{'goos': 'linux', 'goarch': 'amd64'}])
+    def test_full_and_simple_matrix_only_support_linux_amd64(self):
+        expected = [{'goos': 'linux', 'goarch': 'amd64'}]
+        self.assertEqual(release.targets(), expected)
+        self.assertEqual(release.targets(True), expected)
+
+    def test_unsupported_platforms_are_rejected(self):
+        for goos, goarch in (('linux', 'arm64'), ('darwin', 'amd64'), ('darwin', 'arm64'), ('windows', 'amd64')):
+            with self.subTest(goos=goos, goarch=goarch):
+                with self.assertRaises(ValueError):
+                    release.archive_name('9.8.7', {'goos': goos, 'goarch': goarch})
+                with self.assertRaises(ValueError):
+                    release.generate_config(argparse.Namespace(mode='build', simple=False, goos=goos, goarch=goarch, output='unsupported.yaml'))
 
     def test_leaf_keeps_packaging_and_selects_only_one_target(self):
         original = release.config()
-        release.generate_config(argparse.Namespace(mode='build', simple=False, goos='darwin', goarch='arm64', output='leaf.yaml'))
+        release.generate_config(argparse.Namespace(mode='build', simple=False, goos='linux', goarch='amd64', output='leaf.yaml'))
         leaf = yaml.safe_load(Path('leaf.yaml').read_text())
-        self.assertEqual(leaf['builds'][0]['goos'], ['darwin'])
-        self.assertEqual(leaf['builds'][0]['goarch'], ['arm64'])
+        self.assertEqual(leaf['builds'][0]['goos'], ['linux'])
+        self.assertEqual(leaf['builds'][0]['goarch'], ['amd64'])
         self.assertEqual(leaf['builds'][0]['ignore'], [])
         self.assertEqual(leaf['archives'], original['archives'])
         self.assertEqual(leaf['release'], original['release'])
@@ -117,10 +124,10 @@ class ReleaseMatrixTest(unittest.TestCase):
         Path('backend/resources').mkdir()
         Path('backend/resources/data').write_text('fixture')
         release.contexts(args)
-        for arch in ('amd64', 'arm64'):
-            binary = Path('contexts') / arch / 'sub2api'
-            self.assertEqual(binary.read_bytes(), b'fixture')
-            self.assertEqual(binary.stat().st_mode & 0o777, 0o755)
+        self.assertEqual({path.name for path in Path('contexts').iterdir()}, {'amd64'})
+        binary = Path('contexts/amd64/sub2api')
+        self.assertEqual(binary.read_bytes(), b'fixture')
+        self.assertEqual(binary.stat().st_mode & 0o777, 0o755)
 
     def test_plan_requires_a_tag_for_publication(self):
         args = argparse.Namespace(ref='main', dry_run=False, simple=False)
@@ -138,7 +145,7 @@ class ReleaseMatrixTest(unittest.TestCase):
         output = dict(line.split('=', 1) for line in Path('outputs').read_text().splitlines())
         self.assertEqual(output['dry_run'], 'true')
         self.assertEqual(output['owner_lower'], 'exampleowner')
-        self.assertEqual(len(json.loads(output['matrix'])['include']), 5)
+        self.assertEqual(json.loads(output['matrix'])['include'], [{'goos': 'linux', 'goarch': 'amd64'}])
 
     def test_docker_commands_do_not_publish_during_dry_run(self):
         fake_bin = Path('bin')
@@ -152,8 +159,9 @@ class ReleaseMatrixTest(unittest.TestCase):
                'DRY_RUN': 'true', 'SIMPLE_RELEASE': 'false', 'DOCKERHUB_USERNAME': 'skip'}
         subprocess.run(['bash', str(ROOT / '.github/release-tools/release-images.sh')], env=env, check=True)
         log = Path('docker.log').read_text()
-        self.assertEqual(log.count('buildx build'), 2)
-        self.assertIn('linux/arm64', log)
+        self.assertEqual(log.count('buildx build'), 1)
+        self.assertIn('--platform linux/amd64', log)
+        self.assertNotIn('arm64', log)
         self.assertNotIn('--push', log)
         self.assertNotIn('imagetools', log)
         self.assertNotIn('skip/sub2api', log)
@@ -176,20 +184,25 @@ class ReleaseMatrixTest(unittest.TestCase):
                 subprocess.run(['bash', str(ROOT / '.github/release-tools/release-images.sh')], env=env, check=True)
                 log = log_path.read_text()
                 self.assertIn('--push', log)
-                self.assertEqual(log.count('buildx build'), 1 if simple else 2)
+                self.assertEqual(log.count('buildx build'), 1)
+                self.assertIn('--platform linux/amd64', log)
+                self.assertNotIn('arm64', log)
+                self.assertNotIn('imagetools', log)
+                self.assertIn('ghcr.io/exampleowner/sub2api:9.8.7-amd64', log)
+                self.assertIn('ghcr.io/exampleowner/sub2api:9.8.7 ', log)
+                self.assertIn('ghcr.io/exampleowner/sub2api:latest', log)
                 if simple:
                     self.assertNotIn('fixturehub', log)
-                    self.assertNotIn('imagetools', log)
-                    self.assertIn('ghcr.io/exampleowner/sub2api:latest', log)
+                    self.assertNotIn('ghcr.io/exampleowner/sub2api:9.8 ', log)
                 else:
-                    self.assertEqual(log.count('imagetools create'), 2 if dockerhub == 'fixturehub' else 1)
                     if dockerhub == 'fixturehub':
-                        self.assertIn('fixturehub/sub2api:9.8', log)
+                        self.assertIn('fixturehub/sub2api:9.8 ', log)
                     else:
                         self.assertNotIn('fixturehub/sub2api', log)
                         self.assertNotIn('skip/sub2api', log)
                         self.assertNotIn('--tag /sub2api', log)
-                    self.assertIn('ghcr.io/exampleowner/sub2api:9', log)
+                    self.assertIn('ghcr.io/exampleowner/sub2api:9.8 ', log)
+                    self.assertIn('ghcr.io/exampleowner/sub2api:9 ', log)
 
 
 

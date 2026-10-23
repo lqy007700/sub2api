@@ -235,7 +235,7 @@ fast_mode = true
 
 ## 部署方式
 
-本分支从 [lqy007700/sub2api Releases](https://github.com/lqy007700/sub2api/releases) 安装和升级，容器默认使用 `ghcr.io/lqy007700/sub2api:latest`。请先发布本仓库产物；权限设置、GHCR 可见性和从上游部署迁移的步骤见 [Fork 发布与升级指南](docs/FORK_RELEASE.md)。
+本分支仅支持 Ubuntu/Linux amd64（x86_64）部署，从 [lqy007700/sub2api Releases](https://github.com/lqy007700/sub2api/releases) 安装和升级，容器默认使用 `ghcr.io/lqy007700/sub2api:latest`。请先发布本仓库产物；权限设置、GHCR 可见性和从上游部署迁移的步骤见 [Fork 发布与升级指南](docs/FORK_RELEASE.md)。
 
 管理员分组新增可选隐藏计费倍率，配置、优先级、公开展示与迁移说明见 [隐藏倍率使用指南](docs/HIDDEN_GROUP_RATE.md)。
 
@@ -245,7 +245,7 @@ fast_mode = true
 
 #### 前置条件
 
-- Linux 服务器（amd64 或 arm64）
+- Ubuntu 服务器（仅支持 Linux amd64/x86_64）
 - PostgreSQL 15+（已安装并运行）
 - Redis 7+（已安装并运行）
 - Root 权限
@@ -310,7 +310,7 @@ curl -sSL https://raw.githubusercontent.com/lqy007700/sub2api/main/deploy/instal
 
 ### 方式二：Docker Compose（推荐）
 
-使用 Docker Compose 部署，包含 PostgreSQL 和 Redis 容器。
+在 Ubuntu amd64/x86_64 服务器上使用 Docker Compose 部署，包含 PostgreSQL 和 Redis 容器。
 
 #### 前置条件
 
@@ -487,23 +487,7 @@ rm -rf data/ postgres_data/ redis_data/
 
 ---
 
-### 方式三：Apple container（macOS）
-
-Apple 芯片 Mac 在 macOS 26 上可使用 Apple `container` 1.1.0 或更高版本运行完整的 Sub2API、PostgreSQL 和 Redis：
-
-```bash
-git clone https://github.com/lqy007700/sub2api.git
-cd sub2api/deploy
-./apple-container.sh init
-./apple-container.sh up
-./apple-container.sh status
-```
-
-该方式面向本地开发和人工运维，不提供持续重启监管；生产部署仍推荐 Docker Compose。生命周期命令、持久化、升级和运行时限制见 [deploy/APPLE_CONTAINER.md](deploy/APPLE_CONTAINER.md)。
-
----
-
-### 方式四：源码编译
+### 方式三：源码编译
 
 从源码编译安装，适合开发或定制需求。
 

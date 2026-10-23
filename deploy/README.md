@@ -1,6 +1,6 @@
 # Sub2API Deployment Files
 
-This directory contains files for deploying Sub2API on Linux servers and Apple-silicon Macs.
+This directory contains files for deploying Sub2API on Ubuntu/Linux amd64 (x86_64) servers only.
 
 This fork uses [lqy007700/sub2api releases](https://github.com/lqy007700/sub2api/releases) and `ghcr.io/lqy007700/sub2api:latest` by default. Publish this fork's artifacts before deploying. See [Fork release and upgrade guide](../docs/FORK_RELEASE.md) for Actions permissions, optional DockerHub credentials, GHCR visibility, and migration from upstream deployments.
 
@@ -9,7 +9,6 @@ This fork uses [lqy007700/sub2api releases](https://github.com/lqy007700/sub2api
 | Method | Best For | Setup Wizard |
 |--------|----------|--------------|
 | **Docker Compose** | Quick setup, all-in-one | Not needed (auto-setup) |
-| **Apple container** | Native local stack on macOS 26 | Not needed (auto-setup) |
 | **Binary Install** | Production servers, systemd | Web-based wizard |
 
 ## Files
@@ -19,8 +18,6 @@ This fork uses [lqy007700/sub2api releases](https://github.com/lqy007700/sub2api
 | `docker-compose.yml` | Docker Compose configuration (named volumes) |
 | `docker-compose.local.yml` | Docker Compose configuration (local directories, easy migration) |
 | `docker-deploy.sh` | **One-click Docker deployment script (recommended)** |
-| `apple-container.sh` | Native Apple `container` lifecycle script |
-| `APPLE_CONTAINER.md` | Apple `container` deployment and operations guide |
 | `.env.example` | Container environment variables template |
 | `DOCKER.md` | Container image documentation (GHCR by default) |
 | `install.sh` | One-click binary installation script |
@@ -30,23 +27,6 @@ This fork uses [lqy007700/sub2api releases](https://github.com/lqy007700/sub2api
 | `DATAMANAGEMENTD_CN.md` | datamanagementd 部署与联动说明（中文） |
 | `config.example.yaml` | Example configuration file |
 | `EDGE_SECURITY.md` | Reverse proxy, CDN/WAF, trusted proxy, and ingress hardening guide |
-
----
-
-## Apple container Deployment
-
-Apple-silicon Macs running macOS 26 can run the complete Sub2API, PostgreSQL, and Redis stack with Apple `container` 1.1.0 or newer:
-
-```bash
-./apple-container.sh init
-./apple-container.sh up
-./apple-container.sh status
-./apple-container.sh logs app -f
-```
-
-The script uses Apple named volumes, starts dependencies in order, and performs live readiness checks. The application container supervises the Sub2API process so the Web UI's update-and-restart flow can relaunch an updated binary. It does not provide host-level automatic startup; run `./apple-container.sh up` after a host reboot. Docker Compose remains the recommended production deployment path.
-
-See [APPLE_CONTAINER.md](./APPLE_CONTAINER.md) for configuration, upgrades, persistence, networking behavior, and limitations.
 
 ---
 
@@ -395,7 +375,7 @@ GEMINI_OAUTH_CLIENT_SECRET=GOCSPX-your-client-secret
 
 ## Binary Installation
 
-For production servers using systemd.
+For Ubuntu/Linux amd64 (x86_64) production servers using systemd. The installer rejects other operating systems and architectures before installation.
 
 ### One-Line Installation
 
@@ -512,7 +492,7 @@ The main config file is at `/etc/sub2api/config.yaml` (created by Setup Wizard).
 
 ### Prerequisites
 
-- Linux server (Ubuntu 20.04+, Debian 11+, CentOS 8+, etc.)
+- Ubuntu 20.04+ server (Linux amd64/x86_64 only)
 - PostgreSQL 14+
 - Redis 6+
 - systemd

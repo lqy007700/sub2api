@@ -11,7 +11,7 @@ on:
         required: true
         type: string
       simple_release:
-        description: 'Simple release: only x86_64 GHCR image, skip other artifacts'
+        description: 'Image-only release: Linux amd64 GHCR image, skip binary assets and DockerHub'
         required: false
         type: boolean
         default: false
@@ -232,8 +232,6 @@ jobs:
         with:
           go-version-file: backend/go.mod
           cache: false
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Login to DockerHub
@@ -249,7 +247,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build images and publish manifests
+      - name: Build and publish Linux amd64 image tags
         run: bash "$RUNNER_TEMP/release-tools/release-images.sh"
       - name: Get annotated tag notes
         id: tag_message

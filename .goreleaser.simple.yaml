@@ -1,4 +1,4 @@
-# 简化版 GoReleaser 配置 - 仅发布 x86_64 GHCR 镜像
+# 简化版 GoReleaser 配置 - 仅发布 Ubuntu / Linux amd64 GHCR 镜像
 version: 2
 
 project_name: sub2api
