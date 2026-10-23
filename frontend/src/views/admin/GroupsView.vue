@@ -627,6 +627,22 @@
           <p class="input-hint">{{ t("admin.groups.rateMultiplierHint") }}</p>
         </div>
         <div>
+          <label for="create-hidden-rate-multiplier" class="input-label">{{
+            t("admin.groups.form.hiddenRateMultiplier")
+          }}</label>
+          <input
+            id="create-hidden-rate-multiplier"
+            v-model.number="createForm.hidden_rate_multiplier"
+            type="number"
+            step="0.0001"
+            min="0.0001"
+            max="999999.9999"
+            class="input"
+            :placeholder="t('admin.groups.form.hiddenRateMultiplierPlaceholder')"
+          />
+          <p class="input-hint">{{ t("admin.groups.form.hiddenRateMultiplierHint") }}</p>
+        </div>
+        <div>
           <label class="input-label">{{ t("admin.groups.form.rpmLimit") }}</label>
           <input
             v-model.number="createForm.rpm_limit"
@@ -2263,6 +2279,22 @@
             class="input"
             data-tour="group-form-multiplier"
           />
+        </div>
+        <div>
+          <label for="edit-hidden-rate-multiplier" class="input-label">{{
+            t("admin.groups.form.hiddenRateMultiplier")
+          }}</label>
+          <input
+            id="edit-hidden-rate-multiplier"
+            v-model.number="editForm.hidden_rate_multiplier"
+            type="number"
+            step="0.0001"
+            min="0.0001"
+            max="999999.9999"
+            class="input"
+            :placeholder="t('admin.groups.form.hiddenRateMultiplierPlaceholder')"
+          />
+          <p class="input-hint">{{ t("admin.groups.form.hiddenRateMultiplierHint") }}</p>
         </div>
         <div>
           <label class="input-label">{{ t("admin.groups.form.rpmLimit") }}</label>
@@ -4947,6 +4979,7 @@ const createForm = reactive({
   i18n: {} as GroupI18n,
   platform: "anthropic" as GroupPlatform,
   rate_multiplier: 1.0,
+  hidden_rate_multiplier: null as number | string | null,
   is_exclusive: false,
   subscription_type: "standard" as SubscriptionType,
   daily_limit_usd: null as number | null,
@@ -5312,6 +5345,7 @@ const editForm = reactive({
   i18n: {} as GroupI18n,
   platform: "anthropic" as GroupPlatform,
   rate_multiplier: 1.0,
+  hidden_rate_multiplier: null as number | string | null,
   is_exclusive: false,
   status: "active" as "active" | "inactive",
   subscription_type: "standard" as SubscriptionType,
@@ -5389,6 +5423,7 @@ type ImagePricingFormState = {
   allow_image_generation: boolean;
   allow_batch_image_generation: boolean;
   rate_multiplier: number;
+  hidden_rate_multiplier: number | string | null;
   image_rate_independent: boolean;
   image_rate_multiplier: number;
   batch_image_discount_multiplier: number;
@@ -5405,6 +5440,7 @@ type ImagePricingFormState = {
 type VideoPricingFormState = {
   platform: GroupPlatform;
   rate_multiplier: number;
+  hidden_rate_multiplier: number | string | null;
   video_rate_independent: boolean;
   video_rate_multiplier: number;
   video_price_480p: number | string | null;
@@ -5440,6 +5476,12 @@ const parsePreviewPrice = (value: number | string | null | undefined) => {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
 };
 
+const parseHiddenRateMultiplier = (value: number | string | null): number | null => {
+  if (typeof value === "string" && value.trim() === "") return null;
+  const rate = parsePreviewPrice(value);
+  return rate !== null && rate > 0 ? rate : null;
+};
+
 const formatImagePricePreview = (value: number | string | null | undefined) => {
   if (value === null || value === undefined || value === "") {
     return t("admin.groups.imagePricing.notConfigured");
@@ -5465,7 +5507,10 @@ const formatVideoPricePreview = (value: number | string | null | undefined) => {
 const buildImageFinalPricePreview = (form: ImagePricingFormState) => {
   const imageMultiplier = form.image_rate_independent
     ? normalizePreviewNumber(form.image_rate_multiplier, 1)
-    : normalizePreviewNumber(form.rate_multiplier, 1);
+    : normalizePreviewNumber(
+        parseHiddenRateMultiplier(form.hidden_rate_multiplier) ?? form.rate_multiplier,
+        1,
+      );
   const multiplier = imageMultiplier;
   return imagePricingTiers.map((tier) => {
     const basePrice =
@@ -5483,7 +5528,10 @@ const buildImageFinalPricePreview = (form: ImagePricingFormState) => {
 const buildVideoFinalPricePreview = (form: VideoPricingFormState) => {
   const multiplier = form.video_rate_independent
     ? normalizePreviewNumber(form.video_rate_multiplier, 1)
-    : normalizePreviewNumber(form.rate_multiplier, 1);
+    : normalizePreviewNumber(
+        parseHiddenRateMultiplier(form.hidden_rate_multiplier) ?? form.rate_multiplier,
+        1,
+      );
   return videoPricingTiers.map((tier) => {
     const basePrice =
       parsePreviewPrice(form[tier.key]) ??
@@ -5516,11 +5564,15 @@ const DEFAULT_WEB_SEARCH_PRICE_PER_CALL = 0.01;
 const buildWebSearchFinalPricePreview = (form: {
   web_search_price_per_call: number | string | null;
   rate_multiplier: number | string | null;
+  hidden_rate_multiplier: number | string | null;
 }) => {
   const basePrice =
     parsePreviewPrice(form.web_search_price_per_call) ??
     DEFAULT_WEB_SEARCH_PRICE_PER_CALL;
-  const multiplier = normalizePreviewNumber(form.rate_multiplier, 1);
+  const multiplier = normalizePreviewNumber(
+    parseHiddenRateMultiplier(form.hidden_rate_multiplier) ?? form.rate_multiplier,
+    1,
+  );
   return formatImagePricePreview(basePrice * multiplier);
 };
 
@@ -5776,6 +5828,7 @@ const closeCreateModal = () => {
   createForm.i18n = {};
   createForm.platform = "anthropic";
   createForm.rate_multiplier = 1.0;
+  createForm.hidden_rate_multiplier = null;
   createForm.is_exclusive = false;
   createForm.subscription_type = "standard";
   createForm.daily_limit_usd = null;
@@ -5873,6 +5926,18 @@ const validateProfitControlForm = (form: ProfitControlFormState): boolean => {
   return true;
 };
 
+const validateHiddenRateMultiplier = (value: number | string | null): boolean => {
+  if (value === null || (typeof value === "string" && value.trim() === "")) {
+    return true;
+  }
+  const rate = Number(value);
+  if (!Number.isFinite(rate) || rate < 0.0001 || rate > 999999.9999) {
+    appStore.showError(t("admin.groups.form.hiddenRateMultiplierInvalid"));
+    return false;
+  }
+  return true;
+};
+
 const validateGroupReasoningMultipliers = (pricing: PricingFormEntry[]): boolean => {
   for (const entry of pricing) {
     const error = validateReasoningEffortMultipliers(entry.reasoning_effort_multipliers, t);
@@ -5899,6 +5964,7 @@ const handleCreateGroup = async () => {
   if (!validateProfitControlForm(createForm)) {
     return;
   }
+  if (!validateHiddenRateMultiplier(createForm.hidden_rate_multiplier)) return;
   if (!validateGroupReasoningMultipliers(createForm.model_pricing)) return;
   // 模型白名单：开启且没有任何条目时阻止提交，与后端 400 对齐。
   if (
@@ -5920,6 +5986,7 @@ const handleCreateGroup = async () => {
     // 构建请求数据，包含模型路由配置
     const requestData = {
       ...createGroupForm,
+      hidden_rate_multiplier: parseHiddenRateMultiplier(createForm.hidden_rate_multiplier),
       force_openai_fast: normalizeGroupOpenAIFast(
         createForm.platform,
         createForm.force_openai_fast,
@@ -6064,6 +6131,7 @@ const handleEdit = async (group: AdminGroup) => {
   );
   editForm.platform = group.platform;
   editForm.rate_multiplier = group.rate_multiplier;
+  editForm.hidden_rate_multiplier = group.hidden_rate_multiplier ?? null;
   editForm.is_exclusive = group.is_exclusive;
   editForm.status = group.status;
   editForm.subscription_type = group.subscription_type || "standard";
@@ -6186,6 +6254,7 @@ const closeEditModal = () => {
   clearAllAccountSearchState();
   showEditModal.value = false;
   editingGroup.value = null;
+  editForm.hidden_rate_multiplier = null;
   editForm.max_reasoning_effort = "";
   editForm.max_reasoning_effort_over_limit = reasoningEffortOverLimitDowngrade;
   editForm.reasoning_effort_mappings = [];
@@ -6238,6 +6307,7 @@ const handleUpdateGroup = async () => {
   if (!validateProfitControlForm(editForm)) {
     return;
   }
+  if (!validateHiddenRateMultiplier(editForm.hidden_rate_multiplier)) return;
   if (!validateGroupReasoningMultipliers(editForm.model_pricing)) return;
   // 模型白名单：开启且没有任何条目时阻止提交，与后端 400 对齐。
   if (
@@ -6263,6 +6333,7 @@ const handleUpdateGroup = async () => {
     // 转换 fallback_group_id: null -> 0 (后端使用 0 表示清除)
     const payload = {
       ...editForm,
+      hidden_rate_multiplier: parseHiddenRateMultiplier(editForm.hidden_rate_multiplier),
       force_openai_fast: normalizeGroupOpenAIFast(
         editForm.platform,
         editForm.force_openai_fast,

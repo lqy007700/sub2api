@@ -379,6 +379,20 @@ func (_c *UsageLogCreate) SetNillableRateMultiplier(v *float64) *UsageLogCreate 
 	return _c
 }
 
+// SetDisplayRateMultiplier sets the "display_rate_multiplier" field.
+func (_c *UsageLogCreate) SetDisplayRateMultiplier(v float64) *UsageLogCreate {
+	_c.mutation.SetDisplayRateMultiplier(v)
+	return _c
+}
+
+// SetNillableDisplayRateMultiplier sets the "display_rate_multiplier" field if the given value is not nil.
+func (_c *UsageLogCreate) SetNillableDisplayRateMultiplier(v *float64) *UsageLogCreate {
+	if v != nil {
+		_c.SetDisplayRateMultiplier(*v)
+	}
+	return _c
+}
+
 // SetLongContextBillingApplied sets the "long_context_billing_applied" field.
 func (_c *UsageLogCreate) SetLongContextBillingApplied(v bool) *UsageLogCreate {
 	_c.mutation.SetLongContextBillingApplied(v)
@@ -1058,6 +1072,10 @@ func (_c *UsageLogCreate) createSpec() (*UsageLog, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.RateMultiplier(); ok {
 		_spec.SetField(usagelog.FieldRateMultiplier, field.TypeFloat64, value)
 		_node.RateMultiplier = value
+	}
+	if value, ok := _c.mutation.DisplayRateMultiplier(); ok {
+		_spec.SetField(usagelog.FieldDisplayRateMultiplier, field.TypeFloat64, value)
+		_node.DisplayRateMultiplier = &value
 	}
 	if value, ok := _c.mutation.LongContextBillingApplied(); ok {
 		_spec.SetField(usagelog.FieldLongContextBillingApplied, field.TypeBool, value)
@@ -1749,6 +1767,30 @@ func (u *UsageLogUpsert) UpdateRateMultiplier() *UsageLogUpsert {
 // AddRateMultiplier adds v to the "rate_multiplier" field.
 func (u *UsageLogUpsert) AddRateMultiplier(v float64) *UsageLogUpsert {
 	u.Add(usagelog.FieldRateMultiplier, v)
+	return u
+}
+
+// SetDisplayRateMultiplier sets the "display_rate_multiplier" field.
+func (u *UsageLogUpsert) SetDisplayRateMultiplier(v float64) *UsageLogUpsert {
+	u.Set(usagelog.FieldDisplayRateMultiplier, v)
+	return u
+}
+
+// UpdateDisplayRateMultiplier sets the "display_rate_multiplier" field to the value that was provided on create.
+func (u *UsageLogUpsert) UpdateDisplayRateMultiplier() *UsageLogUpsert {
+	u.SetExcluded(usagelog.FieldDisplayRateMultiplier)
+	return u
+}
+
+// AddDisplayRateMultiplier adds v to the "display_rate_multiplier" field.
+func (u *UsageLogUpsert) AddDisplayRateMultiplier(v float64) *UsageLogUpsert {
+	u.Add(usagelog.FieldDisplayRateMultiplier, v)
+	return u
+}
+
+// ClearDisplayRateMultiplier clears the value of the "display_rate_multiplier" field.
+func (u *UsageLogUpsert) ClearDisplayRateMultiplier() *UsageLogUpsert {
+	u.SetNull(usagelog.FieldDisplayRateMultiplier)
 	return u
 }
 
@@ -2684,6 +2726,34 @@ func (u *UsageLogUpsertOne) AddRateMultiplier(v float64) *UsageLogUpsertOne {
 func (u *UsageLogUpsertOne) UpdateRateMultiplier() *UsageLogUpsertOne {
 	return u.Update(func(s *UsageLogUpsert) {
 		s.UpdateRateMultiplier()
+	})
+}
+
+// SetDisplayRateMultiplier sets the "display_rate_multiplier" field.
+func (u *UsageLogUpsertOne) SetDisplayRateMultiplier(v float64) *UsageLogUpsertOne {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.SetDisplayRateMultiplier(v)
+	})
+}
+
+// AddDisplayRateMultiplier adds v to the "display_rate_multiplier" field.
+func (u *UsageLogUpsertOne) AddDisplayRateMultiplier(v float64) *UsageLogUpsertOne {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.AddDisplayRateMultiplier(v)
+	})
+}
+
+// UpdateDisplayRateMultiplier sets the "display_rate_multiplier" field to the value that was provided on create.
+func (u *UsageLogUpsertOne) UpdateDisplayRateMultiplier() *UsageLogUpsertOne {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.UpdateDisplayRateMultiplier()
+	})
+}
+
+// ClearDisplayRateMultiplier clears the value of the "display_rate_multiplier" field.
+func (u *UsageLogUpsertOne) ClearDisplayRateMultiplier() *UsageLogUpsertOne {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.ClearDisplayRateMultiplier()
 	})
 }
 
@@ -3840,6 +3910,34 @@ func (u *UsageLogUpsertBulk) AddRateMultiplier(v float64) *UsageLogUpsertBulk {
 func (u *UsageLogUpsertBulk) UpdateRateMultiplier() *UsageLogUpsertBulk {
 	return u.Update(func(s *UsageLogUpsert) {
 		s.UpdateRateMultiplier()
+	})
+}
+
+// SetDisplayRateMultiplier sets the "display_rate_multiplier" field.
+func (u *UsageLogUpsertBulk) SetDisplayRateMultiplier(v float64) *UsageLogUpsertBulk {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.SetDisplayRateMultiplier(v)
+	})
+}
+
+// AddDisplayRateMultiplier adds v to the "display_rate_multiplier" field.
+func (u *UsageLogUpsertBulk) AddDisplayRateMultiplier(v float64) *UsageLogUpsertBulk {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.AddDisplayRateMultiplier(v)
+	})
+}
+
+// UpdateDisplayRateMultiplier sets the "display_rate_multiplier" field to the value that was provided on create.
+func (u *UsageLogUpsertBulk) UpdateDisplayRateMultiplier() *UsageLogUpsertBulk {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.UpdateDisplayRateMultiplier()
+	})
+}
+
+// ClearDisplayRateMultiplier clears the value of the "display_rate_multiplier" field.
+func (u *UsageLogUpsertBulk) ClearDisplayRateMultiplier() *UsageLogUpsertBulk {
+	return u.Update(func(s *UsageLogUpsert) {
+		s.ClearDisplayRateMultiplier()
 	})
 }
 

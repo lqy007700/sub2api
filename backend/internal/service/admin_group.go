@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math"
 	"net/http"
 	"strings"
 	"time"
@@ -21,6 +22,13 @@ import (
 	"github.com/Wei-Shaw/sub2api/internal/pkg/typesafe"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/xai"
 )
+
+func validateHiddenRateMultiplier(value *float64) error {
+	if value != nil && (math.IsNaN(*value) || math.IsInf(*value, 0) || *value < 0.0001 || *value > 999999.9999) {
+		return infraerrors.BadRequest("INVALID_HIDDEN_RATE_MULTIPLIER", "hidden_rate_multiplier must be finite and between 0.0001 and 999999.9999")
+	}
+	return nil
+}
 
 // Group management implementations
 func (s *adminServiceImpl) ValidateSimpleModeGroupOperation(operation AdminGroupOperation) error {
@@ -401,6 +409,9 @@ func (s *adminServiceImpl) CreateGroup(ctx context.Context, input *CreateGroupIn
 	if input.RateMultiplier <= 0 {
 		return nil, errors.New("rate_multiplier must be > 0")
 	}
+	if err := validateHiddenRateMultiplier(input.HiddenRateMultiplier); err != nil {
+		return nil, err
+	}
 	i18n, err := normalizeGroupI18n(input.I18n)
 	if err != nil {
 		return nil, err
@@ -579,6 +590,7 @@ func (s *adminServiceImpl) CreateGroup(ctx context.Context, input *CreateGroupIn
 		I18n:                            i18n,
 		Platform:                        platform,
 		RateMultiplier:                  input.RateMultiplier,
+		HiddenRateMultiplier:            cloneGroupValuePointer(input.HiddenRateMultiplier),
 		IsExclusive:                     input.IsExclusive,
 		Status:                          StatusActive,
 		SubscriptionType:                subscriptionType,
@@ -803,6 +815,12 @@ func (s *adminServiceImpl) UpdateGroup(ctx context.Context, id int64, input *Upd
 			return nil, errors.New("rate_multiplier must be > 0")
 		}
 		group.RateMultiplier = *input.RateMultiplier
+	}
+	if input.HiddenRateMultiplierSet || input.HiddenRateMultiplier != nil {
+		if err := validateHiddenRateMultiplier(input.HiddenRateMultiplier); err != nil {
+			return nil, err
+		}
+		group.HiddenRateMultiplier = cloneGroupValuePointer(input.HiddenRateMultiplier)
 	}
 	if input.IsExclusive != nil {
 		group.IsExclusive = *input.IsExclusive

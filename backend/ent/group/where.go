@@ -85,6 +85,11 @@ func RateMultiplier(v float64) predicate.Group {
 	return predicate.Group(sql.FieldEQ(FieldRateMultiplier, v))
 }
 
+// HiddenRateMultiplier applies equality check predicate on the "hidden_rate_multiplier" field. It's identical to HiddenRateMultiplierEQ.
+func HiddenRateMultiplier(v float64) predicate.Group {
+	return predicate.Group(sql.FieldEQ(FieldHiddenRateMultiplier, v))
+}
+
 // PeakRateEnabled applies equality check predicate on the "peak_rate_enabled" field. It's identical to PeakRateEnabledEQ.
 func PeakRateEnabled(v bool) predicate.Group {
 	return predicate.Group(sql.FieldEQ(FieldPeakRateEnabled, v))
@@ -653,6 +658,56 @@ func RateMultiplierLT(v float64) predicate.Group {
 // RateMultiplierLTE applies the LTE predicate on the "rate_multiplier" field.
 func RateMultiplierLTE(v float64) predicate.Group {
 	return predicate.Group(sql.FieldLTE(FieldRateMultiplier, v))
+}
+
+// HiddenRateMultiplierEQ applies the EQ predicate on the "hidden_rate_multiplier" field.
+func HiddenRateMultiplierEQ(v float64) predicate.Group {
+	return predicate.Group(sql.FieldEQ(FieldHiddenRateMultiplier, v))
+}
+
+// HiddenRateMultiplierNEQ applies the NEQ predicate on the "hidden_rate_multiplier" field.
+func HiddenRateMultiplierNEQ(v float64) predicate.Group {
+	return predicate.Group(sql.FieldNEQ(FieldHiddenRateMultiplier, v))
+}
+
+// HiddenRateMultiplierIn applies the In predicate on the "hidden_rate_multiplier" field.
+func HiddenRateMultiplierIn(vs ...float64) predicate.Group {
+	return predicate.Group(sql.FieldIn(FieldHiddenRateMultiplier, vs...))
+}
+
+// HiddenRateMultiplierNotIn applies the NotIn predicate on the "hidden_rate_multiplier" field.
+func HiddenRateMultiplierNotIn(vs ...float64) predicate.Group {
+	return predicate.Group(sql.FieldNotIn(FieldHiddenRateMultiplier, vs...))
+}
+
+// HiddenRateMultiplierGT applies the GT predicate on the "hidden_rate_multiplier" field.
+func HiddenRateMultiplierGT(v float64) predicate.Group {
+	return predicate.Group(sql.FieldGT(FieldHiddenRateMultiplier, v))
+}
+
+// HiddenRateMultiplierGTE applies the GTE predicate on the "hidden_rate_multiplier" field.
+func HiddenRateMultiplierGTE(v float64) predicate.Group {
+	return predicate.Group(sql.FieldGTE(FieldHiddenRateMultiplier, v))
+}
+
+// HiddenRateMultiplierLT applies the LT predicate on the "hidden_rate_multiplier" field.
+func HiddenRateMultiplierLT(v float64) predicate.Group {
+	return predicate.Group(sql.FieldLT(FieldHiddenRateMultiplier, v))
+}
+
+// HiddenRateMultiplierLTE applies the LTE predicate on the "hidden_rate_multiplier" field.
+func HiddenRateMultiplierLTE(v float64) predicate.Group {
+	return predicate.Group(sql.FieldLTE(FieldHiddenRateMultiplier, v))
+}
+
+// HiddenRateMultiplierIsNil applies the IsNil predicate on the "hidden_rate_multiplier" field.
+func HiddenRateMultiplierIsNil() predicate.Group {
+	return predicate.Group(sql.FieldIsNull(FieldHiddenRateMultiplier))
+}
+
+// HiddenRateMultiplierNotNil applies the NotNil predicate on the "hidden_rate_multiplier" field.
+func HiddenRateMultiplierNotNil() predicate.Group {
+	return predicate.Group(sql.FieldNotNull(FieldHiddenRateMultiplier))
 }
 
 // PeakRateEnabledEQ applies the EQ predicate on the "peak_rate_enabled" field.

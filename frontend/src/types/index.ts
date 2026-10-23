@@ -637,6 +637,8 @@ export interface Group {
 }
 
 export interface AdminGroup extends Group {
+  // Admin-only actual billing base; null/unset falls back to user rate, then displayed group rate.
+  hidden_rate_multiplier?: number | null
   // 管理端的 name / description 始终是原字段，各语言译文另放在 i18n 里
   i18n?: GroupI18n
   force_openai_fast: boolean
@@ -808,6 +810,7 @@ export interface CreateGroupRequest {
   i18n?: GroupI18n
   platform?: GroupPlatform
   rate_multiplier?: number
+  hidden_rate_multiplier?: number | null
   is_exclusive?: boolean
   subscription_type?: SubscriptionType
   daily_limit_usd?: number | null
@@ -874,6 +877,7 @@ export interface UpdateGroupRequest {
   i18n?: GroupI18n
   platform?: GroupPlatform
   rate_multiplier?: number
+  hidden_rate_multiplier?: number | null
   is_exclusive?: boolean
   status?: 'active' | 'inactive'
   subscription_type?: SubscriptionType

@@ -235,6 +235,10 @@ fast_mode = true
 
 ## 部署方式
 
+本分支从 [lqy007700/sub2api Releases](https://github.com/lqy007700/sub2api/releases) 安装和升级，容器默认使用 `ghcr.io/lqy007700/sub2api:latest`。请先发布本仓库产物；权限设置、GHCR 可见性和从上游部署迁移的步骤见 [Fork 发布与升级指南](docs/FORK_RELEASE.md)。
+
+管理员分组新增可选隐藏计费倍率，配置、优先级、公开展示与迁移说明见 [隐藏倍率使用指南](docs/HIDDEN_GROUP_RATE.md)。
+
 ### 方式一：脚本安装（推荐）
 
 一键安装脚本，自动从 GitHub Releases 下载预编译的二进制文件。
@@ -249,7 +253,7 @@ fast_mode = true
 #### 安装步骤
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/Wei-Shaw/sub2api/main/deploy/install.sh | sudo bash
+curl -sSL https://raw.githubusercontent.com/lqy007700/sub2api/main/deploy/install.sh | sudo bash
 ```
 
 脚本会自动：
@@ -299,7 +303,7 @@ sudo journalctl -u sub2api -f
 sudo systemctl restart sub2api
 
 # 卸载
-curl -sSL https://raw.githubusercontent.com/Wei-Shaw/sub2api/main/deploy/install.sh | sudo bash -s -- uninstall -y
+curl -sSL https://raw.githubusercontent.com/lqy007700/sub2api/main/deploy/install.sh | sudo bash -s -- uninstall -y
 ```
 
 ---
@@ -322,7 +326,7 @@ curl -sSL https://raw.githubusercontent.com/Wei-Shaw/sub2api/main/deploy/install
 mkdir -p sub2api-deploy && cd sub2api-deploy
 
 # 下载并运行部署准备脚本
-curl -sSL https://raw.githubusercontent.com/Wei-Shaw/sub2api/main/deploy/docker-deploy.sh | bash
+curl -sSL https://raw.githubusercontent.com/lqy007700/sub2api/main/deploy/docker-deploy.sh | bash
 
 # 启动服务
 docker compose up -d
@@ -344,7 +348,7 @@ docker compose logs -f sub2api
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/Wei-Shaw/sub2api.git
+git clone https://github.com/lqy007700/sub2api.git
 cd sub2api/deploy
 
 # 2. 复制环境配置文件
@@ -488,7 +492,7 @@ rm -rf data/ postgres_data/ redis_data/
 Apple 芯片 Mac 在 macOS 26 上可使用 Apple `container` 1.1.0 或更高版本运行完整的 Sub2API、PostgreSQL 和 Redis：
 
 ```bash
-git clone https://github.com/Wei-Shaw/sub2api.git
+git clone https://github.com/lqy007700/sub2api.git
 cd sub2api/deploy
 ./apple-container.sh init
 ./apple-container.sh up
@@ -514,7 +518,7 @@ cd sub2api/deploy
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/Wei-Shaw/sub2api.git
+git clone https://github.com/lqy007700/sub2api.git
 cd sub2api
 
 # 2. 安装 pnpm（如果还没有安装）

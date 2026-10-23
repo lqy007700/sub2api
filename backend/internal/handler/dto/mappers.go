@@ -148,6 +148,7 @@ func GroupFromServiceAdmin(g *service.Group) *AdminGroup {
 	}
 	out := &AdminGroup{
 		Group:                       groupFromServiceBase(g),
+		HiddenRateMultiplier:        g.HiddenRateMultiplier,
 		ForceOpenAIFast:             g.ForceOpenAIFast,
 		FreeOpenAIFast:              g.FreeOpenAIFast,
 		ProfitControlEnabled:        g.ProfitControlEnabled,
@@ -714,7 +715,7 @@ func usageLogFromServiceUser(l *service.UsageLog) UsageLog {
 		CacheReadCost:             l.CacheReadCost,
 		TotalCost:                 l.TotalCost,
 		ActualCost:                l.ActualCost,
-		RateMultiplier:            l.RateMultiplier,
+		RateMultiplier:            userFacingRateMultiplier(l),
 		LongContextBillingApplied: l.LongContextBillingApplied,
 		BillingType:               l.BillingType,
 		RequestType:               requestType.String(),
@@ -765,6 +766,7 @@ func UsageLogFromServiceAdmin(l *service.UsageLog) *AdminUsageLog {
 	}
 	usageLog := usageLogFromServiceUser(l)
 	usageLog.UpstreamEndpoint = l.UpstreamEndpoint
+	usageLog.RateMultiplier = l.RateMultiplier
 	return &AdminUsageLog{
 		UsageLog:                usageLog,
 		UpstreamModel:           l.UpstreamModel,
@@ -780,6 +782,13 @@ func UsageLogFromServiceAdmin(l *service.UsageLog) *AdminUsageLog {
 		IPAddress:               l.IPAddress,
 		Account:                 AccountSummaryFromService(l.Account),
 	}
+}
+
+func userFacingRateMultiplier(l *service.UsageLog) float64 {
+	if l.DisplayRateMultiplier != nil {
+		return *l.DisplayRateMultiplier
+	}
+	return l.RateMultiplier
 }
 
 func userFacingReasoningEffort(l *service.UsageLog) *string {

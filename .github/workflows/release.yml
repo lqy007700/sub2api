@@ -202,6 +202,9 @@ jobs:
       RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
       RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
       RELEASE_SHA: ${{ needs.prepare.outputs.sha }}
+      # DockerHub is optional; use it only when both credentials are configured.
+      # GHCR always publishes under the current repository owner.
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME != '' && secrets.DOCKERHUB_TOKEN != '' && secrets.DOCKERHUB_USERNAME || 'skip' }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -234,10 +237,8 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Login to DockerHub
-        if: ${{ env.DRY_RUN != 'true' && env.SIMPLE_RELEASE != 'true' && env.DOCKERHUB_USERNAME != '' }}
+        if: ${{ env.DRY_RUN != 'true' && env.SIMPLE_RELEASE != 'true' && env.DOCKERHUB_USERNAME != 'skip' }}
         uses: docker/login-action@v3
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -249,8 +250,6 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build images and publish manifests
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME || 'skip' }}
         run: bash "$RUNNER_TEMP/release-tools/release-images.sh"
       - name: Get annotated tag notes
         id: tag_message
@@ -279,7 +278,6 @@ jobs:
           GITHUB_REPO_OWNER: ${{ github.repository_owner }}
           GITHUB_REPO_NAME: ${{ github.event.repository.name }}
           GITHUB_REPO_OWNER_LOWER: ${{ needs.prepare.outputs.owner_lower }}
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME || 'skip' }}
       - name: Upload dry-run checksums and metadata
         if: ${{ env.DRY_RUN == 'true' }}
         uses: actions/upload-artifact@v7
@@ -294,10 +292,8 @@ jobs:
 
       # Update DockerHub description
       - name: Update DockerHub description
-        if: ${{ env.DRY_RUN != 'true' && env.SIMPLE_RELEASE != 'true' && env.DOCKERHUB_USERNAME != '' }}
+        if: ${{ env.DRY_RUN != 'true' && env.SIMPLE_RELEASE != 'true' && env.DOCKERHUB_USERNAME != 'skip' }}
         uses: peter-evans/dockerhub-description@v5
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -312,7 +308,6 @@ jobs:
           TAG_MESSAGE: ${{ steps.tag_message.outputs.message }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
         continue-on-error: true
         run: |
           # 检查必要的环境变量
@@ -346,7 +341,7 @@ jobs:
           MESSAGE+="🐳 *Docker 部署:*"$'\n'
           MESSAGE+="\`\`\`bash"$'\n'
           # 根据是否配置 DockerHub 动态生成
-          if [ -n "$DOCKERHUB_USERNAME" ]; then
+          if [ "$DOCKERHUB_USERNAME" != skip ]; then
             DOCKER_IMAGE="${DOCKERHUB_USERNAME}/sub2api"
             MESSAGE+="# Docker Hub"$'\n'
             MESSAGE+="docker pull ${DOCKER_IMAGE}:${VERSION}"$'\n'
@@ -356,7 +351,7 @@ jobs:
           MESSAGE+="\`\`\`"$'\n'$'\n'
           MESSAGE+="🔗 *相关链接:*"$'\n'
           MESSAGE+="• [GitHub Release](https://github.com/${REPO}/releases/tag/${TAG_NAME})"$'\n'
-          if [ -n "$DOCKERHUB_USERNAME" ]; then
+          if [ "$DOCKERHUB_USERNAME" != skip ]; then
             MESSAGE+="• [Docker Hub](https://hub.docker.com/r/${DOCKER_IMAGE})"$'\n'
           fi
           MESSAGE+="• [GitHub Packages](https://github.com/${REPO}/pkgs/container/sub2api)"$'\n'$'\n'

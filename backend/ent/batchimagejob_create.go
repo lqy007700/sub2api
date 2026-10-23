@@ -262,6 +262,20 @@ func (_c *BatchImageJobCreate) SetNillableActualCost(v *float64) *BatchImageJobC
 	return _c
 }
 
+// SetDisplayRateMultiplier sets the "display_rate_multiplier" field.
+func (_c *BatchImageJobCreate) SetDisplayRateMultiplier(v float64) *BatchImageJobCreate {
+	_c.mutation.SetDisplayRateMultiplier(v)
+	return _c
+}
+
+// SetNillableDisplayRateMultiplier sets the "display_rate_multiplier" field if the given value is not nil.
+func (_c *BatchImageJobCreate) SetNillableDisplayRateMultiplier(v *float64) *BatchImageJobCreate {
+	if v != nil {
+		_c.SetDisplayRateMultiplier(*v)
+	}
+	return _c
+}
+
 // SetCurrency sets the "currency" field.
 func (_c *BatchImageJobCreate) SetCurrency(v string) *BatchImageJobCreate {
 	_c.mutation.SetCurrency(v)
@@ -860,6 +874,10 @@ func (_c *BatchImageJobCreate) createSpec() (*BatchImageJob, *sqlgraph.CreateSpe
 		_spec.SetField(batchimagejob.FieldActualCost, field.TypeFloat64, value)
 		_node.ActualCost = &value
 	}
+	if value, ok := _c.mutation.DisplayRateMultiplier(); ok {
+		_spec.SetField(batchimagejob.FieldDisplayRateMultiplier, field.TypeFloat64, value)
+		_node.DisplayRateMultiplier = &value
+	}
 	if value, ok := _c.mutation.Currency(); ok {
 		_spec.SetField(batchimagejob.FieldCurrency, field.TypeString, value)
 		_node.Currency = value
@@ -1331,6 +1349,30 @@ func (u *BatchImageJobUpsert) AddActualCost(v float64) *BatchImageJobUpsert {
 // ClearActualCost clears the value of the "actual_cost" field.
 func (u *BatchImageJobUpsert) ClearActualCost() *BatchImageJobUpsert {
 	u.SetNull(batchimagejob.FieldActualCost)
+	return u
+}
+
+// SetDisplayRateMultiplier sets the "display_rate_multiplier" field.
+func (u *BatchImageJobUpsert) SetDisplayRateMultiplier(v float64) *BatchImageJobUpsert {
+	u.Set(batchimagejob.FieldDisplayRateMultiplier, v)
+	return u
+}
+
+// UpdateDisplayRateMultiplier sets the "display_rate_multiplier" field to the value that was provided on create.
+func (u *BatchImageJobUpsert) UpdateDisplayRateMultiplier() *BatchImageJobUpsert {
+	u.SetExcluded(batchimagejob.FieldDisplayRateMultiplier)
+	return u
+}
+
+// AddDisplayRateMultiplier adds v to the "display_rate_multiplier" field.
+func (u *BatchImageJobUpsert) AddDisplayRateMultiplier(v float64) *BatchImageJobUpsert {
+	u.Add(batchimagejob.FieldDisplayRateMultiplier, v)
+	return u
+}
+
+// ClearDisplayRateMultiplier clears the value of the "display_rate_multiplier" field.
+func (u *BatchImageJobUpsert) ClearDisplayRateMultiplier() *BatchImageJobUpsert {
+	u.SetNull(batchimagejob.FieldDisplayRateMultiplier)
 	return u
 }
 
@@ -2108,6 +2150,34 @@ func (u *BatchImageJobUpsertOne) UpdateActualCost() *BatchImageJobUpsertOne {
 func (u *BatchImageJobUpsertOne) ClearActualCost() *BatchImageJobUpsertOne {
 	return u.Update(func(s *BatchImageJobUpsert) {
 		s.ClearActualCost()
+	})
+}
+
+// SetDisplayRateMultiplier sets the "display_rate_multiplier" field.
+func (u *BatchImageJobUpsertOne) SetDisplayRateMultiplier(v float64) *BatchImageJobUpsertOne {
+	return u.Update(func(s *BatchImageJobUpsert) {
+		s.SetDisplayRateMultiplier(v)
+	})
+}
+
+// AddDisplayRateMultiplier adds v to the "display_rate_multiplier" field.
+func (u *BatchImageJobUpsertOne) AddDisplayRateMultiplier(v float64) *BatchImageJobUpsertOne {
+	return u.Update(func(s *BatchImageJobUpsert) {
+		s.AddDisplayRateMultiplier(v)
+	})
+}
+
+// UpdateDisplayRateMultiplier sets the "display_rate_multiplier" field to the value that was provided on create.
+func (u *BatchImageJobUpsertOne) UpdateDisplayRateMultiplier() *BatchImageJobUpsertOne {
+	return u.Update(func(s *BatchImageJobUpsert) {
+		s.UpdateDisplayRateMultiplier()
+	})
+}
+
+// ClearDisplayRateMultiplier clears the value of the "display_rate_multiplier" field.
+func (u *BatchImageJobUpsertOne) ClearDisplayRateMultiplier() *BatchImageJobUpsertOne {
+	return u.Update(func(s *BatchImageJobUpsert) {
+		s.ClearDisplayRateMultiplier()
 	})
 }
 
@@ -3106,6 +3176,34 @@ func (u *BatchImageJobUpsertBulk) UpdateActualCost() *BatchImageJobUpsertBulk {
 func (u *BatchImageJobUpsertBulk) ClearActualCost() *BatchImageJobUpsertBulk {
 	return u.Update(func(s *BatchImageJobUpsert) {
 		s.ClearActualCost()
+	})
+}
+
+// SetDisplayRateMultiplier sets the "display_rate_multiplier" field.
+func (u *BatchImageJobUpsertBulk) SetDisplayRateMultiplier(v float64) *BatchImageJobUpsertBulk {
+	return u.Update(func(s *BatchImageJobUpsert) {
+		s.SetDisplayRateMultiplier(v)
+	})
+}
+
+// AddDisplayRateMultiplier adds v to the "display_rate_multiplier" field.
+func (u *BatchImageJobUpsertBulk) AddDisplayRateMultiplier(v float64) *BatchImageJobUpsertBulk {
+	return u.Update(func(s *BatchImageJobUpsert) {
+		s.AddDisplayRateMultiplier(v)
+	})
+}
+
+// UpdateDisplayRateMultiplier sets the "display_rate_multiplier" field to the value that was provided on create.
+func (u *BatchImageJobUpsertBulk) UpdateDisplayRateMultiplier() *BatchImageJobUpsertBulk {
+	return u.Update(func(s *BatchImageJobUpsert) {
+		s.UpdateDisplayRateMultiplier()
+	})
+}
+
+// ClearDisplayRateMultiplier clears the value of the "display_rate_multiplier" field.
+func (u *BatchImageJobUpsertBulk) ClearDisplayRateMultiplier() *BatchImageJobUpsertBulk {
+	return u.Update(func(s *BatchImageJobUpsert) {
+		s.ClearDisplayRateMultiplier()
 	})
 }
 

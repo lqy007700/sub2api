@@ -840,6 +840,8 @@ func (s *GatewayService) recordUsageCore(ctx context.Context, input *recordUsage
 	accountRateMultiplier := account.BillingRateMultiplier()
 	usageLog := s.buildRecordUsageLog(ctx, input, result, apiKey, user, account, subscription,
 		requestedModel, multiplier, imageMultiplier, accountRateMultiplier, billingType, cacheTTLOverridden, cost)
+	usageLog.DisplayRateMultiplier = publicUsageRateMultiplier(ctx, apiKey, user.ID, pricingAt, usageLog.RateMultiplier,
+		result.ImageCount > 0 && (cost == nil || cost.BillingMode != string(BillingModeToken)), false, s.ResolveUserGroupRateMultiplier)
 
 	// 计算账号统计定价费用（使用最终上游模型匹配自定义规则）。纯存储费不是一次模型请求，
 	// 账号统计成本回落 total_cost（官方存储价）。
@@ -904,7 +906,7 @@ func (s *GatewayService) recordUsageCore(ctx context.Context, input *recordUsage
 	return nil
 }
 
-// recordUsageMultipliers 返回 token / 图片售价倍率（用户专属 > 分组默认 > 系统默认，token 倍率叠加高峰因子）
+// recordUsageMultipliers 返回 token / 图片售价倍率（隐藏倍率 > 用户专属 > 分组默认 > 系统默认，token 倍率叠加高峰因子）
 // 与计价时刻；pricingAt 为零值时取当前时刻。
 func (s *GatewayService) recordUsageMultipliers(ctx context.Context, apiKey *APIKey, user *User, pricingAt time.Time) (float64, float64, time.Time) {
 	multiplier := 1.0
@@ -916,6 +918,7 @@ func (s *GatewayService) recordUsageMultipliers(ctx context.Context, apiKey *API
 		if user != nil {
 			multiplier = s.ResolveUserGroupRateMultiplier(ctx, user.ID, *apiKey.GroupID, multiplier)
 		}
+		multiplier = apiKey.Group.BillingRateMultiplier(multiplier)
 	}
 	// 高峰因子按请求时刻现算，不并入 getUserGroupRateMultiplier，以免污染 user:group 倍率缓存。
 	if pricingAt.IsZero() {

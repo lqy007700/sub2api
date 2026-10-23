@@ -15,6 +15,10 @@
         </span>
       </div>
 
+      <p v-if="group.hidden_rate_multiplier != null" class="input-hint">
+        {{ t('admin.groups.form.hiddenRateMultiplierHint') }}
+      </p>
+
       <!-- 操作区 -->
       <div class="rounded-lg border border-gray-200 p-3 dark:border-dark-600">
         <!-- 添加用户 -->
@@ -136,7 +140,7 @@
                     <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">{{ t('admin.groups.columns.userNotes') }}</th>
                     <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">{{ t('admin.groups.columns.userStatus') }}</th>
                     <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400">{{ t('admin.groups.columns.rateMultiplier') }}</th>
-                    <th v-if="showFinalRate" class="px-3 py-2 text-left text-xs font-medium text-primary-600 dark:text-primary-400">{{ t('admin.groups.finalRate') }}</th>
+                    <th v-if="showFinalRate" class="px-3 py-2 text-left text-xs font-medium text-primary-600 dark:text-primary-400">{{ t(group.hidden_rate_multiplier != null ? 'admin.groups.actualBaseRate' : 'admin.groups.finalRate') }}</th>
                     <th class="w-10 px-2 py-2"></th>
                   </tr>
                 </thead>
@@ -293,11 +297,14 @@ const platformColorClass = computed(() => {
 
 // 是否显示"最终倍率"预览列
 const showFinalRate = computed(() => {
-  return batchFactor.value != null && batchFactor.value > 0 && batchFactor.value !== 1
+  return props.group?.hidden_rate_multiplier != null ||
+    (batchFactor.value != null && batchFactor.value > 0 && batchFactor.value !== 1)
 })
 
 // 计算最终倍率预览
 const computeFinalRate = (rate: number | null | undefined) => {
+  // Batch changes affect saved user rates; the hidden billing base still overrides them.
+  if (props.group?.hidden_rate_multiplier != null) return props.group.hidden_rate_multiplier
   const base = rate ?? props.group?.rate_multiplier ?? 1
   if (!batchFactor.value) return base
   return parseFloat((base * batchFactor.value).toFixed(6))

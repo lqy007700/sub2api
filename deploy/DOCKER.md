@@ -2,6 +2,8 @@
 
 Sub2API is an AI API Gateway Platform for distributing and managing AI product subscription API quotas.
 
+This fork publishes to `ghcr.io/lqy007700/sub2api` by default. Full releases support both architectures below; Simple Releases support amd64 only. See [Fork release and upgrade guide](../docs/FORK_RELEASE.md) for first-publication permissions, package visibility, and optional DockerHub publishing.
+
 ## Quick Start
 
 ```bash
@@ -10,7 +12,7 @@ docker run -d \
   -p 8080:8080 \
   -e DATABASE_URL="postgres://user:pass@host:5432/sub2api" \
   -e REDIS_URL="redis://host:6379" \
-  weishaw/sub2api:latest
+  ghcr.io/lqy007700/sub2api:latest
 ```
 
 ## Docker Compose
@@ -20,7 +22,7 @@ version: '3.8'
 
 services:
   sub2api:
-    image: weishaw/sub2api:latest
+    image: ghcr.io/lqy007700/sub2api:latest
     ports:
       - "8080:8080"
     environment:
@@ -79,12 +81,12 @@ Docker restores existing containers after a host restart.
 
 ## Tags
 
-- `latest` - Latest stable release
+- `latest` - Most recently published image (including prereleases and amd64-only Simple Releases); pin a version for production
 - `x.y.z` - Specific version
 - `x.y` - Latest patch of minor version
 - `x` - Latest minor of major version
 
 ## Links
 
-- [GitHub Repository](https://github.com/weishaw/sub2api)
-- [Documentation](https://github.com/weishaw/sub2api#readme)
+- [GitHub Repository](https://github.com/lqy007700/sub2api)
+- [Documentation](https://github.com/lqy007700/sub2api#readme)

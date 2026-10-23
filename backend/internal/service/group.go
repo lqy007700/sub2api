@@ -22,6 +22,8 @@ type Group struct {
 	I18n           GroupI18n // 名称与描述的界面语言译文；缺失的语言沿用 Name/Description
 	Platform       string
 	RateMultiplier float64
+	// HiddenRateMultiplier overrides the billing base only; public rates remain unchanged.
+	HiddenRateMultiplier *float64
 	// 高峰时段倍率：peak_rate_enabled 为 true 且当前时刻处于 [PeakStart, PeakEnd) 时，
 	// token 计费倍率额外乘以 PeakRateMultiplier。详见 PeakMultiplierAt。
 	PeakRateEnabled    bool
@@ -146,6 +148,16 @@ type Group struct {
 // surfaced and bound to accounts while running in simple mode.
 func IsGroupBindableInSimpleMode(group *Group) bool {
 	return group != nil && group.Platform != PlatformComposite
+}
+
+// BillingRateMultiplier applies the admin-only override after resolving the public
+// user/group rate. Keeping this outside the user-rate cache prevents hidden rates
+// from leaking into public billing information or surviving a cleared override.
+func (g *Group) BillingRateMultiplier(publicRate float64) float64 {
+	if g != nil && g.HiddenRateMultiplier != nil {
+		return *g.HiddenRateMultiplier
+	}
+	return publicRate
 }
 
 func (g *Group) IsActive() bool {

@@ -53,6 +53,8 @@ const (
 	FieldHoldAmount = "hold_amount"
 	// FieldActualCost holds the string denoting the actual_cost field in the database.
 	FieldActualCost = "actual_cost"
+	// FieldDisplayRateMultiplier holds the string denoting the display_rate_multiplier field in the database.
+	FieldDisplayRateMultiplier = "display_rate_multiplier"
 	// FieldCurrency holds the string denoting the currency field in the database.
 	FieldCurrency = "currency"
 	// FieldHoldID holds the string denoting the hold_id field in the database.
@@ -120,6 +122,7 @@ var Columns = []string{
 	FieldEstimatedCost,
 	FieldHoldAmount,
 	FieldActualCost,
+	FieldDisplayRateMultiplier,
 	FieldCurrency,
 	FieldHoldID,
 	FieldIdempotencyKey,
@@ -317,6 +320,11 @@ func ByHoldAmount(opts ...sql.OrderTermOption) OrderOption {
 // ByActualCost orders the results by the actual_cost field.
 func ByActualCost(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldActualCost, opts...).ToFunc()
+}
+
+// ByDisplayRateMultiplier orders the results by the display_rate_multiplier field.
+func ByDisplayRateMultiplier(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisplayRateMultiplier, opts...).ToFunc()
 }
 
 // ByCurrency orders the results by the currency field.

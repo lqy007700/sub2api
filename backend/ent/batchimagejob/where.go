@@ -154,6 +154,11 @@ func ActualCost(v float64) predicate.BatchImageJob {
 	return predicate.BatchImageJob(sql.FieldEQ(FieldActualCost, v))
 }
 
+// DisplayRateMultiplier applies equality check predicate on the "display_rate_multiplier" field. It's identical to DisplayRateMultiplierEQ.
+func DisplayRateMultiplier(v float64) predicate.BatchImageJob {
+	return predicate.BatchImageJob(sql.FieldEQ(FieldDisplayRateMultiplier, v))
+}
+
 // Currency applies equality check predicate on the "currency" field. It's identical to CurrencyEQ.
 func Currency(v string) predicate.BatchImageJob {
 	return predicate.BatchImageJob(sql.FieldEQ(FieldCurrency, v))
@@ -1392,6 +1397,56 @@ func ActualCostIsNil() predicate.BatchImageJob {
 // ActualCostNotNil applies the NotNil predicate on the "actual_cost" field.
 func ActualCostNotNil() predicate.BatchImageJob {
 	return predicate.BatchImageJob(sql.FieldNotNull(FieldActualCost))
+}
+
+// DisplayRateMultiplierEQ applies the EQ predicate on the "display_rate_multiplier" field.
+func DisplayRateMultiplierEQ(v float64) predicate.BatchImageJob {
+	return predicate.BatchImageJob(sql.FieldEQ(FieldDisplayRateMultiplier, v))
+}
+
+// DisplayRateMultiplierNEQ applies the NEQ predicate on the "display_rate_multiplier" field.
+func DisplayRateMultiplierNEQ(v float64) predicate.BatchImageJob {
+	return predicate.BatchImageJob(sql.FieldNEQ(FieldDisplayRateMultiplier, v))
+}
+
+// DisplayRateMultiplierIn applies the In predicate on the "display_rate_multiplier" field.
+func DisplayRateMultiplierIn(vs ...float64) predicate.BatchImageJob {
+	return predicate.BatchImageJob(sql.FieldIn(FieldDisplayRateMultiplier, vs...))
+}
+
+// DisplayRateMultiplierNotIn applies the NotIn predicate on the "display_rate_multiplier" field.
+func DisplayRateMultiplierNotIn(vs ...float64) predicate.BatchImageJob {
+	return predicate.BatchImageJob(sql.FieldNotIn(FieldDisplayRateMultiplier, vs...))
+}
+
+// DisplayRateMultiplierGT applies the GT predicate on the "display_rate_multiplier" field.
+func DisplayRateMultiplierGT(v float64) predicate.BatchImageJob {
+	return predicate.BatchImageJob(sql.FieldGT(FieldDisplayRateMultiplier, v))
+}
+
+// DisplayRateMultiplierGTE applies the GTE predicate on the "display_rate_multiplier" field.
+func DisplayRateMultiplierGTE(v float64) predicate.BatchImageJob {
+	return predicate.BatchImageJob(sql.FieldGTE(FieldDisplayRateMultiplier, v))
+}
+
+// DisplayRateMultiplierLT applies the LT predicate on the "display_rate_multiplier" field.
+func DisplayRateMultiplierLT(v float64) predicate.BatchImageJob {
+	return predicate.BatchImageJob(sql.FieldLT(FieldDisplayRateMultiplier, v))
+}
+
+// DisplayRateMultiplierLTE applies the LTE predicate on the "display_rate_multiplier" field.
+func DisplayRateMultiplierLTE(v float64) predicate.BatchImageJob {
+	return predicate.BatchImageJob(sql.FieldLTE(FieldDisplayRateMultiplier, v))
+}
+
+// DisplayRateMultiplierIsNil applies the IsNil predicate on the "display_rate_multiplier" field.
+func DisplayRateMultiplierIsNil() predicate.BatchImageJob {
+	return predicate.BatchImageJob(sql.FieldIsNull(FieldDisplayRateMultiplier))
+}
+
+// DisplayRateMultiplierNotNil applies the NotNil predicate on the "display_rate_multiplier" field.
+func DisplayRateMultiplierNotNil() predicate.BatchImageJob {
+	return predicate.BatchImageJob(sql.FieldNotNull(FieldDisplayRateMultiplier))
 }
 
 // CurrencyEQ applies the EQ predicate on the "currency" field.

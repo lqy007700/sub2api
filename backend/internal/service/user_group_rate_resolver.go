@@ -10,6 +10,10 @@ import (
 	"golang.org/x/sync/singleflight"
 )
 
+// noUserGroupRate caches the absence of an override, never a group default.
+// Group prices can change independently of this user/group cache.
+type noUserGroupRate struct{}
+
 type userGroupRateResolver struct {
 	repo         UserGroupRateRepository
 	cache        *gocache.Cache
@@ -49,9 +53,13 @@ func (r *userGroupRateResolver) Resolve(ctx context.Context, userID, groupID int
 	key := fmt.Sprintf("%d:%d", userID, groupID)
 	if r.cache != nil {
 		if cached, ok := r.cache.Get(key); ok {
-			if multiplier, castOK := cached.(float64); castOK {
+			switch multiplier := cached.(type) {
+			case float64:
 				userGroupRateCacheHitTotal.Add(1)
 				return multiplier
+			case noUserGroupRate:
+				userGroupRateCacheHitTotal.Add(1)
+				return groupDefaultMultiplier
 			}
 		}
 	}
@@ -63,7 +71,11 @@ func (r *userGroupRateResolver) Resolve(ctx context.Context, userID, groupID int
 	value, err, shared := r.sf.Do(key, func() (any, error) {
 		if r.cache != nil {
 			if cached, ok := r.cache.Get(key); ok {
-				if multiplier, castOK := cached.(float64); castOK {
+				switch multiplier := cached.(type) {
+				case float64:
+					userGroupRateCacheHitTotal.Add(1)
+					return multiplier, nil
+				case noUserGroupRate:
 					userGroupRateCacheHitTotal.Add(1)
 					return multiplier, nil
 				}
@@ -76,7 +88,7 @@ func (r *userGroupRateResolver) Resolve(ctx context.Context, userID, groupID int
 			return nil, repoErr
 		}
 
-		multiplier := groupDefaultMultiplier
+		var multiplier any = noUserGroupRate{}
 		if userRate != nil {
 			multiplier = *userRate
 		}
@@ -94,6 +106,9 @@ func (r *userGroupRateResolver) Resolve(ctx context.Context, userID, groupID int
 		return groupDefaultMultiplier
 	}
 
+	if _, absent := value.(noUserGroupRate); absent {
+		return groupDefaultMultiplier
+	}
 	multiplier, ok := value.(float64)
 	if !ok {
 		userGroupRateCacheFallbackTotal.Add(1)

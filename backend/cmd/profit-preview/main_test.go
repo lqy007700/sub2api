@@ -44,6 +44,14 @@ func TestParsePreviewInputsIgnoresNullUserOverride(t *testing.T) {
 	require.InDelta(t, 0.36, report.ThresholdMinD, 1e-12)
 }
 
+func TestParsePreviewInputsHiddenRateOverridesPublicAndUserRates(t *testing.T) {
+	inputs, err := parsePreviewInputs([]byte(`{"groups":[{"group":{"id":50,"platform":"openai","rate_multiplier":2,"hidden_rate_multiplier":0.4,"profit_control_enabled":true},"user_overrides":{"41":0.1},"models":["gpt-test"]}]}`), false)
+	require.NoError(t, err)
+	report := service.PreviewProfitAdmission(inputs, time.Now())[0]
+	require.Equal(t, 0.4, report.DefaultD)
+	require.Equal(t, 0.4, report.MinEffectiveD)
+}
+
 func TestParsePreviewInputsRejectsEmptyGroups(t *testing.T) {
 	for _, raw := range [][]byte{
 		[]byte(`{"groups":null}`),

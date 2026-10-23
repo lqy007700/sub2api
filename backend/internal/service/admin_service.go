@@ -238,6 +238,7 @@ type CreateGroupInput struct {
 	I18n                      GroupI18n // 名称与描述的界面语言译文
 	Platform                  string
 	RateMultiplier            float64
+	HiddenRateMultiplier      *float64
 	IsExclusive               bool
 	SubscriptionType          string   // standard/subscription
 	DailyLimitUSD             *float64 // 日限额 (USD)
@@ -319,6 +320,8 @@ type UpdateGroupInput struct {
 	I18n                      *GroupI18n // nil 表示不修改；非 nil 整体替换
 	Platform                  string
 	RateMultiplier            *float64 // 使用指针以支持设置为0
+	HiddenRateMultiplier      *float64
+	HiddenRateMultiplierSet   bool // nil + true clears; nil + false retains the current multiplier
 	IsExclusive               *bool
 	Status                    string
 	SubscriptionType          string   // standard/subscription

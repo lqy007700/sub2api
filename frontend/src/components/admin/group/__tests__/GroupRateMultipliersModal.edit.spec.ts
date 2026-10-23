@@ -43,6 +43,20 @@ describe('group rate multiplier edits', () => {
     expect(mocks.batchSetGroupRateMultipliers).toHaveBeenCalledWith(1, [{ user_id: 7, rate_multiplier: expected }])
   })
 
+  it('previews the hidden actual base without applying user-rate batch adjustments to it', async () => {
+    const wrapper = await openEditor()
+    await wrapper.setProps({ group: {
+      id: 1, name: 'Group', platform: 'openai', rate_multiplier: 1,
+      hidden_rate_multiplier: 0.25,
+    } as AdminGroup })
+    await flushPromises()
+    expect(wrapper.text()).toContain('admin.groups.actualBaseRate')
+    expect(wrapper.get('tbody tr').text()).toContain('0.25')
+    await wrapper.get('input[placeholder="0.5"]').setValue('0.5')
+    expect(wrapper.get('tbody tr').text()).toContain('0.25')
+    expect(wrapper.get('tbody input').element.value).toBe('2')
+  })
+
   it('still removes an override when its input is cleared', async () => {
     const wrapper = await openEditor()
     await wrapper.get('tbody input[type="number"]').setValue('')

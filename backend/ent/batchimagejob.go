@@ -57,6 +57,8 @@ type BatchImageJob struct {
 	HoldAmount *float64 `json:"hold_amount,omitempty"`
 	// ActualCost holds the value of the "actual_cost" field.
 	ActualCost *float64 `json:"actual_cost,omitempty"`
+	// User-visible final batch multiplier captured at submission
+	DisplayRateMultiplier *float64 `json:"display_rate_multiplier,omitempty"`
 	// Currency holds the value of the "currency" field.
 	Currency string `json:"currency,omitempty"`
 	// HoldID holds the value of the "hold_id" field.
@@ -105,7 +107,7 @@ func (*BatchImageJob) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case batchimagejob.FieldEstimatedCost, batchimagejob.FieldHoldAmount, batchimagejob.FieldActualCost:
+		case batchimagejob.FieldEstimatedCost, batchimagejob.FieldHoldAmount, batchimagejob.FieldActualCost, batchimagejob.FieldDisplayRateMultiplier:
 			values[i] = new(sql.NullFloat64)
 		case batchimagejob.FieldID, batchimagejob.FieldUserID, batchimagejob.FieldAPIKeyID, batchimagejob.FieldAccountID, batchimagejob.FieldItemCount, batchimagejob.FieldSuccessCount, batchimagejob.FieldFailCount, batchimagejob.FieldCancelledCount, batchimagejob.FieldRetryCount, batchimagejob.FieldVersion:
 			values[i] = new(sql.NullInt64)
@@ -262,6 +264,13 @@ func (_m *BatchImageJob) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.ActualCost = new(float64)
 				*_m.ActualCost = value.Float64
+			}
+		case batchimagejob.FieldDisplayRateMultiplier:
+			if value, ok := values[i].(*sql.NullFloat64); !ok {
+				return fmt.Errorf("unexpected type %T for field display_rate_multiplier", values[i])
+			} else if value.Valid {
+				_m.DisplayRateMultiplier = new(float64)
+				*_m.DisplayRateMultiplier = value.Float64
 			}
 		case batchimagejob.FieldCurrency:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -509,6 +518,11 @@ func (_m *BatchImageJob) String() string {
 	builder.WriteString(", ")
 	if v := _m.ActualCost; v != nil {
 		builder.WriteString("actual_cost=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	if v := _m.DisplayRateMultiplier; v != nil {
+		builder.WriteString("display_rate_multiplier=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")

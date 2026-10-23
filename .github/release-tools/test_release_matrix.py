@@ -2,6 +2,7 @@ import argparse
 import hashlib
 import importlib.util
 import io
+import itertools
 import json
 import os
 from pathlib import Path
@@ -165,13 +166,13 @@ class ReleaseMatrixTest(unittest.TestCase):
         docker = fake_bin / 'docker'
         docker.write_text('#!/bin/sh\nprintf "%s\\n" "$*" >> "$DOCKER_LOG"\n')
         docker.chmod(0o755)
-        for simple in (False, True):
-            with self.subTest(simple=simple):
-                log_path = Path(f'docker-{simple}.log').resolve()
+        for simple, dockerhub in itertools.product((False, True), ('fixturehub', 'skip', '')):
+            with self.subTest(simple=simple, dockerhub=dockerhub):
+                log_path = Path(f'docker-{simple}-{dockerhub}.log').resolve()
                 env = {**os.environ, 'PATH': str(fake_bin.resolve()) + os.pathsep + os.environ['PATH'],
                        'DOCKER_LOG': str(log_path), 'RUNNER_TEMP': self.temp.name,
                        'RELEASE_VERSION': '9.8.7', 'RELEASE_SHA': 'a' * 40, 'GITHUB_REPOSITORY': 'ExampleOwner/sub2api',
-                       'DRY_RUN': 'false', 'SIMPLE_RELEASE': str(simple).lower(), 'DOCKERHUB_USERNAME': 'fixturehub'}
+                       'DRY_RUN': 'false', 'SIMPLE_RELEASE': str(simple).lower(), 'DOCKERHUB_USERNAME': dockerhub}
                 subprocess.run(['bash', str(ROOT / '.github/release-tools/release-images.sh')], env=env, check=True)
                 log = log_path.read_text()
                 self.assertIn('--push', log)
@@ -181,8 +182,13 @@ class ReleaseMatrixTest(unittest.TestCase):
                     self.assertNotIn('imagetools', log)
                     self.assertIn('ghcr.io/exampleowner/sub2api:latest', log)
                 else:
-                    self.assertEqual(log.count('imagetools create'), 2)
-                    self.assertIn('fixturehub/sub2api:9.8', log)
+                    self.assertEqual(log.count('imagetools create'), 2 if dockerhub == 'fixturehub' else 1)
+                    if dockerhub == 'fixturehub':
+                        self.assertIn('fixturehub/sub2api:9.8', log)
+                    else:
+                        self.assertNotIn('fixturehub/sub2api', log)
+                        self.assertNotIn('skip/sub2api', log)
+                        self.assertNotIn('--tag /sub2api', log)
                     self.assertIn('ghcr.io/exampleowner/sub2api:9', log)
 
 

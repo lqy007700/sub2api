@@ -498,6 +498,7 @@ func (d inflightEstimateDeps) rates(ctx context.Context, apiKey *APIKey) (text, 
 		if d.userGroupRate != nil && apiKey.User != nil {
 			rate = d.userGroupRate(ctx, apiKey.User.ID, *apiKey.GroupID, rate)
 		}
+		rate = apiKey.Group.BillingRateMultiplier(rate)
 	}
 	return computePeakAwareMultipliers(apiKey, rate, timezone.Now())
 }

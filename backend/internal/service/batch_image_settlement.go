@@ -272,6 +272,7 @@ func (s *BatchImageSettlementService) recordUsageLog(ctx context.Context, job *B
 		TotalCost:             actualCost,
 		ActualCost:            actualCost,
 		RateMultiplier:        job.GroupRateMultiplier * job.BatchDiscountMultiplier,
+		DisplayRateMultiplier: cloneAccountValuePointer(job.DisplayRateMultiplier),
 		AccountRateMultiplier: &accountRateMultiplier,
 		BillingType:           BillingTypeBalance,
 		RequestType:           RequestTypeSync,

@@ -68,6 +68,20 @@ func TestUserGroupRateResolverResolve_InvalidCacheEntryLoadsRepoAndCaches(t *tes
 	require.Equal(t, int64(0), fallback)
 }
 
+func TestUserGroupRateResolverResolve_NoOverrideUsesCurrentGroupDefault(t *testing.T) {
+	repo := &userGroupRateResolverRepoStub{}
+	resolver := newUserGroupRateResolver(repo, nil, time.Minute, nil, "service.test")
+	ctx := context.Background()
+	require.Equal(t, 1.2, resolver.Resolve(ctx, 101, 202, 1.2))
+	require.Equal(t, 2.3, resolver.Resolve(ctx, 101, 202, 2.3), "cached absence must not freeze the group default")
+	hidden := 0.4
+	group := &Group{RateMultiplier: 2.3, HiddenRateMultiplier: &hidden}
+	require.Equal(t, hidden, group.BillingRateMultiplier(resolver.Resolve(ctx, 101, 202, group.RateMultiplier)))
+	group.HiddenRateMultiplier = nil
+	require.Equal(t, 2.3, group.BillingRateMultiplier(resolver.Resolve(ctx, 101, 202, group.RateMultiplier)))
+	require.Equal(t, 1, repo.calls)
+}
+
 func TestGatewayServiceGetUserGroupRateMultiplier_FallbacksAndUsesExistingResolver(t *testing.T) {
 	var nilSvc *GatewayService
 	require.Equal(t, 1.3, nilSvc.getUserGroupRateMultiplier(context.Background(), 101, 202, 1.3))

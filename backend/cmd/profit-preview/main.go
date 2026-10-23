@@ -19,18 +19,19 @@ import (
 )
 
 type inputGroup struct {
-	ID                   int64   `json:"id"`
-	Name                 string  `json:"name"`
-	Platform             string  `json:"platform"`
-	RateMultiplier       float64 `json:"rate_multiplier"`
-	SubscriptionType     string  `json:"subscription_type"`
-	ProfitControlEnabled bool    `json:"profit_control_enabled"`
-	ProfitMinMargin      float64 `json:"profit_min_margin"`
-	ProfitSafetyBuffer   float64 `json:"profit_safety_buffer"`
-	PeakRateEnabled      bool    `json:"peak_rate_enabled"`
-	PeakStart            string  `json:"peak_start"`
-	PeakEnd              string  `json:"peak_end"`
-	PeakRateMultiplier   float64 `json:"peak_rate_multiplier"`
+	ID                   int64    `json:"id"`
+	Name                 string   `json:"name"`
+	Platform             string   `json:"platform"`
+	RateMultiplier       float64  `json:"rate_multiplier"`
+	HiddenRateMultiplier *float64 `json:"hidden_rate_multiplier"`
+	SubscriptionType     string   `json:"subscription_type"`
+	ProfitControlEnabled bool     `json:"profit_control_enabled"`
+	ProfitMinMargin      float64  `json:"profit_min_margin"`
+	ProfitSafetyBuffer   float64  `json:"profit_safety_buffer"`
+	PeakRateEnabled      bool     `json:"peak_rate_enabled"`
+	PeakStart            string   `json:"peak_start"`
+	PeakEnd              string   `json:"peak_end"`
+	PeakRateMultiplier   float64  `json:"peak_rate_multiplier"`
 }
 
 type inputAccount struct {
@@ -161,6 +162,7 @@ func parsePreviewInputs(raw []byte, assumeEnabled bool) ([]service.ProfitPreview
 			Status:               service.StatusActive,
 			Hydrated:             true,
 			RateMultiplier:       entry.Group.RateMultiplier,
+			HiddenRateMultiplier: entry.Group.HiddenRateMultiplier,
 			SubscriptionType:     entry.Group.SubscriptionType,
 			ProfitControlEnabled: entry.Group.ProfitControlEnabled,
 			ProfitMinMargin:      entry.Group.ProfitMinMargin,

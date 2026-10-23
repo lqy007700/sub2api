@@ -209,6 +209,8 @@ Nginx drops headers containing underscores by default (e.g. `session_id`), which
 
 ## Deployment
 
+This fork installs and upgrades from [lqy007700/sub2api releases](https://github.com/lqy007700/sub2api/releases) and uses `ghcr.io/lqy007700/sub2api:latest` for container deployments. Publish your fork's artifacts first; see [Fork release and upgrade guide](docs/FORK_RELEASE.md) for setup and migration.
+
 ### Method 1: Script Installation (Recommended)
 
 One-click installation script that downloads pre-built binaries from GitHub Releases.
@@ -223,7 +225,7 @@ One-click installation script that downloads pre-built binaries from GitHub Rele
 #### Installation Steps
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/Wei-Shaw/sub2api/main/deploy/install.sh | sudo bash
+curl -sSL https://raw.githubusercontent.com/lqy007700/sub2api/main/deploy/install.sh | sudo bash
 ```
 
 The script will:
@@ -273,7 +275,7 @@ sudo journalctl -u sub2api -f
 sudo systemctl restart sub2api
 
 # Uninstall
-curl -sSL https://raw.githubusercontent.com/Wei-Shaw/sub2api/main/deploy/install.sh | sudo bash -s -- uninstall -y
+curl -sSL https://raw.githubusercontent.com/lqy007700/sub2api/main/deploy/install.sh | sudo bash -s -- uninstall -y
 ```
 
 ---
@@ -296,7 +298,7 @@ Use the automated deployment script for easy setup:
 mkdir -p sub2api-deploy && cd sub2api-deploy
 
 # Download and run deployment preparation script
-curl -sSL https://raw.githubusercontent.com/Wei-Shaw/sub2api/main/deploy/docker-deploy.sh | bash
+curl -sSL https://raw.githubusercontent.com/lqy007700/sub2api/main/deploy/docker-deploy.sh | bash
 
 # Start services
 docker compose up -d
@@ -318,7 +320,7 @@ If you prefer manual setup:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/Wei-Shaw/sub2api.git
+git clone https://github.com/lqy007700/sub2api.git
 cd sub2api/deploy
 
 # 2. Copy environment configuration
@@ -450,7 +452,7 @@ rm -rf data/ postgres_data/ redis_data/
 Apple-silicon Macs running macOS 26 can run the full Sub2API, PostgreSQL, and Redis stack with Apple `container` 1.1.0 or newer:
 
 ```bash
-git clone https://github.com/Wei-Shaw/sub2api.git
+git clone https://github.com/lqy007700/sub2api.git
 cd sub2api/deploy
 ./apple-container.sh init
 ./apple-container.sh up
@@ -476,7 +478,7 @@ Build and run from source code for development or customization.
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/Wei-Shaw/sub2api.git
+git clone https://github.com/lqy007700/sub2api.git
 cd sub2api
 
 # 2. Install pnpm (if not already installed)

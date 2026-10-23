@@ -112,6 +112,20 @@ func (_c *GroupCreate) SetNillableRateMultiplier(v *float64) *GroupCreate {
 	return _c
 }
 
+// SetHiddenRateMultiplier sets the "hidden_rate_multiplier" field.
+func (_c *GroupCreate) SetHiddenRateMultiplier(v float64) *GroupCreate {
+	_c.mutation.SetHiddenRateMultiplier(v)
+	return _c
+}
+
+// SetNillableHiddenRateMultiplier sets the "hidden_rate_multiplier" field if the given value is not nil.
+func (_c *GroupCreate) SetNillableHiddenRateMultiplier(v *float64) *GroupCreate {
+	if v != nil {
+		_c.SetHiddenRateMultiplier(*v)
+	}
+	return _c
+}
+
 // SetPeakRateEnabled sets the "peak_rate_enabled" field.
 func (_c *GroupCreate) SetPeakRateEnabled(v bool) *GroupCreate {
 	_c.mutation.SetPeakRateEnabled(v)
@@ -1246,6 +1260,11 @@ func (_c *GroupCreate) check() error {
 	if _, ok := _c.mutation.RateMultiplier(); !ok {
 		return &ValidationError{Name: "rate_multiplier", err: errors.New(`ent: missing required field "Group.rate_multiplier"`)}
 	}
+	if v, ok := _c.mutation.HiddenRateMultiplier(); ok {
+		if err := group.HiddenRateMultiplierValidator(v); err != nil {
+			return &ValidationError{Name: "hidden_rate_multiplier", err: fmt.Errorf(`ent: validator failed for field "Group.hidden_rate_multiplier": %w`, err)}
+		}
+	}
 	if _, ok := _c.mutation.PeakRateEnabled(); !ok {
 		return &ValidationError{Name: "peak_rate_enabled", err: errors.New(`ent: missing required field "Group.peak_rate_enabled"`)}
 	}
@@ -1485,6 +1504,10 @@ func (_c *GroupCreate) createSpec() (*Group, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.RateMultiplier(); ok {
 		_spec.SetField(group.FieldRateMultiplier, field.TypeFloat64, value)
 		_node.RateMultiplier = value
+	}
+	if value, ok := _c.mutation.HiddenRateMultiplier(); ok {
+		_spec.SetField(group.FieldHiddenRateMultiplier, field.TypeFloat64, value)
+		_node.HiddenRateMultiplier = &value
 	}
 	if value, ok := _c.mutation.PeakRateEnabled(); ok {
 		_spec.SetField(group.FieldPeakRateEnabled, field.TypeBool, value)
@@ -1969,6 +1992,30 @@ func (u *GroupUpsert) UpdateRateMultiplier() *GroupUpsert {
 // AddRateMultiplier adds v to the "rate_multiplier" field.
 func (u *GroupUpsert) AddRateMultiplier(v float64) *GroupUpsert {
 	u.Add(group.FieldRateMultiplier, v)
+	return u
+}
+
+// SetHiddenRateMultiplier sets the "hidden_rate_multiplier" field.
+func (u *GroupUpsert) SetHiddenRateMultiplier(v float64) *GroupUpsert {
+	u.Set(group.FieldHiddenRateMultiplier, v)
+	return u
+}
+
+// UpdateHiddenRateMultiplier sets the "hidden_rate_multiplier" field to the value that was provided on create.
+func (u *GroupUpsert) UpdateHiddenRateMultiplier() *GroupUpsert {
+	u.SetExcluded(group.FieldHiddenRateMultiplier)
+	return u
+}
+
+// AddHiddenRateMultiplier adds v to the "hidden_rate_multiplier" field.
+func (u *GroupUpsert) AddHiddenRateMultiplier(v float64) *GroupUpsert {
+	u.Add(group.FieldHiddenRateMultiplier, v)
+	return u
+}
+
+// ClearHiddenRateMultiplier clears the value of the "hidden_rate_multiplier" field.
+func (u *GroupUpsert) ClearHiddenRateMultiplier() *GroupUpsert {
+	u.SetNull(group.FieldHiddenRateMultiplier)
 	return u
 }
 
@@ -3100,6 +3147,34 @@ func (u *GroupUpsertOne) AddRateMultiplier(v float64) *GroupUpsertOne {
 func (u *GroupUpsertOne) UpdateRateMultiplier() *GroupUpsertOne {
 	return u.Update(func(s *GroupUpsert) {
 		s.UpdateRateMultiplier()
+	})
+}
+
+// SetHiddenRateMultiplier sets the "hidden_rate_multiplier" field.
+func (u *GroupUpsertOne) SetHiddenRateMultiplier(v float64) *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetHiddenRateMultiplier(v)
+	})
+}
+
+// AddHiddenRateMultiplier adds v to the "hidden_rate_multiplier" field.
+func (u *GroupUpsertOne) AddHiddenRateMultiplier(v float64) *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.AddHiddenRateMultiplier(v)
+	})
+}
+
+// UpdateHiddenRateMultiplier sets the "hidden_rate_multiplier" field to the value that was provided on create.
+func (u *GroupUpsertOne) UpdateHiddenRateMultiplier() *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateHiddenRateMultiplier()
+	})
+}
+
+// ClearHiddenRateMultiplier clears the value of the "hidden_rate_multiplier" field.
+func (u *GroupUpsertOne) ClearHiddenRateMultiplier() *GroupUpsertOne {
+	return u.Update(func(s *GroupUpsert) {
+		s.ClearHiddenRateMultiplier()
 	})
 }
 
@@ -4560,6 +4635,34 @@ func (u *GroupUpsertBulk) AddRateMultiplier(v float64) *GroupUpsertBulk {
 func (u *GroupUpsertBulk) UpdateRateMultiplier() *GroupUpsertBulk {
 	return u.Update(func(s *GroupUpsert) {
 		s.UpdateRateMultiplier()
+	})
+}
+
+// SetHiddenRateMultiplier sets the "hidden_rate_multiplier" field.
+func (u *GroupUpsertBulk) SetHiddenRateMultiplier(v float64) *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.SetHiddenRateMultiplier(v)
+	})
+}
+
+// AddHiddenRateMultiplier adds v to the "hidden_rate_multiplier" field.
+func (u *GroupUpsertBulk) AddHiddenRateMultiplier(v float64) *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.AddHiddenRateMultiplier(v)
+	})
+}
+
+// UpdateHiddenRateMultiplier sets the "hidden_rate_multiplier" field to the value that was provided on create.
+func (u *GroupUpsertBulk) UpdateHiddenRateMultiplier() *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.UpdateHiddenRateMultiplier()
+	})
+}
+
+// ClearHiddenRateMultiplier clears the value of the "hidden_rate_multiplier" field.
+func (u *GroupUpsertBulk) ClearHiddenRateMultiplier() *GroupUpsertBulk {
+	return u.Update(func(s *GroupUpsert) {
+		s.ClearHiddenRateMultiplier()
 	})
 }
 

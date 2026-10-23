@@ -70,6 +70,8 @@ const (
 	FieldActualCost = "actual_cost"
 	// FieldRateMultiplier holds the string denoting the rate_multiplier field in the database.
 	FieldRateMultiplier = "rate_multiplier"
+	// FieldDisplayRateMultiplier holds the string denoting the display_rate_multiplier field in the database.
+	FieldDisplayRateMultiplier = "display_rate_multiplier"
 	// FieldLongContextBillingApplied holds the string denoting the long_context_billing_applied field in the database.
 	FieldLongContextBillingApplied = "long_context_billing_applied"
 	// FieldAccountRateMultiplier holds the string denoting the account_rate_multiplier field in the database.
@@ -188,6 +190,7 @@ var Columns = []string{
 	FieldTotalCost,
 	FieldActualCost,
 	FieldRateMultiplier,
+	FieldDisplayRateMultiplier,
 	FieldLongContextBillingApplied,
 	FieldAccountRateMultiplier,
 	FieldBillingType,
@@ -438,6 +441,11 @@ func ByActualCost(opts ...sql.OrderTermOption) OrderOption {
 // ByRateMultiplier orders the results by the rate_multiplier field.
 func ByRateMultiplier(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRateMultiplier, opts...).ToFunc()
+}
+
+// ByDisplayRateMultiplier orders the results by the display_rate_multiplier field.
+func ByDisplayRateMultiplier(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDisplayRateMultiplier, opts...).ToFunc()
 }
 
 // ByLongContextBillingApplied orders the results by the long_context_billing_applied field.

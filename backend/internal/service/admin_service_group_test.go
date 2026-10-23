@@ -216,7 +216,7 @@ func TestAdminServiceSimpleModeNormalizesAllUnsupportedCreateFieldsDirectly(t *t
 	fallbackID := int64(44)
 	input := &CreateGroupInput{
 		Name: "simple", Description: "allowed", Platform: PlatformAnthropic,
-		RateMultiplier: 9, IsExclusive: true, SubscriptionType: SubscriptionTypeSubscription,
+		RateMultiplier: 9, HiddenRateMultiplier: &one, IsExclusive: true, SubscriptionType: SubscriptionTypeSubscription,
 		DailyLimitUSD: &one, LongContextPricingEnabled: true,
 		ModelPricing:    []ChannelModelPricing{{Models: []string{"claude"}}},
 		PeakRateEnabled: true, PeakStart: "00:00", PeakEnd: "01:00", PeakRateMultiplier: &one,
@@ -255,7 +255,7 @@ func TestAdminServiceSimpleModeNormalizesAllUnsupportedUpdateFieldsDirectly(t *t
 	pricing := []ChannelModelPricing{{Models: []string{"claude"}}}
 	input := &UpdateGroupInput{
 		Name: "renamed", Description: &description, Platform: PlatformOpenAI, Status: status,
-		RateMultiplier: &one, IsExclusive: &truth, SubscriptionType: SubscriptionTypeSubscription,
+		RateMultiplier: &one, HiddenRateMultiplier: &one, HiddenRateMultiplierSet: true, IsExclusive: &truth, SubscriptionType: SubscriptionTypeSubscription,
 		DailyLimitUSD: &one, LongContextPricingEnabled: &truth, ModelPricing: &pricing,
 		PeakRateEnabled: &truth, PeakRateMultiplier: &one, ImageRateIndependent: &truth,
 		ImageRateMultiplier: &one, VideoRateIndependent: &truth, VideoRateMultiplier: &one,
