@@ -14,7 +14,7 @@
 
 当前主分支后续发布只生成 Linux amd64 产物，不再构建 Linux arm64、macOS 或 Windows，也不再提供 Apple container 部署入口。Ubuntu 服务器运行 `uname -m` 应返回 `x86_64`；`aarch64` 服务器无法使用这些原生产物。
 
-版本号沿用 `v<官方版本>-lqy007700.<修订号>`，例如 `v0.2.18-lqy007700.3`。同一官方版本再次发布时递增最后的修订号；合并下一官方版本后从 `.1` 开始。`lqy007700.N` 表示本分支的正式修订号；GoReleaser 显式配置 `prerelease: false` 和 `make_latest: "true"`，避免根据连字符后缀自动判定为预发布。
+版本号沿用 `v<官方版本>-lqy007700.<修订号>`，例如 `v0.2.18-lqy007700.3`。同一官方版本再次发布时递增最后的修订号；合并下一官方版本后从 `.1` 开始。`lqy007700.N` 表示本分支修订号；完整发布的 GoReleaser 配置显式设置 `prerelease: false` 和 `make_latest: "true"`，避免根据连字符后缀自动判定为预发布。Simple 仅镜像发布则设置 `prerelease: true` 和 `make_latest: "false"`，不进入二进制安装和自动更新使用的最新正式版通道。
 
 **默认安装器与后台自动更新查询 GitHub 的最新正式 Release。** 正式发布必须能通过 `https://api.github.com/repos/lqy007700/sub2api/releases/latest` 查询，并包含 Linux amd64 安装包和校验文件。后台先比较官方版本，再按数字比较本分支修订号，例如 `.10` 高于 `.2`。
 
@@ -55,7 +55,7 @@ git push origin v0.2.18-lqy007700.3
 
 每次只构建一份 Linux amd64 镜像并直接标记各个标签，不需要 QEMU 或跨架构清单合并。
 
-`simple_release=true` 或仓库变量 `SIMPLE_RELEASE=true` 仍表示**仅镜像发布**：只发布 Linux amd64 GHCR 镜像和 Release 说明，不上传二进制或校验和，也不推送 DockerHub。默认完整模式同样只有 amd64，但保留安装器和指定版本升级需要的安装包。发布会更新镜像的移动标签，生产部署建议固定具体版本或摘要。
+`simple_release=true` 或仓库变量 `SIMPLE_RELEASE=true` 仍表示**仅镜像发布**：只发布 Linux amd64 GHCR 镜像和 Release 说明，不上传二进制或校验和，也不推送 DockerHub。Simple Release 标记为预发布且不设为 Latest，`/releases/latest` 继续指向包含安装包和校验文件的完整发布；后台更新与回退列表也会过滤预发布版本。默认完整模式同样只有 amd64，但保留安装器和指定版本升级需要的安装包。Simple 仍会更新镜像的 `latest` 标签，生产部署建议固定具体版本或摘要。
 
 ## 部署本仓库的版本
 
