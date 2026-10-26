@@ -75,6 +75,30 @@ beforeEach(() => {
 })
 
 describe('admin hidden group multiplier', () => {
+  it.each(['openai', 'composite'])('saves hidden rates together with per-image billing for %s', async platform => {
+    mocks.list.mockResolvedValue({ items: [{ ...group, platform, image_count_billing: true }], total: 1 })
+    const wrapper = await editGroup()
+    const label = wrapper.findAll('label').find(item => item.text() === 'admin.groups.imagePricing.perImageBilling')!
+    expect(label.get<HTMLInputElement>('input').element.checked).toBe(true)
+    await wrapper.get('#edit-hidden-rate-multiplier').setValue('0.125')
+    await wrapper.get('#edit-group-form').trigger('submit')
+    await flushPromises()
+    expect(mocks.update).toHaveBeenCalledWith(42, expect.objectContaining({
+      hidden_rate_multiplier: 0.125, image_count_billing: true, rate_multiplier: 5,
+    }))
+  })
+
+  it('clears per-image billing when image generation is disabled while preserving the hidden rate', async () => {
+    mocks.list.mockResolvedValue({ items: [{ ...group, platform: 'openai', allow_image_generation: false, image_count_billing: true }], total: 1 })
+    const wrapper = await editGroup()
+    expect(wrapper.findAll('label').some(item => item.text() === 'admin.groups.imagePricing.perImageBilling')).toBe(false)
+    await wrapper.get('#edit-group-form').trigger('submit')
+    await flushPromises()
+    expect(mocks.update).toHaveBeenCalledWith(42, expect.objectContaining({
+      hidden_rate_multiplier: 2, image_count_billing: false,
+    }))
+  })
+
   it('keeps the field out of public Group and accepts nullable admin requests', () => {
     const publicHasHidden: 'hidden_rate_multiplier' extends keyof Group ? true : false = false
     const create: Pick<CreateGroupRequest, 'hidden_rate_multiplier'> = { hidden_rate_multiplier: null }

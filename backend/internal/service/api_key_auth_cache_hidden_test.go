@@ -13,6 +13,7 @@ func TestAPIKeyAuthSnapshotHiddenRateRoundtripAndClear(t *testing.T) {
 	apiKey := profitAuthTestAPIKey()
 	hidden := 0.4
 	apiKey.Group.HiddenRateMultiplier = &hidden
+	apiKey.Group.ImageCountBilling = true
 	snapshot := svc.snapshotFromAPIKey(context.Background(), apiKey)
 	require.NotNil(t, snapshot.Group.HiddenRateMultiplier)
 	// Snapshot ownership is independent of subsequent in-memory edits.
@@ -27,6 +28,7 @@ func TestAPIKeyAuthSnapshotHiddenRateRoundtripAndClear(t *testing.T) {
 	require.True(t, used)
 	require.Equal(t, 0.4, restored.Group.BillingRateMultiplier(0.2))
 	require.Equal(t, apiKey.Group.RateMultiplier, restored.Group.RateMultiplier)
+	require.True(t, restored.Group.ImageCountBilling)
 	*restored.Group.HiddenRateMultiplier = 0.8
 	require.Equal(t, 0.4, *entry.Snapshot.Group.HiddenRateMultiplier)
 
@@ -38,10 +40,13 @@ func TestAPIKeyAuthSnapshotHiddenRateRoundtripAndClear(t *testing.T) {
 	require.Nil(t, restored.Group.HiddenRateMultiplier)
 	require.Equal(t, 0.2, restored.Group.BillingRateMultiplier(0.2))
 
-	// v24 did not carry hidden billing configuration and must always reload.
-	cleared.Version = 24
-	restored, used, err = svc.applyAuthCacheEntry(apiKey.Key, &APIKeyAuthCacheEntry{Snapshot: cleared})
-	require.NoError(t, err)
-	require.False(t, used)
-	require.Nil(t, restored)
+	// Both the fork and upstream used v25 with different group fields. Neither
+	// legacy shape may be reused after combining hidden rates and image billing.
+	for _, legacyVersion := range []int{24, 25} {
+		cleared.Version = legacyVersion
+		restored, used, err = svc.applyAuthCacheEntry(apiKey.Key, &APIKeyAuthCacheEntry{Snapshot: cleared})
+		require.NoError(t, err)
+		require.False(t, used)
+		require.Nil(t, restored)
+	}
 }

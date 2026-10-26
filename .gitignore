@@ -143,6 +143,7 @@ docs/*
 !docs/PLUGIN_DEVELOPMENT.md
 !docs/FORK_RELEASE.md
 !docs/HIDDEN_GROUP_RATE.md
+!docs/UPSTREAM_FUNCTIONAL_SYNC.md
 !docs/channel-monitor-v2-safe-defaults.md
 !docs/codex-credits.md
 !docs/legal/
