@@ -40,10 +40,11 @@ function mountView() {
 }
 
 it.each([
-  ['degraded', 'operational'],
-  ['failed', 'issues'],
-  ['error', 'issues'],
-  ['', undefined],
+  ['operational', 'operational'],
+  ['degraded', 'degraded'],
+  ['failed', 'degraded'],
+  ['error', 'degraded'],
+  ['', 'degraded'],
 ])('summarizes primary status %j as %j', async (primary_status, overallStatus) => {
   mocks.list.mockResolvedValue({ items: [{ id: 1, primary_status }] })
   const wrapper = mountView()

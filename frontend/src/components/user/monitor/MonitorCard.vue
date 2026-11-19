@@ -35,9 +35,9 @@
       </div>
       <span
         class="px-2.5 py-1 rounded-full text-xs font-semibold flex-shrink-0"
-        :class="statusBadgeClass(displayStatus)"
+        :class="statusBadgeClass(item.primary_status)"
       >
-        {{ statusLabel(displayStatus) }}
+        {{ statusLabel(item.primary_status) }}
       </span>
     </div>
 
@@ -70,7 +70,6 @@
     <MonitorTimeline
       :buckets="item.daily_timeline"
       :days="parseInt(window, 10)"
-      :monitor-id="item.id"
       :countdown-seconds="countdownSeconds"
     />
   </article>
@@ -83,7 +82,6 @@ import type { UserMonitorView } from '@/api/channelMonitor'
 import {
   useChannelMonitorFormat,
   providerGradient,
-  userMonitorDisplayStatus,
 } from '@/composables/useChannelMonitorFormat'
 import { isChannelMonitorQuotaVisible } from '@/utils/featureFlags'
 import ProviderIcon from './ProviderIcon.vue'
@@ -121,8 +119,6 @@ const {
   formatLatency,
   formatMonitorModel,
 } = useChannelMonitorFormat()
-
-const displayStatus = computed(() => userMonitorDisplayStatus(props.item.primary_status))
 
 const providerTintClass = computed(() =>
   PROVIDER_TINT[props.item.provider] ?? 'text-gray-500 dark:text-gray-300'

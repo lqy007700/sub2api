@@ -64,6 +64,12 @@ describe('MonitorCard quota snapshot visibility', () => {
     expect(wrapper.attributes('tabindex')).toBeUndefined()
   })
 
+  it('keeps the original warning badge for a degraded current status', () => {
+    const wrapper = mountCard(makeItem({ primary_status: 'degraded' }))
+    expect(wrapper.get('.bg-amber-100').text()).toBe('monitorCommon.status.degraded')
+    wrapper.unmount()
+  })
+
   it('hides the quota block when the system switch is off even if data exists', () => {
     isQuotaVisible.mockReturnValue(false)
     const wrapper = mountCard(

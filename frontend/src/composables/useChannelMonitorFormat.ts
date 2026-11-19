@@ -45,10 +45,6 @@ export interface AvailabilityRow {
   availability_7d: number | null | undefined
 }
 
-export function userMonitorDisplayStatus(status: MonitorStatus | '') {
-  return status === 'degraded' ? 'operational' : status
-}
-
 export function useChannelMonitorFormat() {
   const { t } = useI18n()
 

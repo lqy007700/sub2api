@@ -39,7 +39,6 @@ import MonitorHero, {
 import MonitorCardGrid from '@/components/user/monitor/MonitorCardGrid.vue'
 import { DEFAULT_INTERVAL_SECONDS, STATUS_OPERATIONAL } from '@/constants/channelMonitor'
 import { useAutoRefresh } from '@/composables/useAutoRefresh'
-import { userMonitorDisplayStatus } from '@/composables/useChannelMonitorFormat'
 
 const { t } = useI18n()
 const appStore = useAppStore()
@@ -64,12 +63,9 @@ const countdown = autoRefresh.countdown
 
 // ── Computed ──
 const overallStatus = computed<OverallStatus>(() => {
-  const statuses = items.value.map(item => userMonitorDisplayStatus(item.primary_status))
-  if (statuses.some(status => status === 'failed' || status === 'error')) return 'issues'
-  if (statuses.length > 0 && statuses.every(status => status === STATUS_OPERATIONAL)) {
-    return 'operational'
-  }
-  return null
+  return items.value.every(item => item.primary_status === STATUS_OPERATIONAL)
+    ? 'operational'
+    : 'degraded'
 })
 
 // ── Loaders ──

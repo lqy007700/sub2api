@@ -567,7 +567,7 @@ export default {
   // Channel Status (user-facing read-only view)
   channelStatus: {
     dailyHistory: 'Status over {n} days',
-    historyPlaceholder: 'Pale bars · No monitoring data',
+    historyPlaceholder: 'Some days have no monitoring data',
     noHistorySample: 'No monitoring data',
     title: 'Channel Status',
     description: 'Inspect channel availability, latency and recent status',
@@ -584,7 +584,8 @@ export default {
     },
     overall: {
       operational: 'OPERATIONAL',
-      issues: 'Channel Issues'
+      degraded: 'DEGRADED',
+      unavailable: 'UNAVAILABLE'
     },
     columns: {
       name: 'Name',
