@@ -585,11 +585,6 @@ export default {
       '15d': '15 天',
       '30d': '30 天'
     },
-    overall: {
-      operational: 'OPERATIONAL',
-      degraded: 'DEGRADED',
-      unavailable: 'UNAVAILABLE'
-    },
     columns: {
       name: '名称',
       provider: '供应商',

@@ -28,35 +28,27 @@ function mountView() {
   return shallowMount(ChannelStatusV1View, {
     global: { stubs: {
       AppLayout: { template: '<div><slot /></div>' },
-      MonitorHero: { props: ['loading', 'overallStatus'], emits: ['update:window', 'refresh'], template: `<div :data-loading="loading" :data-overall-status="overallStatus">
-        <button class="fifteen" @click="$emit('update:window', '15d')">15d</button>
-        <button class="thirty" @click="$emit('update:window', '30d')">30d</button>
-        <button class="refresh" @click="$emit('refresh')">Refresh</button>
-      </div>` },
+      MonitorHero: false,
       MonitorCardGrid: false,
-      MonitorCard: { props: ['availabilityValue'], template: '<output>{{ availabilityValue }}</output>' }
+      MonitorCard: { props: ['availabilityValue', 'item'], template: '<output :data-status="item.primary_status">{{ availabilityValue }}</output>' }
     } }
   })
 }
 
-it.each([
-  ['operational', 'operational'],
-  ['degraded', 'degraded'],
-  ['failed', 'degraded'],
-  ['error', 'degraded'],
-  ['', 'degraded'],
-])('summarizes primary status %j as %j', async (primary_status, overallStatus) => {
-  mocks.list.mockResolvedValue({ items: [{ id: 1, primary_status }] })
+it('does not show an overall badge beside the tabs when a channel is degraded', async () => {
+  mocks.list.mockResolvedValue({ items: [{ id: 1, primary_status: 'degraded' }] })
   const wrapper = mountView()
   await flushPromises()
-  expect(wrapper.get('[data-loading]').attributes('data-overall-status')).toBe(overallStatus)
+  expect(wrapper.findAll('[role="tab"]')).toHaveLength(3)
+  expect(wrapper.text()).not.toContain('channelStatus.overall')
+  expect(wrapper.get('output').attributes('data-status')).toBe('degraded')
 })
 
 describe('channel monitor automatic detail refresh', () => {
-  it.each(['fifteen', 'thirty'])('refreshes the cached %s-day availability on timer ticks', async (tab) => {
+  it.each([15, 30])('refreshes the cached %s-day availability on timer ticks', async (days) => {
     const wrapper = mountView()
     await flushPromises()
-    await wrapper.get('.' + tab).trigger('click')
+    await wrapper.findAll('[role="tab"]')[days === 15 ? 1 : 2].trigger('click')
     await flushPromises()
     expect(wrapper.get('output').text()).toBe('90')
     mocks.status.mockResolvedValue(detail(98))
@@ -64,7 +56,7 @@ describe('channel monitor automatic detail refresh', () => {
     await flushPromises()
     expect(wrapper.get('output').text()).toBe('98')
     expect(mocks.status).toHaveBeenCalledTimes(2)
-    expect(wrapper.get('[data-loading]').attributes('data-loading')).toBe('false')
+    expect(wrapper.get('button[title="common.refresh"]').attributes('disabled')).toBeUndefined()
   })
 
   it('keeps the seven-day view on the list endpoint without extra detail requests', async () => {
@@ -81,10 +73,10 @@ describe('channel monitor automatic detail refresh', () => {
   it('still refreshes cached availability on manual reload', async () => {
     const wrapper = mountView()
     await flushPromises()
-    await wrapper.get('.fifteen').trigger('click')
+    await wrapper.findAll('[role="tab"]')[1].trigger('click')
     await flushPromises()
     mocks.status.mockResolvedValue(detail(98))
-    await wrapper.get('.refresh').trigger('click')
+    await wrapper.get('button[title="common.refresh"]').trigger('click')
     await flushPromises()
     expect(wrapper.get('output').text()).toBe('98')
   })

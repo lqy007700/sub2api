@@ -51,6 +51,8 @@ describe('AppSidebar labels', () => {
     expect(links.get(role === 'admin' ? '/admin/dashboard' : '/dashboard')).toBe('概览')
     expect(links.get('/keys')).toBe('密钥')
     expect(links.get('/monitor')).toBe('渠道')
+    expect(links.get('/usage')).toBe('记录')
+    if (role === 'admin') expect(links.get('/admin/usage')).toBe('记录')
     expect(links.get('/orders')).toBe('订单')
     expect(links.has('/profile')).toBe(false)
     wrapper.unmount()

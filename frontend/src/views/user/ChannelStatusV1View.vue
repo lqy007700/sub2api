@@ -1,8 +1,6 @@
 <template>
   <AppLayout>
     <MonitorHero
-      :overall-status="overallStatus"
-      :interval-seconds="DEFAULT_INTERVAL_SECONDS"
       :window="currentWindow"
       :loading="loading"
       :auto-refresh="autoRefresh"
@@ -21,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 import { extractApiErrorMessage } from '@/utils/apiError'
@@ -32,12 +30,9 @@ import {
   type UserMonitorDetail,
 } from '@/api/channelMonitor'
 import AppLayout from '@/components/layout/AppLayout.vue'
-import MonitorHero, {
-  type MonitorWindow,
-  type OverallStatus,
-} from '@/components/user/monitor/MonitorHero.vue'
+import MonitorHero, { type MonitorWindow } from '@/components/user/monitor/MonitorHero.vue'
 import MonitorCardGrid from '@/components/user/monitor/MonitorCardGrid.vue'
-import { DEFAULT_INTERVAL_SECONDS, STATUS_OPERATIONAL } from '@/constants/channelMonitor'
+import { DEFAULT_INTERVAL_SECONDS } from '@/constants/channelMonitor'
 import { useAutoRefresh } from '@/composables/useAutoRefresh'
 
 const { t } = useI18n()
@@ -60,13 +55,6 @@ const autoRefresh = useAutoRefresh({
   shouldPause: () => document.hidden || loading.value,
 })
 const countdown = autoRefresh.countdown
-
-// ── Computed ──
-const overallStatus = computed<OverallStatus>(() => {
-  return items.value.every(item => item.primary_status === STATUS_OPERATIONAL)
-    ? 'operational'
-    : 'degraded'
-})
 
 // ── Loaders ──
 async function reload(silent = false) {

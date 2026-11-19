@@ -580,11 +580,6 @@ export default {
       '15d': '15 days',
       '30d': '30 days'
     },
-    overall: {
-      operational: 'OPERATIONAL',
-      degraded: 'DEGRADED',
-      unavailable: 'UNAVAILABLE'
-    },
     columns: {
       name: 'Name',
       provider: 'Provider',
