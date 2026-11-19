@@ -2,7 +2,19 @@ import { readFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { describe, expect, it } from 'vitest'
+import { mount, RouterLinkStub } from '@vue/test-utils'
+import { createPinia } from 'pinia'
+import { nextTick, reactive } from 'vue'
+import { createI18n } from 'vue-i18n'
+import { describe, expect, it, vi } from 'vitest'
+import { useAdminSettingsStore, useAppStore, useAuthStore } from '@/stores'
+import type { CustomMenuItem, PublicSettings, User } from '@/types'
+import AppSidebar from '../AppSidebar.vue'
+
+vi.mock('vue-router', () => ({
+  useRoute: () => ({ path: '/dashboard' }),
+  useRouter: () => ({ push: vi.fn() })
+}))
 
 const componentPath = resolve(dirname(fileURLToPath(import.meta.url)), '../AppSidebar.vue')
 const componentSource = readFileSync(componentPath, 'utf8')
@@ -16,6 +28,40 @@ describe('AppSidebar custom SVG styles', () => {
     expect(componentSource).toContain('display: block;')
     expect(componentSource).not.toContain('stroke: currentColor;')
     expect(componentSource).not.toContain('fill: none;')
+  })
+})
+
+describe('AppSidebar custom menu visibility', () => {
+  it.each(['user', 'admin'] as const)('hides and restores links in the %s sidebar', async (role) => {
+    const pinia = createPinia()
+    const appStore = useAppStore(pinia)
+    const authStore = useAuthStore(pinia)
+    const adminSettingsStore = useAdminSettingsStore(pinia)
+    authStore.user = { role } as User
+    adminSettingsStore.loaded = true
+
+    const docs: CustomMenuItem = {
+      id: 'docs', label: 'Docs', url: 'https://example.com/docs', icon_svg: '', visibility: role, sort_order: 0
+    }
+    const items = reactive([docs, { ...docs, id: 'help', label: 'Help', sort_order: 1, hide_in_sidebar: true }])
+    appStore.cachedPublicSettings = { custom_menu_items: role === 'user' ? items : [] } as PublicSettings
+    adminSettingsStore.customMenuItems = role === 'admin' ? items : []
+
+    const wrapper = mount(AppSidebar, {
+      global: {
+        plugins: [pinia, createI18n({ legacy: false, missingWarn: false, fallbackWarn: false })],
+        stubs: { RouterLink: RouterLinkStub, VersionBadge: true }
+      }
+    })
+    const links = () => wrapper.findAllComponents(RouterLinkStub)
+      .map(link => link.props('to'))
+      .filter(to => String(to).startsWith('/custom/'))
+
+    expect(links()).toEqual(['/custom/docs'])
+    items[1].hide_in_sidebar = false
+    await nextTick()
+    expect(links()).toEqual(['/custom/docs', '/custom/help'])
+    wrapper.unmount()
   })
 })
 

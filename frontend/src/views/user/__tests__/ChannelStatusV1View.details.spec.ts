@@ -28,7 +28,7 @@ function mountView() {
   return shallowMount(ChannelStatusV1View, {
     global: { stubs: {
       AppLayout: { template: '<div><slot /></div>' },
-      MonitorHero: { props: ['loading'], emits: ['update:window', 'refresh'], template: `<div :data-loading="loading">
+      MonitorHero: { props: ['loading', 'overallStatus'], emits: ['update:window', 'refresh'], template: `<div :data-loading="loading" :data-overall-status="overallStatus">
         <button class="fifteen" @click="$emit('update:window', '15d')">15d</button>
         <button class="thirty" @click="$emit('update:window', '30d')">30d</button>
         <button class="refresh" @click="$emit('refresh')">Refresh</button>
@@ -38,6 +38,18 @@ function mountView() {
     } }
   })
 }
+
+it.each([
+  ['degraded', 'operational'],
+  ['failed', 'issues'],
+  ['error', 'issues'],
+  ['', undefined],
+])('summarizes primary status %j as %j', async (primary_status, overallStatus) => {
+  mocks.list.mockResolvedValue({ items: [{ id: 1, primary_status }] })
+  const wrapper = mountView()
+  await flushPromises()
+  expect(wrapper.get('[data-loading]').attributes('data-overall-status')).toBe(overallStatus)
+})
 
 describe('channel monitor automatic detail refresh', () => {
   it.each(['fifteen', 'thirty'])('refreshes the cached %s-day availability on timer ticks', async (tab) => {
@@ -57,6 +69,7 @@ describe('channel monitor automatic detail refresh', () => {
   it('keeps the seven-day view on the list endpoint without extra detail requests', async () => {
     const wrapper = mountView()
     await flushPromises()
+    await wrapper.get('output').trigger('click')
     await vi.advanceTimersByTimeAsync(30000)
     await flushPromises()
     expect(mocks.list).toHaveBeenCalledTimes(2)

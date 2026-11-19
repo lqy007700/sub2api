@@ -16,6 +16,7 @@ type CustomMenuItem struct {
 	PageSlug       string `json:"page_slug,omitempty"`
 	Visibility     string `json:"visibility"` // "user" or "admin"
 	SortOrder      int    `json:"sort_order"`
+	HideInSidebar  bool   `json:"hide_in_sidebar,omitempty"`
 	HideOpenButton bool   `json:"hide_open_button,omitempty"`
 }
 

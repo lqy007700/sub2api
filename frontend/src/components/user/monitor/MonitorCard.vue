@@ -1,8 +1,6 @@
 <template>
-  <button
-    type="button"
-    class="group text-left p-5 rounded-2xl min-h-[280px] w-full bg-white/70 backdrop-blur-xl border border-gray-200/80 shadow-card dark:bg-dark-800/60 dark:border-dark-700/70 hover:-translate-y-1 hover:shadow-card-hover dark:hover:border-primary-500/30 hover:border-gray-300 transition-all duration-300 ease-out flex flex-col"
-    @click="emit('click')"
+  <article
+    class="text-left p-5 rounded-2xl min-h-[280px] w-full bg-white/70 backdrop-blur-xl border border-gray-200/80 shadow-card dark:bg-dark-800/60 dark:border-dark-700/70 flex flex-col"
   >
     <!-- Header: icon + name/model + status chip -->
     <div class="flex items-start gap-3">
@@ -37,9 +35,9 @@
       </div>
       <span
         class="px-2.5 py-1 rounded-full text-xs font-semibold flex-shrink-0"
-        :class="statusBadgeClass(item.primary_status)"
+        :class="statusBadgeClass(displayStatus)"
       >
-        {{ statusLabel(item.primary_status) }}
+        {{ statusLabel(displayStatus) }}
       </span>
     </div>
 
@@ -70,10 +68,12 @@
 
     <!-- Timeline -->
     <MonitorTimeline
-      :buckets="item.timeline"
+      :buckets="item.daily_timeline"
+      :days="parseInt(window, 10)"
+      :monitor-id="item.id"
       :countdown-seconds="countdownSeconds"
     />
-  </button>
+  </article>
 </template>
 
 <script setup lang="ts">
@@ -83,6 +83,7 @@ import type { UserMonitorView } from '@/api/channelMonitor'
 import {
   useChannelMonitorFormat,
   providerGradient,
+  userMonitorDisplayStatus,
 } from '@/composables/useChannelMonitorFormat'
 import { isChannelMonitorQuotaVisible } from '@/utils/featureFlags'
 import ProviderIcon from './ProviderIcon.vue'
@@ -111,10 +112,6 @@ const props = defineProps<{
   countdownSeconds: number
 }>()
 
-const emit = defineEmits<{
-  (e: 'click'): void
-}>()
-
 const { t } = useI18n()
 const {
   statusLabel,
@@ -124,6 +121,8 @@ const {
   formatLatency,
   formatMonitorModel,
 } = useChannelMonitorFormat()
+
+const displayStatus = computed(() => userMonitorDisplayStatus(props.item.primary_status))
 
 const providerTintClass = computed(() =>
   PROVIDER_TINT[props.item.provider] ?? 'text-gray-500 dark:text-gray-300'

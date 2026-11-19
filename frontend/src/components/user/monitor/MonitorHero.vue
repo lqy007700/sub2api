@@ -22,6 +22,7 @@
       </div>
 
       <span
+        v-if="overallStatus"
         class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold tracking-wider uppercase"
         :class="overallChipClass"
       >
@@ -29,7 +30,7 @@
           class="w-1.5 h-1.5 rounded-full mr-1.5"
           :class="overallDotClass"
         ></span>
-        {{ overallLabel }}
+        {{ t(`channelStatus.overall.${overallStatus}`) }}
       </span>
 
       <button
@@ -61,7 +62,7 @@ import { useI18n } from 'vue-i18n'
 import Icon from '@/components/icons/Icon.vue'
 import AutoRefreshButton from '@/components/common/AutoRefreshButton.vue'
 export type MonitorWindow = '7d' | '15d' | '30d'
-export type OverallStatus = 'operational' | 'degraded'
+export type OverallStatus = 'operational' | 'issues' | null
 
 const props = defineProps<{
   overallStatus: OverallStatus
@@ -91,26 +92,11 @@ const windowOptions = computed<{ value: MonitorWindow; label: string }[]>(() => 
   { value: '30d', label: t('channelStatus.windowTab.30d') },
 ])
 
-const overallLabel = computed(() => t(`channelStatus.overall.${props.overallStatus}`))
+const overallChipClass = computed(() => props.overallStatus === 'operational'
+  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
+  : 'bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300')
 
-const overallChipClass = computed(() => {
-  switch (props.overallStatus) {
-    case 'operational':
-      return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300'
-    case 'degraded':
-    default:
-      return 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300'
-  }
-})
-
-const overallDotClass = computed(() => {
-  switch (props.overallStatus) {
-    case 'operational':
-      return 'bg-emerald-500 animate-pulse'
-    case 'degraded':
-    default:
-      return 'bg-amber-500 animate-pulse'
-  }
-})
-
+const overallDotClass = computed(() => props.overallStatus === 'operational'
+  ? 'bg-emerald-500 animate-pulse'
+  : 'bg-red-500 animate-pulse')
 </script>

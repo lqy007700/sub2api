@@ -33,6 +33,7 @@ export interface UserMonitorView {
   availability_7d: number
   extra_models: UserMonitorExtraModel[]
   timeline: MonitorTimelinePoint[]
+  daily_timeline?: { date: string; status: MonitorStatus }[]
   /**
    * 主模型最近配额快照。仅当系统开启 channel_monitor_show_quota 时
    * 服务端才会下发（关闭时服务端已剥离，前端 flag 仅作纵深防御）。

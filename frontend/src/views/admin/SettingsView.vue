@@ -6864,7 +6864,18 @@
                     />
                   </div>
 
-                  <label class="flex items-center gap-2 sm:col-span-2">
+                  <label class="flex items-center gap-2">
+                    <input
+                      v-model="item.hide_in_sidebar"
+                      type="checkbox"
+                      data-testid="custom-menu-hide-in-sidebar"
+                    />
+                    <span class="text-sm text-gray-700 dark:text-gray-300">
+                      {{ t("admin.settings.customMenu.hideInSidebar") }}
+                    </span>
+                  </label>
+
+                  <label class="flex items-center gap-2">
                     <input
                       v-model="item.hide_open_button"
                       type="checkbox"
@@ -8970,6 +8981,7 @@ import type {
 } from "@/api/admin/settings";
 import type {
   AdminGroup,
+  CustomMenuItem,
   LoginAgreementDocument,
   NotifyEmailEntry,
   Proxy,
@@ -9814,15 +9826,7 @@ const form = reactive<SettingsForm>({
   payment_alipay_mobile_precreate_deep_link: false,
   table_default_page_size: tablePageSizeDefault,
   table_page_size_options: [10, 20, 50, 100],
-  custom_menu_items: [] as Array<{
-    id: string;
-    label: string;
-    icon_svg: string;
-    url: string;
-    visibility: "user" | "admin";
-    sort_order: number;
-    hide_open_button?: boolean;
-  }>,
+  custom_menu_items: [] as CustomMenuItem[],
   custom_endpoints: [] as Array<{
     name: string;
     endpoint: string;

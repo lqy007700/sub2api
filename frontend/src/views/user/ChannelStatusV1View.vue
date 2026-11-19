@@ -16,14 +16,6 @@
       :countdown-seconds="countdown"
       :loading="loading"
       :detail-cache="detailCache"
-      @card-click="openDetail"
-    />
-
-    <MonitorDetailDialog
-      :show="showDetail"
-      :monitor-id="detailTarget?.id ?? null"
-      :title="detailTitle"
-      @close="closeDetail"
     />
   </AppLayout>
 </template>
@@ -45,9 +37,9 @@ import MonitorHero, {
   type OverallStatus,
 } from '@/components/user/monitor/MonitorHero.vue'
 import MonitorCardGrid from '@/components/user/monitor/MonitorCardGrid.vue'
-import MonitorDetailDialog from '@/components/user/MonitorDetailDialog.vue'
 import { DEFAULT_INTERVAL_SECONDS, STATUS_OPERATIONAL } from '@/constants/channelMonitor'
 import { useAutoRefresh } from '@/composables/useAutoRefresh'
+import { userMonitorDisplayStatus } from '@/composables/useChannelMonitorFormat'
 
 const { t } = useI18n()
 const appStore = useAppStore()
@@ -57,8 +49,6 @@ const items = ref<UserMonitorView[]>([])
 const loading = ref(false)
 const currentWindow = ref<MonitorWindow>('7d')
 const detailCache = reactive<Record<number, UserMonitorDetail>>({})
-const showDetail = ref(false)
-const detailTarget = ref<UserMonitorView | null>(null)
 
 let abortController: AbortController | null = null
 
@@ -74,16 +64,12 @@ const countdown = autoRefresh.countdown
 
 // ── Computed ──
 const overallStatus = computed<OverallStatus>(() => {
-  if (items.value.length === 0) return 'operational'
-  for (const it of items.value) {
-    if (it.primary_status === 'failed' || it.primary_status === 'error') return 'degraded'
-    if (it.primary_status !== STATUS_OPERATIONAL) return 'degraded'
+  const statuses = items.value.map(item => userMonitorDisplayStatus(item.primary_status))
+  if (statuses.some(status => status === 'failed' || status === 'error')) return 'issues'
+  if (statuses.length > 0 && statuses.every(status => status === STATUS_OPERATIONAL)) {
+    return 'operational'
   }
-  return 'operational'
-})
-
-const detailTitle = computed(() => {
-  return detailTarget.value?.name || t('channelStatus.detailTitle')
+  return null
 })
 
 // ── Loaders ──
@@ -136,16 +122,6 @@ async function ensureDetailsForWindow() {
 async function handleWindowChange(value: MonitorWindow) {
   currentWindow.value = value
   await ensureDetailsForWindow()
-}
-
-function openDetail(row: UserMonitorView) {
-  detailTarget.value = row
-  showDetail.value = true
-}
-
-function closeDetail() {
-  showDetail.value = false
-  detailTarget.value = null
 }
 
 watch(items, () => {

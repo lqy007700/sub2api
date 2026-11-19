@@ -56,6 +56,14 @@ function mountCard(item: UserMonitorView) {
 }
 
 describe('MonitorCard quota snapshot visibility', () => {
+  it('renders the channel card as static content', () => {
+    isQuotaVisible.mockReturnValue(false)
+    const wrapper = mountCard(makeItem())
+    expect(wrapper.element.tagName).toBe('ARTICLE')
+    expect(wrapper.attributes('role')).toBeUndefined()
+    expect(wrapper.attributes('tabindex')).toBeUndefined()
+  })
+
   it('hides the quota block when the system switch is off even if data exists', () => {
     isQuotaVisible.mockReturnValue(false)
     const wrapper = mountCard(

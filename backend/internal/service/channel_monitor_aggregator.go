@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"time"
 )
 
 // 渠道监控聚合层：把 latest + availability 拼成 admin/user 视图所需的 summary / detail。
@@ -54,7 +55,8 @@ func (s *ChannelMonitorService) BatchMonitorStatusSummary(
 //	1 次查 monitors；
 //	1 次批量 latest（含 ping_latency_ms）；
 //	1 次批量 7d availability；
-//	1 次批量 timeline（主模型最近 N 条）。
+//	1 次批量 timeline（主模型最近 N 条）；
+//	1 次批量查询主模型近 30 个 UTC 日的最差检测状态。
 func (s *ChannelMonitorService) ListUserView(ctx context.Context) ([]*UserMonitorView, error) {
 	monitors, err := s.repo.ListEnabled(ctx)
 	if err != nil {
@@ -68,11 +70,18 @@ func (s *ChannelMonitorService) ListUserView(ctx context.Context) ([]*UserMonito
 	summaries := s.BatchMonitorStatusSummary(ctx, ids, primaryByID, extrasByID)
 	latestMap := s.batchLatest(ctx, ids)
 	timelineMap := s.batchTimeline(ctx, ids, primaryByID)
+	since := time.Now().UTC().Truncate(24*time.Hour).AddDate(0, 0, 1-monitorAvailability30Days)
+	daily, err := s.repo.ListDailyStatusForMonitors(ctx, ids, primaryByID, since)
+	if err != nil {
+		slog.Warn("channel_monitor: user view daily timeline failed", "error", err)
+	}
 
 	views := make([]*UserMonitorView, 0, len(monitors))
 	for _, m := range monitors {
 		primaryLatest := pickLatest(latestMap[m.ID], m.PrimaryModel)
-		views = append(views, buildUserViewFromSummary(m, summaries[m.ID], primaryLatest, timelineMap[m.ID]))
+		view := buildUserViewFromSummary(m, summaries[m.ID], primaryLatest, timelineMap[m.ID])
+		view.DailyTimeline = daily[m.ID]
+		views = append(views, view)
 	}
 	return views, nil
 }

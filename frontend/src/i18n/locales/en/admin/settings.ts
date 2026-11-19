@@ -748,6 +748,7 @@ export default {
         namePlaceholder: 'e.g. Help Center',
         url: 'Page URL',
         urlPlaceholder: 'https://example.com/page',
+        hideInSidebar: 'Hide from the sidebar',
         hideOpenButton: 'Hide the “Open in new tab” button',
         iconSvg: 'SVG Icon',
         iconSvgPlaceholder: '<svg>...</svg>',

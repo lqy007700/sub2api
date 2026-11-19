@@ -576,6 +576,9 @@ export default {
     searchPlaceholder: '搜索渠道...',
     allProviders: '全部供应商',
     loadError: '加载渠道状态失败',
+    dailyHistory: '近 {n} 天状态',
+    historyPlaceholder: '浅色示意 · 无监测记录',
+    noHistorySample: '无监测记录',
     detailLoadError: '加载渠道详情失败',
     detailTitle: '渠道详情',
     closeDetail: '关闭',
@@ -586,8 +589,7 @@ export default {
     },
     overall: {
       operational: 'OPERATIONAL',
-      degraded: 'DEGRADED',
-      unavailable: 'UNAVAILABLE'
+      issues: '渠道异常'
     },
     columns: {
       name: '名称',

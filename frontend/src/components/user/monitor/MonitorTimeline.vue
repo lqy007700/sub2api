@@ -1,33 +1,25 @@
 <template>
   <div class="mt-4 pt-3 border-t border-gray-100 dark:border-dark-700/60">
-    <div
-      class="flex justify-between text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-2"
-    >
-      <span>{{ t('monitorCommon.history60pts', { n: length }) }}</span>
+    <div class="mb-2 flex justify-between text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+      <span>{{ t('channelStatus.dailyHistory', { n: days }) }}</span>
       <span class="tabular-nums">{{ t('monitorCommon.nextUpdateIn', { n: countdownSeconds }) }}</span>
     </div>
 
-    <div
-      v-if="maintenance"
-      class="flex h-5 w-full items-center justify-center rounded border border-dashed border-gray-300 dark:border-dark-600 text-[10px] uppercase tracking-widest text-gray-400"
-    >
-      {{ t('monitorCommon.maintenancePaused') }}
-    </div>
-    <div v-else class="flex items-end gap-[2px] h-5 w-full">
+    <div class="flex h-5 w-full items-end gap-[2px]" role="list" :aria-label="t('channelStatus.dailyHistory', { n: days })">
       <div
-        v-for="(bar, idx) in displayBars"
-        :key="idx"
-        class="flex-1 min-w-0 rounded-sm"
-        :class="bar.colorClass"
-        :style="{ height: bar.heightPct + '%' }"
-        :title="bar.title"
+        v-for="bar in bars"
+        :key="bar.date"
+        role="listitem"
+        class="min-w-0 flex-1 rounded-sm"
+        :class="bar.classes"
+        :title="bar.label"
+        :aria-label="bar.label"
       ></div>
     </div>
 
-    <div
-      class="mt-1 flex justify-between text-[9px] uppercase tracking-widest text-gray-400"
-    >
-      <span>{{ t('monitorCommon.past') }}</span>
+    <div class="mt-1 flex justify-between text-[10px] text-gray-500 dark:text-gray-400">
+      <span v-if="bars.some(bar => bar.placeholder)">{{ t('channelStatus.historyPlaceholder') }}</span>
+      <span v-else>{{ t('monitorCommon.past') }}</span>
       <span>{{ t('monitorCommon.now') }}</span>
     </div>
   </div>
@@ -36,80 +28,48 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { MonitorTimelinePoint } from '@/api/channelMonitor'
-import { useChannelMonitorFormat } from '@/composables/useChannelMonitorFormat'
+import type { UserMonitorView } from '@/api/channelMonitor'
+import { useChannelMonitorFormat, userMonitorDisplayStatus } from '@/composables/useChannelMonitorFormat'
 
-const props = withDefaults(defineProps<{
-  buckets?: MonitorTimelinePoint[]
+const props = defineProps<{
+  buckets?: UserMonitorView['daily_timeline']
+  days: number
+  monitorId: number
   countdownSeconds: number
-  length?: number
-  maintenance?: boolean
-}>(), {
-  buckets: () => [],
-  length: 60,
-  maintenance: false,
-})
+}>()
 
 const { t } = useI18n()
-const { statusLabel, formatLatency, formatRelativeTime } = useChannelMonitorFormat()
+const { statusLabel } = useChannelMonitorFormat()
 
-interface Bar {
-  colorClass: string
-  heightPct: number
-  title: string
+const statusClasses = {
+  operational: 'h-full bg-emerald-500',
+  failed: 'h-1/3 bg-red-500',
+  error: 'h-1/3 bg-red-500',
 }
 
-// 4 级高度 + 颜色双重编码：高=好+绿，短=坏+红，灰=未测试。
-// 长绿(正常) > 中黄(降级) > 短红(失败/系统错误) > 很短灰(未测试)。
-const STATUS_HEIGHT: Record<string, number> = {
-  operational: 100,
-  degraded: 65,
-  failed: 35,
-  error: 35,
-  empty: 15,
-}
+const millisecondsPerDay = 24 * 60 * 60 * 1000
 
-const STATUS_COLOR: Record<string, string> = {
-  operational: 'bg-emerald-500',
-  degraded: 'bg-amber-500',
-  failed: 'bg-red-500',
-  error: 'bg-red-500',
-  empty: 'bg-gray-300 dark:bg-dark-600',
-}
-
-const displayBars = computed<Bar[]>(() => {
-  // Real points come newest-first; convert to oldest-first so the rightmost
-  // bar represents "now". Pad the left with empty placeholders to keep the
-  // bar count stable at `length`.
-  const real = [...(props.buckets ?? [])]
-    .slice(0, props.length)
-    .reverse()
-
-  const padCount = Math.max(0, props.length - real.length)
-  const bars: Bar[] = []
-
-  for (let i = 0; i < padCount; i += 1) {
-    bars.push({
-      colorClass: STATUS_COLOR.empty,
-      heightPct: STATUS_HEIGHT.empty,
-      title: '',
-    })
-  }
-
-  for (const point of real) {
-    const status = point.status as keyof typeof STATUS_HEIGHT
-    const colorClass = STATUS_COLOR[status] ?? STATUS_COLOR.empty
-    const heightPct = STATUS_HEIGHT[status] ?? STATUS_HEIGHT.empty
-    const latency = formatLatency(point.latency_ms)
-    const relative = formatRelativeTime(point.checked_at)
-    const label = statusLabel(point.status)
-    bars.push({
-      colorClass,
-      heightPct,
-      title: `${relative} · ${label} · ${latency}ms`,
-    })
-  }
-
-  return bars
+const bars = computed(() => {
+  const statusesByDate = new Map(props.buckets?.map(point => [point.date, point.status]))
+  const today = Math.floor(Date.now() / millisecondsPerDay)
+  return Array.from({ length: props.days }, (_, index) => {
+    const day = today - props.days + 1 + index
+    const date = new Date(day * millisecondsPerDay).toISOString().slice(0, 10)
+    const status = userMonitorDisplayStatus(statusesByDate.get(date) ?? '')
+    const recordedClasses = status && statusClasses[status]
+    if (recordedClasses) {
+      return { date, classes: recordedClasses, label: `${date} UTC · ${statusLabel(status)}`, placeholder: false }
+    }
+    // Anchor the decorative accents to UTC dates so switching ranges keeps overlapping days identical.
+    const accent = (day + props.monitorId) % 15 === 0
+    return {
+      date,
+      classes: accent
+        ? 'h-2/3 border border-dashed border-amber-300 bg-amber-100 dark:border-amber-700 dark:bg-amber-950/40'
+        : 'h-full border border-dashed border-emerald-300 bg-emerald-100 dark:border-emerald-700 dark:bg-emerald-950/40',
+      label: `${date} UTC · ${t('channelStatus.noHistorySample')}`,
+      placeholder: true,
+    }
+  })
 })
 </script>

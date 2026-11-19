@@ -1,0 +1,322 @@
+<!--
+  ThisAI 首页 · 可将本文件全部内容粘贴到 Sub2API「首页内容」并保存。
+  只使用作用域 CSS、内嵌 SVG 和原生 HTML；无 JavaScript、外部字体、统计代码。
+  Logo 沿用用户提供的 logo.svg 原始图形与配色。
+  接入示例中的 THISAI_API_KEY 和 MODEL_ID 是占位符，不是真实凭据或可用模型承诺。
+-->
+<style>
+  #thisai-home {
+    --th-forest: #123e36;
+    --th-mint: #c6f6df;
+    --th-lime: #e7ff87;
+    --th-jade: #79cfb1;
+    --th-paper: #f7f8f2;
+    --th-ink: #163b33;
+    --th-muted: #687970;
+    --th-line: #dce4da;
+    width: 100%;
+    min-height: 100vh;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--th-paper);
+    color: var(--th-ink);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    text-align: left;
+    -webkit-font-smoothing: antialiased;
+  }
+  #thisai-home *, #thisai-home *::before, #thisai-home *::after { box-sizing: border-box; }
+  #thisai-home h1, #thisai-home h2, #thisai-home h3, #thisai-home p, #thisai-home figure { margin: 0; }
+  #thisai-home a { color: inherit; text-decoration: none; }
+  #thisai-home a:focus-visible, #thisai-home summary:focus-visible { outline: 3px solid #33836c; outline-offset: 5px; }
+  #thisai-home svg { display: block; flex-shrink: 0; }
+  #thisai-home ::selection { color: var(--th-forest); background: var(--th-lime); }
+  #thisai-home .th-container { width: min(1240px, 100%); margin: 0 auto; padding: 0 40px; }
+  #thisai-home .th-mono { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+  #thisai-home .th-header { border-bottom: 1px solid var(--th-line); }
+  #thisai-home .th-nav { min-height: 92px; display: flex; align-items: center; justify-content: space-between; gap: 28px; }
+  #thisai-home .th-brand { display: inline-flex; align-items: center; gap: 12px; font-size: 24px; font-weight: 750; letter-spacing: -.8px; }
+  #thisai-home .th-brand svg { width: 42px; height: 42px; }
+  #thisai-home .th-nav-links { display: flex; align-items: center; gap: 30px; font-size: 14px; font-weight: 550; }
+  #thisai-home .th-nav-links a:not(.th-nav-login):hover { color: #2a8066; }
+  #thisai-home .th-nav-login { display: inline-flex; align-items: center; gap: 12px; border: 1px solid #c9d4c8; border-radius: 100px; padding: 10px 19px; transition: background .18s; }
+  #thisai-home .th-nav-login:hover { background: #e8eee2; }
+  #thisai-home .th-arrow { font-size: 20px; line-height: 1; font-weight: 400; }
+  #thisai-home .th-hero { display: grid; grid-template-columns: 1.14fr 1fr; align-items: center; gap: 64px; padding-top: 70px; padding-bottom: 64px; }
+  #thisai-home .th-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 27px; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; }
+  #thisai-home .th-dot { width: 7px; height: 7px; border-radius: 50%; background: #378b6c; }
+  #thisai-home .th-hero h1 { font-size: clamp(42px, 4.5vw, 64px); font-weight: 750; line-height: 1.22; letter-spacing: -2.8px; }
+  #thisai-home .th-heading-line { display: block; }
+  #thisai-home .th-highlight { position: relative; display: inline-block; color: #37856b; }
+  #thisai-home .th-highlight::after { content: ""; position: absolute; left: -3px; right: -3px; bottom: 3px; height: 13px; border-radius: 9px 4px 12px 3px; background: var(--th-lime); z-index: -1; transform: rotate(-1.5deg); }
+  #thisai-home .th-hero-copy { margin-top: 25px; max-width: 420px; color: var(--th-muted); font-size: 16px; line-height: 1.95; }
+  #thisai-home .th-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 33px; }
+  #thisai-home .th-button { display: inline-flex; align-items: center; justify-content: center; gap: 25px; min-height: 52px; border: 1px solid transparent; border-radius: 100px; padding: 13px 25px; font-size: 14px; font-weight: 600; transition: transform .18s, background .18s; }
+  #thisai-home .th-button:hover { transform: translateY(-2px); }
+  #thisai-home .th-button-primary { background: var(--th-forest); color: #f3fff4; }
+  #thisai-home .th-button-primary:hover { background: #20594c; }
+  #thisai-home .th-button-secondary { border-color: #cbd5c8; }
+  #thisai-home .th-button-secondary:hover { background: #eaf0e5; }
+  #thisai-home .th-hero-note { margin-top: 20px; font-size: 11px; color: #7c8a7d; }
+  #thisai-home .th-hero-note span { margin: 0 8px; color: #bac4b7; }
+  #thisai-home .th-scene { position: relative; height: 474px; overflow: hidden; border-radius: 28px; background: var(--th-forest); color: var(--th-mint); }
+  #thisai-home .th-scene::before { content: ""; position: absolute; inset: 0; opacity: .15; background-image: radial-gradient(#c6f6df 1px, transparent 1px); background-size: 22px 22px; mask-image: linear-gradient(black, transparent 90%); }
+  #thisai-home .th-scene-top { position: absolute; top: 27px; left: 27px; right: 27px; display: flex; align-items: center; justify-content: space-between; font-size: 10px; letter-spacing: 1.25px; }
+  #thisai-home .th-scene-index { color: #91b8a5; }
+  #thisai-home .th-orbit { position: absolute; width: 300px; height: 300px; border: 1px solid #c6f6df20; border-radius: 50%; left: 50%; top: 48%; transform: translate(-50%, -50%); }
+  #thisai-home .th-orbit-small { width: 206px; height: 206px; border-style: dashed; border-color: #c6f6df18; }
+  #thisai-home .th-connectors { position: absolute; left: 0; top: 47px; width: 100%; height: 335px; }
+  #thisai-home .th-hub { position: absolute; left: 50%; top: 47%; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; width: 120px; height: 120px; border: 1px solid #79cfb145; border-radius: 32px; background: #1b5145; box-shadow: 0 12px 36px #09282045; }
+  #thisai-home .th-hub svg { width: 84px; height: 84px; }
+  #thisai-home .th-node { position: absolute; display: flex; align-items: center; gap: 10px; border: 1px solid #c6f6df29; border-radius: 14px; padding: 11px 15px; background: #1d4b40; box-shadow: 0 6px 16px #092c2428; font-size: 13px; font-weight: 600; }
+  #thisai-home .th-node-icon { display: inline-flex; align-items: center; justify-content: center; width: 27px; height: 27px; border-radius: 7px; background: #c6f6df14; font: 14px/1 Consolas, monospace; }
+  #thisai-home .th-node-tools { top: 103px; left: 28px; }
+  #thisai-home .th-node-code { top: 116px; right: 23px; }
+  #thisai-home .th-node-app { top: 294px; left: 35px; }
+  #thisai-home .th-node-model { top: 288px; right: 23px; color: var(--th-forest); background: var(--th-mint); border-color: var(--th-mint); }
+  #thisai-home .th-node-model .th-node-icon { background: #123e3610; }
+  #thisai-home .th-scene-spark { position: absolute; right: 55px; top: 222px; width: 22px; height: 22px; }
+  #thisai-home .th-scene-dot { position: absolute; left: 59px; top: 222px; width: 10px; height: 10px; border-radius: 50%; background: var(--th-jade); }
+  #thisai-home .th-scene-bottom { position: absolute; left: 27px; right: 27px; bottom: 28px; display: flex; align-items: end; justify-content: space-between; gap: 12px; }
+  #thisai-home .th-scene-caption { font-size: 22px; font-weight: 550; letter-spacing: -.7px; line-height: 1.3; }
+  #thisai-home .th-scene-bottom small { color: #8fb6a3; font-size: 9px; white-space: nowrap; }
+  #thisai-home .th-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; padding-top: 24px; padding-bottom: 25px; border-top: 1px solid var(--th-line); border-bottom: 1px solid var(--th-line); }
+  #thisai-home .th-strip-item { display: flex; align-items: center; gap: 15px; }
+  #thisai-home .th-strip-number { color: #8c9b8d; font-size: 11px; }
+  #thisai-home .th-strip strong { font-size: 13px; font-weight: 600; }
+  #thisai-home .th-strip small { display: block; color: var(--th-muted); font-size: 11px; margin-top: 2px; }
+  #thisai-home .th-section { padding-top: 78px; padding-bottom: 8px; scroll-margin-top: 24px; }
+  #thisai-home .th-section-top { display: flex; align-items: end; justify-content: space-between; gap: 25px; margin-bottom: 30px; }
+  #thisai-home .th-kicker { display: block; margin-bottom: 13px; color: #628372; font-size: 10px; font-weight: 650; letter-spacing: 1.6px; }
+  #thisai-home h2 { font-size: 32px; line-height: 1.35; font-weight: 650; letter-spacing: -1.2px; }
+  #thisai-home .th-section-description { max-width: 285px; color: var(--th-muted); font-size: 13px; line-height: 1.9; }
+  #thisai-home .th-features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  #thisai-home .th-feature { position: relative; min-height: 244px; border: 1px solid var(--th-line); border-radius: 20px; padding: 25px; background: #fcfcf8; }
+  #thisai-home .th-feature:first-child { background: #eaf3e6; border-color: #d4e3cf; }
+  #thisai-home .th-feature-icon { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; margin-bottom: 31px; border-radius: 12px; background: #e6eee2; }
+  #thisai-home .th-feature:first-child .th-feature-icon { background: var(--th-forest); color: var(--th-mint); }
+  #thisai-home .th-feature-icon svg { width: 21px; height: 21px; }
+  #thisai-home .th-feature-index { position: absolute; top: 29px; right: 24px; font-size: 10px; color: #8c9b8d; }
+  #thisai-home h3 { font-size: 18px; font-weight: 650; letter-spacing: -.4px; }
+  #thisai-home .th-feature p { margin-top: 9px; color: var(--th-muted); font-size: 13px; line-height: 1.85; }
+  #thisai-home .th-guide { display: grid; grid-template-columns: .88fr 1.12fr; gap: 54px; align-items: start; margin-top: 34px; }
+  #thisai-home .th-steps { display: flex; flex-direction: column; gap: 26px; }
+  #thisai-home .th-step { display: flex; align-items: start; gap: 15px; }
+  #thisai-home .th-step-number { display: flex; align-items: center; justify-content: center; width: 31px; height: 31px; flex-shrink: 0; margin-top: 2px; border: 1px solid #c6d5c4; border-radius: 50%; font-size: 11px; color: #66826d; }
+  #thisai-home .th-step h3 { font-size: 15px; font-weight: 600; }
+  #thisai-home .th-step p { margin-top: 5px; color: var(--th-muted); font-size: 12px; line-height: 1.9; }
+  #thisai-home .th-step a { border-bottom: 1px solid #87a790; }
+  #thisai-home .th-inline-code { display: inline; padding: 2px 5px; border-radius: 4px; background: #e8eee3; color: #365b48; font: 11px/1.7 "SFMono-Regular", Consolas, monospace; overflow-wrap: anywhere; }
+  #thisai-home .th-terminal { overflow: hidden; border: 1px solid #cfdacf; border-radius: 18px; background: #133a32; }
+  #thisai-home .th-terminal-top { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #c6f6df16; background: #10352d; color: #a7c5b1; font-size: 10px; }
+  #thisai-home .th-terminal-dots { display: flex; gap: 5px; }
+  #thisai-home .th-terminal-dots i { width: 6px; height: 6px; background: #587d65; border-radius: 50%; }
+  #thisai-home .th-terminal-dots i:first-child { background: #c9e779; }
+  #thisai-home .th-terminal pre { margin: 0; overflow-x: auto; padding: 23px 24px 25px; color: #d5e5d8; font: 12px/1.95 "SFMono-Regular", Consolas, "Liberation Mono", monospace; tab-size: 2; }
+  #thisai-home .th-code-key { color: #a4ccb8; }
+  #thisai-home .th-code-value { color: var(--th-lime); }
+  #thisai-home .th-code-comment { color: #91b39b; }
+  #thisai-home .th-code-note { margin-top: 10px; font-size: 10px; color: #798977; line-height: 1.8; }
+  #thisai-home .th-faq-layout { display: grid; grid-template-columns: .7fr 1.3fr; gap: 55px; }
+  #thisai-home .th-faq-intro p { margin-top: 17px; max-width: 220px; color: var(--th-muted); font-size: 13px; line-height: 1.9; }
+  #thisai-home .th-faq-list { border-top: 1px solid var(--th-line); }
+  #thisai-home details { border-bottom: 1px solid var(--th-line); }
+  #thisai-home summary { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 0; font-size: 14px; font-weight: 550; cursor: pointer; list-style: none; }
+  #thisai-home summary::-webkit-details-marker { display: none; }
+  #thisai-home .th-faq-toggle { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid #d7e0d2; border-radius: 50%; color: #64846f; font: 17px/1 sans-serif; transition: transform .18s; }
+  #thisai-home details[open] .th-faq-toggle { transform: rotate(45deg); }
+  #thisai-home details p { padding: 0 30px 21px 0; color: var(--th-muted); font-size: 12px; line-height: 1.95; }
+  #thisai-home .th-cta { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 30px; margin-top: 72px; overflow: hidden; border-radius: 23px; padding: 39px 40px; color: var(--th-mint); background: var(--th-forest); }
+  #thisai-home .th-cta-copy { position: relative; z-index: 1; }
+  #thisai-home .th-cta .th-kicker { color: #9cc2a5; font-size: 9px; margin-bottom: 9px; }
+  #thisai-home .th-cta h2 { font-size: 30px; letter-spacing: -.8px; }
+  #thisai-home .th-cta p { margin-top: 9px; font-size: 12px; color: #a0bdab; }
+  #thisai-home .th-button-lime { position: relative; z-index: 1; background: var(--th-lime); color: var(--th-forest); white-space: nowrap; }
+  #thisai-home .th-button-lime:hover { background: #f0ffb6; }
+  #thisai-home .th-cta-star { position: absolute; right: 245px; top: -22px; width: 210px; height: 210px; opacity: .07; transform: rotate(10deg); }
+  #thisai-home .th-footer { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 120px; padding-top: 25px; padding-bottom: 25px; }
+  #thisai-home .th-footer-brand { display: flex; align-items: center; gap: 11px; }
+  #thisai-home .th-footer-brand svg { width: 28px; height: 28px; }
+  #thisai-home .th-footer-brand strong { font-size: 14px; font-weight: 700; letter-spacing: -.3px; }
+  #thisai-home .th-footer small { color: #839080; font-size: 10px; }
+  #thisai-home .th-footer-links { display: flex; gap: 24px; color: #708371; font-size: 11px; }
+  #thisai-home .th-footer-links a:hover { color: var(--th-forest); }
+  @media (min-width: 1600px) { #thisai-home .th-hero { padding-top: 88px; padding-bottom: 80px; } }
+  @media (max-width: 1020px) {
+    #thisai-home .th-container { padding-left: 28px; padding-right: 28px; }
+    #thisai-home .th-hero { gap: 30px; }
+    #thisai-home .th-hero h1 { font-size: 46px; letter-spacing: -2px; }
+    #thisai-home .th-scene { height: 444px; }
+    #thisai-home .th-node { padding: 10px; font-size: 11px; gap: 7px; }
+    #thisai-home .th-node-tools { left: 15px; }
+    #thisai-home .th-node-code, #thisai-home .th-node-model { right: 15px; }
+    #thisai-home .th-node-app { left: 15px; }
+    #thisai-home .th-scene-bottom small { display: none; }
+    #thisai-home .th-guide { gap: 30px; }
+    #thisai-home .th-feature { padding: 22px; }
+  }
+  @media (max-width: 760px) {
+    #thisai-home .th-container { padding-left: 22px; padding-right: 22px; }
+    #thisai-home .th-nav { min-height: 76px; gap: 16px; }
+    #thisai-home .th-brand { font-size: 22px; }
+    #thisai-home .th-brand svg { width: 36px; height: 36px; }
+    #thisai-home .th-nav-links { gap: 15px; }
+    #thisai-home .th-nav-links .th-nav-section { display: none; }
+    #thisai-home .th-nav-login { padding: 8px 15px; font-size: 12px; gap: 10px; }
+    #thisai-home .th-hero { grid-template-columns: 1fr; gap: 34px; padding-top: 43px; padding-bottom: 34px; }
+    #thisai-home .th-eyebrow { font-size: 10px; margin-bottom: 22px; }
+    #thisai-home .th-hero h1 { font-size: clamp(37px, 8vw, 58px); letter-spacing: -1.9px; }
+    #thisai-home .th-hero-copy { max-width: 460px; font-size: 14px; margin-top: 22px; }
+    #thisai-home .th-actions { margin-top: 25px; gap: 10px; }
+    #thisai-home .th-button { min-height: 48px; padding: 11px 20px; font-size: 13px; gap: 20px; }
+    #thisai-home .th-hero-note { font-size: 10px; margin-top: 16px; }
+    #thisai-home .th-scene { height: 390px; border-radius: 23px; }
+    #thisai-home .th-scene-top { top: 23px; left: 22px; right: 22px; font-size: 9px; }
+    #thisai-home .th-hub { width: 106px; height: 106px; border-radius: 28px; }
+    #thisai-home .th-hub svg { width: 74px; height: 74px; }
+    #thisai-home .th-orbit { width: 270px; height: 270px; }
+    #thisai-home .th-orbit-small { width: 186px; height: 186px; }
+    #thisai-home .th-connectors { top: 20px; }
+    #thisai-home .th-node-tools { top: 78px; left: 22px; }
+    #thisai-home .th-node-code { top: 93px; right: 18px; }
+    #thisai-home .th-node-app { top: 257px; left: 22px; }
+    #thisai-home .th-node-model { top: 249px; right: 18px; }
+    #thisai-home .th-scene-spark { top: 197px; right: 37px; width: 18px; height: 18px; }
+    #thisai-home .th-scene-dot { top: 191px; left: 34px; width: 8px; height: 8px; }
+    #thisai-home .th-scene-bottom { bottom: 23px; left: 22px; right: 22px; }
+    #thisai-home .th-scene-caption { font-size: 18px; }
+    #thisai-home .th-strip { gap: 12px; padding-top: 20px; padding-bottom: 20px; }
+    #thisai-home .th-strip-item { align-items: start; gap: 7px; }
+    #thisai-home .th-strip-number { margin-top: 2px; font-size: 9px; }
+    #thisai-home .th-strip strong { font-size: 11px; }
+    #thisai-home .th-strip small { font-size: 9px; margin-top: 3px; }
+    #thisai-home .th-section { padding-top: 49px; }
+    #thisai-home .th-section-top { display: block; margin-bottom: 23px; }
+    #thisai-home h2 { font-size: 27px; letter-spacing: -.8px; }
+    #thisai-home .th-section-description { margin-top: 13px; max-width: 100%; font-size: 12px; }
+    #thisai-home .th-features { grid-template-columns: 1fr; gap: 12px; }
+    #thisai-home .th-feature { min-height: auto; padding: 23px; }
+    #thisai-home .th-feature-icon { margin-bottom: 19px; }
+    #thisai-home .th-feature p { max-width: 440px; font-size: 12px; }
+    #thisai-home .th-guide { grid-template-columns: 1fr; gap: 29px; margin-top: 24px; }
+    #thisai-home .th-steps { gap: 22px; }
+    #thisai-home .th-terminal pre { padding: 19px 17px 22px; font-size: 10px; }
+    #thisai-home .th-faq-layout { grid-template-columns: 1fr; gap: 25px; }
+    #thisai-home .th-faq-intro p { max-width: none; margin-top: 12px; font-size: 12px; }
+    #thisai-home summary { font-size: 13px; padding: 17px 0; }
+    #thisai-home .th-cta { align-items: start; flex-direction: column; gap: 24px; margin-top: 43px; padding: 29px 25px; border-radius: 20px; }
+    #thisai-home .th-cta h2 { font-size: 27px; }
+    #thisai-home .th-cta-star { right: -30px; top: -20px; width: 220px; height: 220px; }
+    #thisai-home .th-footer { flex-wrap: wrap; gap: 15px; min-height: 115px; padding-top: 26px; padding-bottom: 26px; }
+    #thisai-home .th-footer-brand { width: 100%; }
+    #thisai-home .th-footer-links { gap: 18px; }
+  }
+  @media (max-width: 360px) {
+    #thisai-home .th-container { padding-left: 16px; padding-right: 16px; }
+    #thisai-home .th-hero h1 { font-size: 34px; }
+    #thisai-home .th-button { gap: 13px; padding-left: 17px; padding-right: 17px; }
+    #thisai-home .th-node { font-size: 10px; padding: 8px; }
+    #thisai-home .th-node-icon { width: 23px; height: 23px; }
+  }
+  @media (prefers-reduced-motion: reduce) { #thisai-home * { transition: none !important; } }
+</style>
+
+<div id="thisai-home" lang="zh-CN">
+  <header class="th-header">
+    <nav class="th-container th-nav" aria-label="主导航">
+      <a class="th-brand" href="/home" aria-label="ThisAI 首页">
+        <svg viewBox="0 0 128 128" role="img" aria-label="ThisAI Logo"><rect width="128" height="128" rx="34" fill="#123e36"/><path d="M31 37h57v17H68v42H49V54H31z" fill="#c6f6df"/><path d="m95 23 3.5 9.5L108 36l-9.5 3.5L95 49l-3.5-9.5L82 36l9.5-3.5z" fill="#e7ff87"/><circle cx="89" cy="87" r="9" fill="#79cfb1"/></svg>
+        <span>ThisAI</span>
+      </a>
+      <div class="th-nav-links">
+        <a class="th-nav-section" href="#th-features">产品能力</a>
+        <a class="th-nav-section" href="#th-guide">快速接入</a>
+        <a class="th-nav-section" href="#th-faq">常见问题</a>
+        <a class="th-nav-login" href="/login">登录控制台 <span class="th-arrow" aria-hidden="true">↗</span></a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="th-container">
+    <section class="th-hero" aria-labelledby="th-hero-title">
+      <div>
+        <p class="th-eyebrow th-mono"><span class="th-dot" aria-hidden="true"></span> A LITTLE KEY. A WORLD OF AI.</p>
+        <h1 id="th-hero-title"><span class="th-heading-line">把好用的 AI，</span><span class="th-heading-line">接入你的<span class="th-highlight">每一天。</span></span></h1>
+        <p class="th-hero-copy">一个入口，连接你的 AI 工具。坚持不降智，让模型发挥原有水平。<br>管理密钥、查看用量，让每一次调用清晰可见。</p>
+        <div class="th-actions">
+          <a class="th-button th-button-primary" href="/login">开始使用 <span class="th-arrow" aria-hidden="true">↗</span></a>
+          <a class="th-button th-button-secondary" href="#th-guide">查看接入方式 <span class="th-arrow" aria-hidden="true">↓</span></a>
+        </div>
+        <p class="th-hero-note">兼容接口<span>·</span>密钥管理<span>·</span>用量记录</p>
+      </div>
+      <figure class="th-scene" aria-label="连接示意：通过 ThisAI 将 AI 工具、代码和应用连接到已开通的模型，并非实时运行状态。">
+        <div class="th-scene-top th-mono"><span>ONE GATEWAY. MORE POSSIBILITIES.</span><span class="th-scene-index">FIG. 01</span></div>
+        <div class="th-orbit" aria-hidden="true"></div><div class="th-orbit th-orbit-small" aria-hidden="true"></div>
+        <svg class="th-connectors" viewBox="0 0 500 335" fill="none" preserveAspectRatio="none" aria-hidden="true"><path d="M112 88C192 88 173 169 250 169M388 103C327 103 326 169 250 169M113 262C190 262 180 169 250 169M388 257C321 257 326 169 250 169" stroke="#79cfb1" stroke-opacity=".32" stroke-width="1.2" stroke-dasharray="4 5"/></svg>
+        <div class="th-hub" aria-hidden="true"><svg viewBox="0 0 128 128"><rect width="128" height="128" rx="34" fill="#123e36"/><path d="M31 37h57v17H68v42H49V54H31z" fill="#c6f6df"/><path d="m95 23 3.5 9.5L108 36l-9.5 3.5L95 49l-3.5-9.5L82 36l9.5-3.5z" fill="#e7ff87"/><circle cx="89" cy="87" r="9" fill="#79cfb1"/></svg></div>
+        <div class="th-node th-node-tools"><span class="th-node-icon" aria-hidden="true">✳</span> AI 工具</div>
+        <div class="th-node th-node-code"><span class="th-node-icon" aria-hidden="true">&lt;/&gt;</span> 你的代码</div>
+        <div class="th-node th-node-app"><span class="th-node-icon" aria-hidden="true">▤</span> 你的应用</div>
+        <div class="th-node th-node-model"><span class="th-node-icon" aria-hidden="true">↗</span> 已开通模型</div>
+        <svg class="th-scene-spark" viewBox="0 0 32 32" aria-hidden="true"><path d="m16 0 4.4 11.6L32 16l-11.6 4.4L16 32l-4.4-11.6L0 16l11.6-4.4z" fill="#e7ff87"/></svg>
+        <div class="th-scene-dot" aria-hidden="true"></div>
+        <figcaption class="th-scene-bottom"><span class="th-scene-caption">少一点配置。<br>多一点可能。</span><small class="th-mono">THISAI.SITE / 连接示意</small></figcaption>
+      </figure>
+    </section>
+
+    <div class="th-strip" aria-label="使用特点">
+      <div class="th-strip-item"><span class="th-strip-number th-mono">01 /</span><div><strong>一把密钥</strong><small>让接入更简单</small></div></div>
+      <div class="th-strip-item"><span class="th-strip-number th-mono">02 /</span><div><strong>统一入口</strong><small>连接你的工具与应用</small></div></div>
+      <div class="th-strip-item"><span class="th-strip-number th-mono">03 /</span><div><strong>用量可查</strong><small>每次调用都有记录</small></div></div>
+    </div>
+
+    <section id="th-features" class="th-section" aria-labelledby="th-features-title">
+      <div class="th-section-top"><div><span class="th-kicker th-mono">BUILT FOR YOUR EVERYDAY</span><h2 id="th-features-title">专注创造，接入交给 ThisAI。</h2></div><p class="th-section-description">从第一把密钥到日常使用，<br>把需要的操作放在一个清晰的工作空间。</p></div>
+      <div class="th-features">
+        <article class="th-feature"><span class="th-feature-index th-mono">01</span><div class="th-feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="9" r="4"/><path d="m11 12 9 9m-4-4 3-3m-6 0 3-3"/></svg></div><h3>密钥，由你管理。</h3><p>在控制台创建和管理 API Key。<br>连接你的应用，不必分享上游账号。</p></article>
+        <article class="th-feature"><span class="th-feature-index th-mono">02</span><div class="th-feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m7 9 3 3-3 3m6 0h4"/></svg></div><h3>沿用熟悉的接入方式。</h3><p>使用兼容接口配置工具与代码。<br>通过已开通的分组，调用可用模型。</p></article>
+        <article class="th-feature"><span class="th-feature-index th-mono">03</span><div class="th-feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16M8 15v-4m5 4V7m5 8v-6"/></svg></div><h3>用在哪里，看得清楚。</h3><p>查看账户余额、请求记录和用量。<br>消费与可用额度，以控制台显示为准。</p></article>
+      </div>
+    </section>
+
+    <section id="th-guide" class="th-section" aria-labelledby="th-guide-title">
+      <span class="th-kicker th-mono">FROM ZERO TO YOUR FIRST CALL</span><h2 id="th-guide-title">三步，开始你的第一次调用。</h2>
+      <div class="th-guide">
+        <div class="th-steps">
+          <div class="th-step"><span class="th-step-number th-mono">01</span><div><h3>登录你的工作空间</h3><p>已有账号？<a href="/login">进入控制台</a>。<br>尚未开通账号，请联系站点管理员。</p></div></div>
+          <div class="th-step"><span class="th-step-number th-mono">02</span><div><h3>创建一把 API Key</h3><p>在密钥管理中创建密钥，并选择已开通的分组。<br>请妥善保存密钥，不要放入公开代码或截图。</p></div></div>
+          <div class="th-step"><span class="th-step-number th-mono">03</span><div><h3>填入地址与可用模型</h3><p>兼容客户端 Base URL：<br><code class="th-inline-code">https://api.thisai.site/v1</code><br>模型 ID 请使用当前分组实际可用的名称。</p></div></div>
+        </div>
+        <div>
+          <div class="th-terminal"><div class="th-terminal-top"><span class="th-terminal-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="th-mono">REQUEST EXAMPLE / cURL</span></div><pre aria-label="Responses API 调用示例"><code><span class="th-code-comment"># 替换密钥和模型 ID 后再运行</span>
+curl https://api.thisai.site/v1/responses \
+  -H <span class="th-code-value">"Authorization: Bearer THISAI_API_KEY"</span> \
+  -H <span class="th-code-value">"Content-Type: application/json"</span> \
+  -d '{
+    <span class="th-code-key">"model"</span>: <span class="th-code-value">"MODEL_ID"</span>,
+    <span class="th-code-key">"input"</span>: <span class="th-code-value">"你好，ThisAI。"</span>,
+    <span class="th-code-key">"stream"</span>: true
+  }'</code></pre></div>
+          <p class="th-code-note">仅为 Responses 接口示例；接口与模型支持范围以账号分组的实际配置为准。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="th-faq" class="th-section th-faq-layout" aria-labelledby="th-faq-title">
+      <div class="th-faq-intro"><span class="th-kicker th-mono">A FEW THINGS TO KNOW</span><h2 id="th-faq-title">开始前，<br>你可能想了解。</h2><p>把常见问题讲清楚，<br>让每一次接入少一点猜测。</p></div>
+      <div class="th-faq-list">
+        <details open><summary>我可以使用哪些模型？<span class="th-faq-toggle" aria-hidden="true">+</span></summary><p>可用模型取决于你已开通的分组及站点配置。请在控制台确认后填写模型 ID；首页不代表所有模型都已开放。</p></details>
+        <details><summary>现有的 AI 工具可以直接接入吗？<span class="th-faq-toggle" aria-hidden="true">+</span></summary><p>支持自定义兼容 API 地址的工具通常可以配置接入。填入 Base URL 和 ThisAI API Key，并确认工具使用的接口与模型在当前分组中受支持。</p></details>
+        <details><summary>如何查看余额和使用情况？<span class="th-faq-toggle" aria-hidden="true">+</span></summary><p>登录控制台查看账户余额、用量统计和请求记录。具体计费、额度和购买方式以站点规则及控制台展示为准。</p></details>
+        <details><summary>API Key 可以放在前端网页里吗？<span class="th-faq-toggle" aria-hidden="true">+</span></summary><p>不建议。前端代码、浏览器请求和公开仓库都可能暴露密钥。请在服务端或可信的本地环境中使用，并定期检查密钥与用量记录。</p></details>
+      </div>
+    </section>
+
+    <section class="th-cta" aria-labelledby="th-cta-title"><svg class="th-cta-star" viewBox="0 0 32 32" aria-hidden="true"><path d="m16 0 4.4 11.6L32 16l-11.6 4.4L16 32l-4.4-11.6L0 16l11.6-4.4z" fill="#e7ff87"/></svg><div class="th-cta-copy"><span class="th-kicker th-mono">MAKE ROOM FOR YOUR NEXT IDEA</span><h2 id="th-cta-title">让想法，开始运行。</h2><p>你的下一次创造，从一个简单的连接开始。</p></div><a class="th-button th-button-lime" href="/login">进入 ThisAI <span class="th-arrow" aria-hidden="true">↗</span></a></section>
+  </main>
+
+  <footer class="th-container th-footer">
+    <div class="th-footer-brand"><svg viewBox="0 0 128 128" aria-hidden="true"><rect width="128" height="128" rx="34" fill="#123e36"/><path d="M31 37h57v17H68v42H49V54H31z" fill="#c6f6df"/><path d="m95 23 3.5 9.5L108 36l-9.5 3.5L95 49l-3.5-9.5L82 36l9.5-3.5z" fill="#e7ff87"/><circle cx="89" cy="87" r="9" fill="#79cfb1"/></svg><strong>ThisAI</strong></div>
+    <small class="th-mono">© 2026 ThisAI. A simpler way to connect.</small>
+    <div class="th-footer-links"><a href="/key-usage">密钥用量查询</a><a href="/login">控制台 <span aria-hidden="true">↗</span></a></div>
+  </footer>
+</div>

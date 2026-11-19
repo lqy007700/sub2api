@@ -42,7 +42,6 @@
         :window="window"
         :availability-value="resolveAvailability(item)"
         :countdown-seconds="countdownSeconds"
-        @click="emit('cardClick', item)"
       />
     </div>
   </div>
@@ -60,10 +59,6 @@ const props = defineProps<{
   countdownSeconds: number
   loading: boolean
   detailCache: Record<number, UserMonitorDetail>
-}>()
-
-const emit = defineEmits<{
-  (e: 'cardClick', item: UserMonitorView): void
 }>()
 
 const { t } = useI18n()
