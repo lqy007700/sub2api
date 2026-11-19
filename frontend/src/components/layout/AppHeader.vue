@@ -21,7 +21,7 @@
         </div>
       </div>
 
-      <!-- Right: Announcements + Docs + Language + Subscriptions + Balance + User Dropdown -->
+      <!-- Right: Announcements + Docs + Subscriptions + Balance + User Dropdown -->
       <div class="flex min-w-0 items-center gap-1 sm:gap-3">
         <!-- Announcement Bell -->
         <AnnouncementBell v-if="user" />
@@ -49,9 +49,6 @@
           <Icon name="grid" size="sm" />
           <span class="hidden sm:inline">{{ t('nav.modelPlaza') }}</span>
         </router-link>
-
-        <!-- Language Switcher -->
-        <LocaleSwitcher />
 
         <!-- Subscription Progress (for users with active subscriptions; not mounted at all when the feature is off) -->
         <SubscriptionProgressMini v-if="user && subscriptionFeatureEnabled" />
@@ -104,11 +101,22 @@
         </div>
 
         <!-- User Dropdown -->
-        <div v-if="user" class="relative" ref="dropdownRef">
+        <div
+          v-if="user"
+          ref="dropdownRef"
+          class="relative"
+          :class="{ 'user-menu-open': dropdownOpen }"
+          @pointerenter="openDropdownOnHover"
+          @pointerleave="closeDropdownOnHover"
+          @keydown.esc="dismissDropdown"
+        >
           <button
+            ref="dropdownTriggerRef"
+            type="button"
             @click="toggleDropdown"
             class="flex items-center gap-2 rounded-xl p-1.5 transition-colors hover:bg-gray-100 dark:hover:bg-dark-800"
             :aria-label="t('common.userMenu')"
+            :aria-expanded="dropdownOpen"
           >
             <div class="flex h-8 w-8 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 text-sm font-medium text-white shadow-sm">
               <img
@@ -257,7 +265,6 @@ import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAppStore, useAuthStore, useOnboardingStore } from '@/stores'
 import { useAdminSettingsStore } from '@/stores/adminSettings'
-import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
 import SubscriptionProgressMini from '@/components/common/SubscriptionProgressMini.vue'
 import AnnouncementBell from '@/components/common/AnnouncementBell.vue'
 import Icon from '@/components/icons/Icon.vue'
@@ -277,6 +284,7 @@ const onboardingStore = useOnboardingStore()
 const user = computed(() => authStore.user)
 const dropdownOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
+const dropdownTriggerRef = ref<HTMLButtonElement | null>(null)
 const contactInfo = computed(() => appStore.contactInfo)
 const docUrl = computed(() => sanitizeUrl(appStore.docUrl))
 const modelPlazaEnabled = computed(() => isFeatureFlagEnabled(FeatureFlags.modelPlaza))
@@ -353,8 +361,22 @@ function toggleDropdown() {
   dropdownOpen.value = !dropdownOpen.value
 }
 
+function openDropdownOnHover(event: PointerEvent) {
+  if (event.pointerType === 'mouse') dropdownOpen.value = true
+}
+
+function closeDropdownOnHover(event: PointerEvent) {
+  if (event.pointerType === 'mouse') closeDropdown()
+}
+
 function closeDropdown() {
   dropdownOpen.value = false
+}
+
+function dismissDropdown() {
+  if (!dropdownOpen.value) return
+  closeDropdown()
+  dropdownTriggerRef.value?.focus()
 }
 
 async function handleLogout() {
@@ -394,6 +416,12 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+/* Bridge the gap so the pointer can move from the trigger into the menu. */
+.user-menu-open::after {
+  @apply absolute right-0 top-full h-2 w-56;
+  content: '';
+}
+
 .dropdown-enter-active,
 .dropdown-leave-active {
   transition: all 0.2s ease;

@@ -178,7 +178,6 @@ describe('KeyUsageView daily detail', () => {
       global: {
         stubs: {
           RouterLink: { template: '<a><slot /></a>' },
-          LocaleSwitcher: true,
           Icon: true,
         },
       },
@@ -222,7 +221,6 @@ describe('KeyUsageView daily detail', () => {
       global: {
         stubs: {
           RouterLink: { template: '<a><slot /></a>' },
-          LocaleSwitcher: true,
           Icon: true,
         },
       },
@@ -276,7 +274,6 @@ describe('KeyUsageView subscription feature flag', () => {
       global: {
         stubs: {
           RouterLink: { template: '<a><slot /></a>' },
-          LocaleSwitcher: true,
           Icon: true,
         },
       },

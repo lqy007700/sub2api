@@ -411,6 +411,7 @@ func (s *proxyRepoStub) CountExpiringSoon(_ context.Context, _ time.Time) (int64
 }
 
 type redeemRepoStub struct {
+	RedeemCodeRepository
 	deleteErrByID map[int64]error
 	deletedIDs    []int64
 

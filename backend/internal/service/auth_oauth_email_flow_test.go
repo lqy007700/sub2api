@@ -14,6 +14,7 @@ import (
 )
 
 type redeemCodeRepoStub struct {
+	RedeemCodeRepository
 	codesByCode map[string]*RedeemCode
 	useCalls    []struct {
 		id     int64

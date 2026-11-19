@@ -7,6 +7,7 @@ import { createPinia } from 'pinia'
 import { nextTick, reactive } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { describe, expect, it, vi } from 'vitest'
+import zhCommon from '@/i18n/locales/zh/common'
 import { useAdminSettingsStore, useAppStore, useAuthStore } from '@/stores'
 import type { CustomMenuItem, PublicSettings, User } from '@/types'
 import AppSidebar from '../AppSidebar.vue'
@@ -28,6 +29,31 @@ describe('AppSidebar custom SVG styles', () => {
     expect(componentSource).toContain('display: block;')
     expect(componentSource).not.toContain('stroke: currentColor;')
     expect(componentSource).not.toContain('fill: none;')
+  })
+})
+
+describe('AppSidebar labels', () => {
+  it.each(['user', 'admin'] as const)('renders the short %s navigation labels', (role) => {
+    const pinia = createPinia()
+    useAuthStore(pinia).user = { role } as User
+    useAppStore(pinia).cachedPublicSettings = { payment_enabled: false } as PublicSettings
+    useAdminSettingsStore(pinia).loaded = true
+    const i18n = createI18n({
+      legacy: false, locale: 'zh', messages: { zh: zhCommon }, missingWarn: false, fallbackWarn: false
+    })
+    const wrapper = mount(AppSidebar, {
+      global: { plugins: [pinia, i18n], stubs: { RouterLink: RouterLinkStub, VersionBadge: true } }
+    })
+
+    const links = new Map(wrapper.findAllComponents(RouterLinkStub)
+      .filter(link => link.classes().includes('sidebar-link'))
+      .map(link => [link.props('to'), link.text()]))
+    expect(links.get(role === 'admin' ? '/admin/dashboard' : '/dashboard')).toBe('概览')
+    expect(links.get('/keys')).toBe('密钥')
+    expect(links.get('/monitor')).toBe('渠道')
+    expect(links.get('/orders')).toBe('订单')
+    expect(links.has('/profile')).toBe(false)
+    wrapper.unmount()
   })
 })
 

@@ -10,6 +10,7 @@ import (
 )
 
 type redeemRejectRepo struct {
+	RedeemCodeRepository
 	code      RedeemCode
 	useCalled bool
 }

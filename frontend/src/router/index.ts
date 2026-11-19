@@ -344,9 +344,8 @@ const routes: RouteRecordRaw[] = [
     meta: {
       requiresAuth: true,
       requiresAdmin: false,
-      title: 'My Orders',
-      titleKey: 'nav.myOrders',
-      requiresPayment: true
+      title: 'Orders',
+      titleKey: 'nav.myOrders'
     }
   },
   {

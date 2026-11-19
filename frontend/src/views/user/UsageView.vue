@@ -184,6 +184,7 @@
           :columns="visibleColumns"
           :server-side-sort="true"
           :show-account-billing="false"
+          use-display-cost
           :show-upstream-endpoint="false"
           default-sort-key="created_at"
           default-sort-order="desc"
@@ -687,7 +688,7 @@ const exportToCSV = async () => {
       'Cache Read Tokens',
       'Cache Creation Tokens',
       'Rate Multiplier',
-      'Billed Cost',
+      'Displayed Cost',
       'Original Cost',
       'First Token (ms)',
       'Duration (ms)',
@@ -706,7 +707,7 @@ const exportToCSV = async () => {
       log.cache_read_tokens,
       log.cache_creation_tokens,
       log.rate_multiplier,
-      log.actual_cost.toFixed(8),
+      (log.display_cost ?? log.actual_cost).toFixed(8),
       log.total_cost.toFixed(8),
       log.first_token_ms ?? '',
       log.duration_ms ?? '',

@@ -71,8 +71,9 @@ func (h *RedeemHandler) GetHistory(c *gin.Context) {
 		return
 	}
 
-	// Keep the legacy array response for clients that do not request pagination.
-	if c.Request.URL.Query().Has("page") || c.Request.URL.Query().Has("page_size") {
+	codesOnly := c.Query("codes_only") == "true"
+	// Keep the legacy array response for clients that do not request pagination or filtering.
+	if codesOnly || c.Request.URL.Query().Has("page") || c.Request.URL.Query().Has("page_size") {
 		page, pageSize := 1, 20
 		for name, target := range map[string]*int{"page": &page, "page_size": &pageSize} {
 			if raw, exists := c.GetQuery(name); exists {
@@ -91,7 +92,7 @@ func (h *RedeemHandler) GetHistory(c *gin.Context) {
 			response.BadRequest(c, "Invalid page")
 			return
 		}
-		codes, result, err := h.redeemService.GetUserHistoryPaginated(c.Request.Context(), subject.UserID, pagination.PaginationParams{Page: page, PageSize: pageSize})
+		codes, result, err := h.redeemService.GetUserHistoryPaginated(c.Request.Context(), subject.UserID, pagination.PaginationParams{Page: page, PageSize: pageSize}, codesOnly)
 		if err != nil {
 			response.ErrorFrom(c, err)
 			return

@@ -18,6 +18,7 @@ type historyRepo struct {
 	userID      int64
 	params      pagination.PaginationParams
 	legacyLimit int
+	codesOnly   bool
 }
 
 func (r *historyRepo) ListByUser(_ context.Context, userID int64, limit int) ([]service.RedeemCode, error) {
@@ -27,6 +28,10 @@ func (r *historyRepo) ListByUser(_ context.Context, userID int64, limit int) ([]
 func (r *historyRepo) ListByUserPaginated(_ context.Context, userID int64, params pagination.PaginationParams, codeType string) ([]service.RedeemCode, *pagination.PaginationResult, error) {
 	r.userID, r.params = userID, params
 	return []service.RedeemCode{}, &pagination.PaginationResult{Total: 101}, nil
+}
+func (r *historyRepo) ListUserRedemptions(ctx context.Context, userID int64, params pagination.PaginationParams) ([]service.RedeemCode, *pagination.PaginationResult, error) {
+	r.codesOnly = true
+	return r.ListByUserPaginated(ctx, userID, params, "")
 }
 func TestRedeemHistory(t *testing.T) {
 	for _, tt := range []struct {
@@ -38,6 +43,7 @@ func TestRedeemHistory(t *testing.T) {
 		{"default", "?page=1", 7, 200, 1, 20},
 		{"size only", "?page_size=50", 7, 200, 1, 50},
 		{"second user", "?page=2&page_size=100&user_id=7", 8, 200, 2, 100},
+		{"codes only", "?codes_only=true", 7, 200, 1, 20},
 		{"cap", "?page_size=101", 7, 200, 1, 100},
 		{"beyond last", "?page=100&page_size=20", 7, 200, 100, 20},
 		{"zero", "?page=0", 7, 400, 0, 0},
@@ -62,6 +68,7 @@ func TestRedeemHistory(t *testing.T) {
 				return
 			}
 			require.Equal(t, tt.userID, repo.userID)
+			require.Equal(t, tt.name == "codes only", repo.codesOnly)
 			var body struct {
 				Data json.RawMessage `json:"data"`
 			}

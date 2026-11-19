@@ -70,6 +70,7 @@ type RedeemCodeRepository interface {
 	// ListByUserPaginated returns paginated balance/concurrency history for a specific user.
 	// codeType filter is optional - pass empty string to return all types.
 	ListByUserPaginated(ctx context.Context, userID int64, params pagination.PaginationParams, codeType string) ([]RedeemCode, *pagination.PaginationResult, error)
+	ListUserRedemptions(ctx context.Context, userID int64, params pagination.PaginationParams) ([]RedeemCode, *pagination.PaginationResult, error)
 	// SumPositiveBalanceByUser returns the total recharged amount (sum of positive balance values) for a user.
 	SumPositiveBalanceByUser(ctx context.Context, userID int64) (float64, error)
 }
@@ -751,7 +752,10 @@ func (s *RedeemService) reduceOrCancelSubscription(ctx context.Context, userID, 
 	return nil
 }
 
-// GetUserHistoryPaginated returns all redemption types for the authenticated user.
-func (s *RedeemService) GetUserHistoryPaginated(ctx context.Context, userID int64, params pagination.PaginationParams) ([]RedeemCode, *pagination.PaginationResult, error) {
+// GetUserHistoryPaginated can restrict history to codes applied through the redemption flow.
+func (s *RedeemService) GetUserHistoryPaginated(ctx context.Context, userID int64, params pagination.PaginationParams, codesOnly bool) ([]RedeemCode, *pagination.PaginationResult, error) {
+	if codesOnly {
+		return s.redeemRepo.ListUserRedemptions(ctx, userID, params)
+	}
 	return s.redeemRepo.ListByUserPaginated(ctx, userID, params, "")
 }

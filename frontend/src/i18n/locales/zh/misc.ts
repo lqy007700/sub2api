@@ -382,6 +382,13 @@ export default {
     },
     orders: {
       title: '我的订单',
+      tabs: {
+        payments: '支付订单',
+        balance: '充值',
+        subscription: '购买',
+        redemption: '兑换',
+      },
+      redemptionHistory: '兑换记录',
       empty: '暂无订单',
       orderId: '订单 ID',
       orderNo: '订单编号',

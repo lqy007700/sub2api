@@ -163,6 +163,11 @@ export default {
 
   // Navigation
   nav: {
+    sidebar: {
+      overview: '概览',
+      keys: '密钥',
+      channels: '渠道',
+    },
     dashboard: '仪表盘',
     announcements: '公告',
     apiKeys: 'API 密钥',
@@ -200,7 +205,7 @@ export default {
     recharge: '充值',
     subscribe: '订阅',
     docs: '文档',
-    myOrders: '我的订单',
+    myOrders: '订单',
     orderManagement: '订单管理',
     paymentDashboard: '支付概览',
     paymentConfig: '支付配置',

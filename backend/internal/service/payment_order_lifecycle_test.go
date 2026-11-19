@@ -30,6 +30,7 @@ type paymentOrderLifecycleQueryProvider struct {
 }
 
 type paymentOrderLifecycleRedeemRepo struct {
+	RedeemCodeRepository
 	codesByCode map[string]*RedeemCode
 	useCalls    []struct {
 		id     int64

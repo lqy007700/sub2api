@@ -4,9 +4,10 @@ package repository
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/Wei-Shaw/sub2api/internal/pkg/pagination"
 	"github.com/Wei-Shaw/sub2api/internal/service"
-	"time"
 )
 
 func (s *RedeemCodeRepoSuite) TestListWithFilters_SortByValueAsc() {
@@ -23,6 +24,35 @@ func (s *RedeemCodeRepoSuite) TestListWithFilters_SortByValueAsc() {
 	s.Require().Len(codes, 2)
 	s.Require().Equal("VALUE-10", codes[0].Code)
 	s.Require().Equal("VALUE-20", codes[1].Code)
+}
+
+func (s *RedeemCodeRepoSuite) TestUserRedemptionsExcludePaymentCodesAndAdjustmentsBeforePagination() {
+	user := s.createUser("orders@example.com")
+	other := s.createUser("other-orders@example.com")
+	now := time.Now().UTC()
+	createCode := func(code string, codeType string, userID int64, offset time.Duration) {
+		_, err := s.client.RedeemCode.Create().SetCode(code).SetType(codeType).
+			SetStatus(service.StatusUsed).SetUsedBy(userID).SetUsedAt(now.Add(offset)).Save(s.ctx)
+		s.Require().NoError(err)
+	}
+	createCode("PAYMENT-CODE", service.RedeemTypeBalance, user.ID, 3*time.Minute)
+	createCode("ADMIN-CREDIT", "admin_balance", user.ID, 2*time.Minute)
+	createCode("USER-REDEEM-BALANCE", service.RedeemTypeBalance, user.ID, time.Minute)
+	createCode("USER-REDEEM-SUBSCRIPTION", service.RedeemTypeSubscription, user.ID, 0)
+	createCode("OTHER-REDEEM", service.RedeemTypeConcurrency, other.ID, 4*time.Minute)
+	_, err := s.client.PaymentOrder.Create().SetUserID(user.ID).SetUserEmail(user.Email).
+		SetUserName("test").SetAmount(10).SetPayAmount(10).SetPaymentType("stripe").
+		SetPaymentTradeNo("").SetRechargeCode("PAYMENT-CODE").SetExpiresAt(now).
+		SetClientIP("127.0.0.1").SetSrcHost("localhost").Save(s.ctx)
+	s.Require().NoError(err)
+
+	for i, code := range []string{"USER-REDEEM-BALANCE", "USER-REDEEM-SUBSCRIPTION"} {
+		rows, page, err := s.repo.ListUserRedemptions(s.ctx, user.ID, pagination.PaginationParams{Page: i + 1, PageSize: 1})
+		s.Require().NoError(err)
+		s.Require().Len(rows, 1)
+		s.Equal(code, rows[0].Code)
+		s.EqualValues(2, page.Total)
+	}
 }
 
 func (s *RedeemCodeRepoSuite) TestHistoryPaginationIsolationAndOrdering() {

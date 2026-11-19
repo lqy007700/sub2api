@@ -11,6 +11,7 @@ import type {
   CheckoutInfoResponse,
   CreateOrderRequest,
   CreateOrderResult,
+  OrderType,
   PaymentOrder
 } from '@/types/payment'
 import type { BasePaginationResponse } from '@/types'
@@ -50,7 +51,7 @@ export const paymentAPI = {
   },
 
   /** Get current user's orders */
-  getMyOrders(params?: { page?: number; page_size?: number; status?: string }) {
+  getMyOrders(params?: { page?: number; page_size?: number; status?: string; order_type?: OrderType }) {
     return apiClient.get<BasePaginationResponse<PaymentOrder>>('/payment/orders/my', { params })
   },
 

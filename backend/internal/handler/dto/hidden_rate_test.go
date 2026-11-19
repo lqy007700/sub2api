@@ -38,6 +38,9 @@ func TestUsageDisplaySnapshotKeepsActualCostsAndAdminRate(t *testing.T) {
 		require.Equal(t, 0.375, admin.RateMultiplier)
 		require.Equal(t, log.ActualCost, user.ActualCost)
 		require.Equal(t, log.TotalCost, user.TotalCost)
+		require.NotNil(t, user.DisplayCost)
+		require.InDelta(t, 0.01*display, *user.DisplayCost, 1e-12)
+		require.Nil(t, admin.DisplayCost)
 		payload, err := json.Marshal(user)
 		require.NoError(t, err)
 		require.NotContains(t, string(payload), "display_rate_multiplier")
@@ -46,4 +49,37 @@ func TestUsageDisplaySnapshotKeepsActualCostsAndAdminRate(t *testing.T) {
 	legacy := &service.UsageLog{RateMultiplier: 1.7}
 	require.Equal(t, 1.7, UsageLogFromService(legacy).RateMultiplier)
 	require.Equal(t, 1.7, UsageLogFromServiceAdmin(legacy).RateMultiplier)
+	require.Nil(t, UsageLogFromService(legacy).DisplayCost)
+}
+
+func TestUsageDisplayCostUsesSettledCharge(t *testing.T) {
+	publicRate := 2.0
+	for _, tc := range []struct {
+		name       string
+		actualCost float64
+		totalCost  float64
+		rate       float64
+		want       *float64
+	}{
+		{name: "Free Fast", actualCost: 0.04, totalCost: 0.16, rate: 0.5, want: new(0.16)},
+		{name: "batch settlement", actualCost: 0.04, totalCost: 0.04, rate: 0.5, want: new(0.16)},
+		{name: "zero charge", actualCost: 0, totalCost: 0.16, rate: 0.5},
+		{name: "zero billing rate", actualCost: 0, totalCost: 0.16, rate: 0},
+		{name: "matching rates", actualCost: 0.04, totalCost: 0.02, rate: publicRate},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			log := &service.UsageLog{
+				RateMultiplier: tc.rate, DisplayRateMultiplier: &publicRate,
+				ActualCost: tc.actualCost, TotalCost: tc.totalCost,
+			}
+			got := UsageLogFromService(log)
+			require.Equal(t, tc.actualCost, got.ActualCost)
+			if tc.want == nil {
+				require.Nil(t, got.DisplayCost)
+				return
+			}
+			require.NotNil(t, got.DisplayCost)
+			require.InDelta(t, *tc.want, *got.DisplayCost, 1e-12)
+		})
+	}
 }

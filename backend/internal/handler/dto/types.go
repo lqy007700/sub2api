@@ -627,14 +627,15 @@ type UsageLog struct {
 	CacheCreation30mTokens int `json:"cache_creation_30m_tokens"`
 	CacheCreation12hTokens int `json:"cache_creation_12h_tokens"`
 
-	InputCost                 float64 `json:"input_cost"`
-	OutputCost                float64 `json:"output_cost"`
-	CacheCreationCost         float64 `json:"cache_creation_cost"`
-	CacheReadCost             float64 `json:"cache_read_cost"`
-	TotalCost                 float64 `json:"total_cost"`
-	ActualCost                float64 `json:"actual_cost"`
-	RateMultiplier            float64 `json:"rate_multiplier"`
-	LongContextBillingApplied bool    `json:"long_context_billing_applied"`
+	InputCost                 float64  `json:"input_cost"`
+	OutputCost                float64  `json:"output_cost"`
+	CacheCreationCost         float64  `json:"cache_creation_cost"`
+	CacheReadCost             float64  `json:"cache_read_cost"`
+	TotalCost                 float64  `json:"total_cost"`
+	ActualCost                float64  `json:"actual_cost"`
+	DisplayCost               *float64 `json:"display_cost,omitempty"` // Public-rate cost when it differs from the recorded charge.
+	RateMultiplier            float64  `json:"rate_multiplier"`
+	LongContextBillingApplied bool     `json:"long_context_billing_applied"`
 
 	BillingType  int8   `json:"billing_type"`
 	RequestType  string `json:"request_type"`

@@ -29,6 +29,9 @@
     <template #cell-payment_type="{ value }">
       <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('payment.methods.' + value, value) }}</span>
     </template>
+    <template #cell-order_type="{ value }">
+      <span class="text-sm">{{ t('payment.orders.tabs.' + value, value) }}</span>
+    </template>
     <template #cell-status="{ value }">
       <OrderStatusBadge :status="value" />
     </template>
@@ -56,6 +59,7 @@ const props = defineProps<{
   orders: PaymentOrder[]
   loading: boolean
   showUser?: boolean
+  showOrderType?: boolean
 }>()
 
 function formatDate(dateStr: string) { return new Date(dateStr).toLocaleString() }
@@ -73,6 +77,9 @@ const columns = computed((): Column[] => {
   ]
   if (props.showUser) {
     cols.push({ key: 'user_email', label: t('payment.admin.colUser') })
+  }
+  if (props.showOrderType) {
+    cols.push({ key: 'order_type', label: t('payment.orders.orderType') })
   }
   cols.push(
     { key: 'pay_amount', label: t('payment.orders.payAmount') },

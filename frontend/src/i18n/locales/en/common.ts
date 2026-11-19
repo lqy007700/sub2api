@@ -163,6 +163,11 @@ export default {
 
   // Navigation
   nav: {
+    sidebar: {
+      overview: 'Overview',
+      keys: 'Keys',
+      channels: 'Channels',
+    },
     dashboard: 'Dashboard',
     announcements: 'Announcements',
     apiKeys: 'API Keys',
@@ -200,7 +205,7 @@ export default {
     recharge: 'Recharge',
     subscribe: 'Subscription',
     docs: 'Docs',
-    myOrders: 'My Orders',
+    myOrders: 'Orders',
     orderManagement: 'Orders',
     paymentDashboard: 'Payment Dashboard',
     paymentConfig: 'Payment Config',

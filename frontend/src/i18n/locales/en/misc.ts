@@ -358,6 +358,13 @@ export default {
     },
     orders: {
       title: 'My Orders',
+      tabs: {
+        payments: 'Payment Orders',
+        balance: 'Top-ups',
+        subscription: 'Purchases',
+        redemption: 'Redemptions',
+      },
+      redemptionHistory: 'Redemption History',
       empty: 'No orders yet',
       orderId: 'Order ID',
       orderNo: 'Order No.',

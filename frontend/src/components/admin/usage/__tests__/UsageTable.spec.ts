@@ -33,6 +33,7 @@ const localizedMessages: Record<'en' | 'zh', Record<string, string>> = {
 }
 
 const messages: Record<string, string> = {
+  'usage.cost': 'Cost',
   'usage.outputTps': 'Output TPS',
   'admin.usage.userDeletedBadge': 'Deleted',
   'usage.costDetails': 'Cost Breakdown',
@@ -353,6 +354,25 @@ describe('admin UsageTable tooltip', () => {
     expect(text).toContain('$5.0000 / 1M tokens')
     expect(text).toContain('$30.0000 / 1M tokens')
     expect(text).toContain('$0.069568')
+  })
+
+  it.each([
+    [true, 0.8, '0.800000', 'Cost'],
+    [true, 0, '0.000000', 'Cost'],
+    [true, undefined, '0.400000', 'Cost'],
+    [false, 0.8, '0.400000', 'User billed'],
+  ])('uses the public amount only in the user table (%s, %s)', async (useDisplayCost, displayCost, amount, label) => {
+    const row = { ...baseImageRow, display_cost: displayCost }
+    const wrapper = mount(UsageTable, {
+      props: { data: [row], columns: [], useDisplayCost, showAccountBilling: !useDisplayCost },
+      global: { stubs: { DataTable: DataTableStub, EmptyState: true, Icon: true, Teleport: true } },
+    })
+    expect(wrapper.get('[data-request-id]').text()).toContain('$' + amount)
+    const triggers = wrapper.findAll('.group.relative')
+    await triggers[triggers.length - 1].trigger('mouseenter')
+    const costLabel = wrapper.get('.fixed').findAll('span').find(span => span.text() === label)
+    expect(costLabel?.element.parentElement?.textContent).toContain('$' + amount + '00')
+    wrapper.unmount()
   })
 
   it.each(['token', 'image', 'per_request'])('keeps eight decimal places in %s cost details', async (billingMode) => {

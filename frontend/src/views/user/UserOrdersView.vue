@@ -1,6 +1,21 @@
 <template>
   <AppLayout>
-    <div class="space-y-4">
+    <div class="tabs mb-4 w-fit max-w-full flex-wrap" role="group" :aria-label="t('nav.myOrders')">
+      <button
+        v-for="tab in orderTabs"
+        :key="tab"
+        type="button"
+        class="tab whitespace-nowrap"
+        :class="{ 'tab-active': activeTab === tab }"
+        :aria-pressed="activeTab === tab"
+        @click="selectTab(tab)"
+      >
+        {{ t('payment.orders.tabs.' + tab) }}
+      </button>
+    </div>
+
+    <RedeemHistory v-if="activeTab === 'redemption'" :title="t('payment.orders.redemptionHistory')" codes-only />
+    <div v-else class="space-y-4">
       <!-- Filters -->
       <div class="card p-4">
         <div class="flex flex-wrap items-center gap-3">
@@ -9,13 +24,13 @@
             <button @click="fetchOrders" :disabled="loading" class="btn btn-secondary" :title="t('common.refresh')">
               <Icon name="refresh" size="md" :class="loading ? 'animate-spin' : ''" />
             </button>
-            <button class="btn btn-primary" @click="router.push('/purchase')">{{ t('payment.result.backToRecharge') }}</button>
+            <button v-if="paymentEnabled" class="btn btn-primary" @click="router.push('/purchase')">{{ t('payment.result.backToRecharge') }}</button>
           </div>
         </div>
       </div>
 
       <!-- Table -->
-      <OrderTable :orders="orders" :loading="loading">
+      <OrderTable :orders="orders" :loading="loading" :show-order-type="activeTab === 'payments'">
         <template #actions="{ row }">
           <div class="flex items-center gap-2">
             <button v-if="row.status === 'PENDING'" @click="handleCancel(row.id)" class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-yellow-600 hover:bg-yellow-50 dark:text-yellow-400 dark:hover:bg-yellow-900/20">
@@ -81,24 +96,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onBeforeUnmount, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores'
 import { paymentAPI } from '@/api/payment'
 import { extractI18nErrorMessage } from '@/utils/apiError'
-import type { PaymentOrder } from '@/types/payment'
+import { FeatureFlags, resolveFeatureFlag } from '@/utils/featureFlags'
+import type { OrderType, PaymentOrder } from '@/types/payment'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import BaseDialog from '@/components/common/BaseDialog.vue'
 import Select from '@/components/common/Select.vue'
 import Icon from '@/components/icons/Icon.vue'
 import OrderTable from '@/components/payment/OrderTable.vue'
+import RedeemHistory from '@/components/user/RedeemHistory.vue'
 
 const { t } = useI18n()
 const router = useRouter()
 const appStore = useAppStore()
+const paymentEnabled = computed(() => resolveFeatureFlag(appStore.cachedPublicSettings, FeatureFlags.payment))
 
+type OrdersTab = 'payments' | OrderType | 'redemption'
+const orderTabs: OrdersTab[] = ['payments', 'balance', 'subscription', 'redemption']
+const activeTab = ref<OrdersTab>('payments')
 const loading = ref(false)
 const actionLoading = ref(false)
 const orders = ref<PaymentOrder[]>([])
@@ -108,6 +129,7 @@ const cancelTargetId = ref<number | null>(null)
 const refundTarget = ref<PaymentOrder | null>(null)
 const refundReason = ref('')
 const pagination = reactive({ page: 1, page_size: 20, total: 0 })
+let ordersRequest = 0
 
 const statusFilters = computed(() => [
   { value: '', label: t('common.all') },
@@ -118,20 +140,35 @@ const statusFilters = computed(() => [
 ])
 
 async function fetchOrders() {
+  const tab = activeTab.value
+  if (tab === 'redemption') return
+  const request = ++ordersRequest
   loading.value = true
   try {
     const res = await paymentAPI.getMyOrders({
       page: pagination.page,
       page_size: pagination.page_size,
       status: currentFilter.value || undefined,
+      ...(tab === 'payments' ? {} : { order_type: tab }),
     })
+    if (request !== ordersRequest) return
     orders.value = res.data.items || []
     pagination.total = res.data.total || 0
   } catch (err: unknown) {
+    if (request !== ordersRequest) return
     appStore.showError(extractI18nErrorMessage(err, t, 'payment.errors', t('common.error')))
   } finally {
-    loading.value = false
+    if (request === ordersRequest) loading.value = false
   }
+}
+
+function selectTab(tab: OrdersTab) {
+  if (activeTab.value === tab) return
+  activeTab.value = tab
+  ordersRequest++
+  orders.value = []
+  pagination.total = 0
+  handlePageChange(1)
 }
 
 function handlePageChange(page: number) { pagination.page = page; fetchOrders() }
@@ -186,4 +223,5 @@ async function loadRefundEligibility() {
 }
 
 onMounted(() => { fetchOrders(); loadRefundEligibility() })
+onBeforeUnmount(() => { ordersRequest++ })
 </script>

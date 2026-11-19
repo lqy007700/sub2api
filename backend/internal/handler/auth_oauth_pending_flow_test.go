@@ -2906,6 +2906,7 @@ func (s *oauthPendingFlowRefreshTokenCacheStub) IsTokenInFamily(context.Context,
 }
 
 type oauthPendingFlowRedeemCodeRepo struct {
+	service.RedeemCodeRepository
 	client *dbent.Client
 }
 

@@ -2155,6 +2155,7 @@ func (stubProxyRepo) CountExpiringSoon(ctx context.Context, now time.Time) (int6
 }
 
 type stubRedeemCodeRepo struct {
+	service.RedeemCodeRepository
 	byUser map[int64][]service.RedeemCode
 }
 

@@ -2,6 +2,7 @@
 package dto
 
 import (
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -759,6 +760,7 @@ func UsageLogFromService(l *service.UsageLog) *UsageLog {
 		return nil
 	}
 	u := usageLogFromServiceUser(l)
+	u.DisplayCost = userFacingDisplayCost(l)
 	return &u
 }
 
@@ -793,6 +795,21 @@ func userFacingRateMultiplier(l *service.UsageLog) float64 {
 		return *l.DisplayRateMultiplier
 	}
 	return l.RateMultiplier
+}
+
+func userFacingDisplayCost(l *service.UsageLog) *float64 {
+	publicRate := l.DisplayRateMultiplier
+	if publicRate == nil || *publicRate < 0 || l.RateMultiplier <= 0 || *publicRate == l.RateMultiplier {
+		return nil
+	}
+
+	// Replace the rate on the settled amount to preserve the request's pricing
+	// rules, including Free Fast, batch discounts and zero-charge requests.
+	cost := l.ActualCost * (*publicRate / l.RateMultiplier)
+	if math.IsNaN(cost) || math.IsInf(cost, 0) || cost == l.ActualCost {
+		return nil
+	}
+	return &cost
 }
 
 func userFacingReasoningEffort(l *service.UsageLog) *string {

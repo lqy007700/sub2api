@@ -6,6 +6,7 @@ import (
 	"time"
 
 	dbent "github.com/Wei-Shaw/sub2api/ent"
+	"github.com/Wei-Shaw/sub2api/ent/paymentorder"
 	"github.com/Wei-Shaw/sub2api/ent/redeemcode"
 	"github.com/Wei-Shaw/sub2api/ent/user"
 	"github.com/Wei-Shaw/sub2api/internal/pkg/pagination"
@@ -368,6 +369,29 @@ func (r *redeemCodeRepository) ListByUserPaginated(ctx context.Context, userID i
 		q = q.Where(redeemcode.TypeEQ(codeType))
 	}
 
+	return paginateRedeemHistory(ctx, q, params)
+}
+
+// ListUserRedemptions filters out account adjustments and codes created by payment fulfillment.
+func (r *redeemCodeRepository) ListUserRedemptions(ctx context.Context, userID int64, params pagination.PaginationParams) ([]service.RedeemCode, *pagination.PaginationResult, error) {
+	q := r.client.RedeemCode.Query().Where(
+		redeemcode.UsedByEQ(userID),
+		redeemcode.TypeIn(service.RedeemTypeBalance, service.RedeemTypeConcurrency, service.RedeemTypeSubscription),
+		func(s *entsql.Selector) {
+			orders := entsql.Table(paymentorder.Table)
+			payment := entsql.Dialect(s.Dialect()).Select().From(orders).
+				Select(orders.C(paymentorder.FieldID)).
+				Where(entsql.And(
+					entsql.EQ(orders.C(paymentorder.FieldUserID), userID),
+					entsql.ColumnsEQ(orders.C(paymentorder.FieldRechargeCode), s.C(redeemcode.FieldCode)),
+				))
+			s.Where(entsql.NotExists(payment))
+		},
+	)
+	return paginateRedeemHistory(ctx, q, params)
+}
+
+func paginateRedeemHistory(ctx context.Context, q *dbent.RedeemCodeQuery, params pagination.PaginationParams) ([]service.RedeemCode, *pagination.PaginationResult, error) {
 	total, err := q.Count(ctx)
 	if err != nil {
 		return nil, nil, err
