@@ -308,7 +308,7 @@ func allowedReturnURLHost(returnURLHost string, requestHost string, refererURL s
 	return sameOriginHost(returnURLHost, parsedReferer.Host)
 }
 
-func buildPaymentReturnURL(base string, orderID int64, outTradeNo string, resumeToken string) (string, error) {
+func buildPaymentReturnURL(base, providerKey string, orderID int64, outTradeNo, resumeToken string) (string, error) {
 	canonical := strings.TrimSpace(base)
 	if canonical == "" {
 		return "", nil
@@ -322,6 +322,20 @@ func buildPaymentReturnURL(base string, orderID int64, outTradeNo string, resume
 		return "", infraerrors.BadRequest("INVALID_RETURN_URL", "return_url must be a valid absolute URL")
 	}
 	parsed.Fragment = ""
+
+	if providerKey == payment.TypeEasyPay {
+		// EasyPay signs the decoded return_url value. A second query parameter
+		// introduces a literal '&' that strict gateways reject.
+		query := url.Values{}
+		if resumeToken != "" {
+			query.Set("resume_token", resumeToken)
+		} else if orderID > 0 {
+			query.Set("order_id", strconv.FormatInt(orderID, 10))
+		}
+		parsed.RawQuery = query.Encode()
+		parsed.ForceQuery = false
+		return parsed.String(), nil
+	}
 
 	query := parsed.Query()
 	if orderID > 0 {

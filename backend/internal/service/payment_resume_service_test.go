@@ -8,6 +8,8 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"strconv"
 	"strings"
@@ -16,6 +18,7 @@ import (
 
 	"github.com/Wei-Shaw/sub2api/internal/payment"
 	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNormalizeVisibleMethods(t *testing.T) {
@@ -190,7 +193,7 @@ func TestCanonicalizeReturnURLRejectsNonCanonicalPath(t *testing.T) {
 func TestBuildPaymentReturnURL(t *testing.T) {
 	t.Parallel()
 
-	got, err := buildPaymentReturnURL("https://example.com/payment/result?from=checkout#fragment", 42, "sub2_42", "resume-token")
+	got, err := buildPaymentReturnURL("https://example.com/payment/result?from=checkout#fragment", payment.TypeAlipay, 42, "sub2_42", "resume-token")
 	if err != nil {
 		t.Fatalf("buildPaymentReturnURL returned error: %v", err)
 	}
@@ -223,7 +226,7 @@ func TestBuildPaymentReturnURL(t *testing.T) {
 func TestBuildPaymentReturnURLWithoutResumeTokenStillIncludesOutTradeNo(t *testing.T) {
 	t.Parallel()
 
-	got, err := buildPaymentReturnURL("https://example.com/payment/result", 42, "sub2_42", "")
+	got, err := buildPaymentReturnURL("https://example.com/payment/result", payment.TypeAlipay, 42, "sub2_42", "")
 	if err != nil {
 		t.Fatalf("buildPaymentReturnURL returned error: %v", err)
 	}
@@ -247,12 +250,101 @@ func TestBuildPaymentReturnURLWithoutResumeTokenStillIncludesOutTradeNo(t *testi
 func TestBuildPaymentReturnURLEmptyBase(t *testing.T) {
 	t.Parallel()
 
-	got, err := buildPaymentReturnURL("", 42, "sub2_42", "resume-token")
+	got, err := buildPaymentReturnURL("", payment.TypeEasyPay, 42, "sub2_42", "resume-token")
 	if err != nil {
 		t.Fatalf("buildPaymentReturnURL returned error: %v", err)
 	}
 	if got != "" {
 		t.Fatalf("buildPaymentReturnURL = %q, want empty string", got)
+	}
+}
+
+func TestInvokeEasyPayWithSingleParameterReturnURL(t *testing.T) {
+	for _, tc := range []struct {
+		name        string
+		mode        string
+		endpoint    string
+		withSigning bool
+	}{
+		{name: "redirect", mode: "popup", endpoint: "/submit.php", withSigning: true},
+		{name: "api", mode: "qrcode", endpoint: "/mapi.php", withSigning: true},
+		{name: "without signing key", mode: "popup", endpoint: "/submit.php"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := context.Background()
+			client := newPaymentConfigServiceTestClient(t)
+			user, err := client.User.Create().SetEmail("checkout@example.com").SetPasswordHash("hash").Save(ctx)
+			require.NoError(t, err)
+
+			returnURLs := make(chan string, 1)
+			gateway := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path != tc.endpoint || r.ParseForm() != nil {
+					http.Error(w, "invalid checkout request", http.StatusBadRequest)
+					return
+				}
+				returnURL := r.Form.Get("return_url")
+				if returnURL == "" || strings.Contains(returnURL, "&") {
+					http.Error(w, "invalid return_url", http.StatusBadRequest)
+					return
+				}
+				returnURLs <- returnURL
+				_, _ = w.Write([]byte(`{"code":1,"trade_no":"gateway-order","qrcode":"qr-payload"}`))
+			}))
+			defer gateway.Close()
+
+			var signingKey []byte
+			if tc.withSigning {
+				signingKey = []byte("0123456789abcdef0123456789abcdef")
+			}
+			resume := NewPaymentResumeService(signingKey)
+			svc := &PaymentService{entClient: client, resumeService: resume}
+			selection := &payment.InstanceSelection{
+				ProviderKey: payment.TypeEasyPay,
+				InstanceID:  "1",
+				PaymentMode: tc.mode,
+				Config: map[string]string{
+					"pid": "1001", "pkey": "test-key", "apiBase": gateway.URL, "paymentMode": tc.mode,
+					"notifyUrl": "https://app.example.com/api/v1/payment/webhook/easypay",
+					"returnUrl": "https://app.example.com/payment/result",
+				},
+			}
+			const resultURL = "https://app.example.com/payment/result"
+			req := CreateOrderRequest{
+				UserID: user.ID, Amount: 100, PaymentType: payment.TypeAlipay, OrderType: payment.OrderTypeBalance,
+				ReturnURL: resultURL + "?from=checkout&source=browser", SrcHost: "app.example.com", ClientIP: "127.0.0.1",
+			}
+			cfg := &PaymentConfig{}
+			order, err := svc.createOrderInTx(ctx, req, &User{Email: user.Email, Username: user.Username}, nil, cfg, 100, 100, 0, 100, 0, selection)
+			require.NoError(t, err)
+			resp, err := svc.invokeProvider(ctx, order, req, cfg, 100, "100.00", 100, nil, selection)
+			require.NoError(t, err)
+			if tc.mode == "popup" {
+				request, err := http.NewRequestWithContext(ctx, http.MethodGet, resp.PayURL, nil)
+				require.NoError(t, err)
+				res, err := gateway.Client().Do(request)
+				require.NoError(t, err)
+				defer func() { _ = res.Body.Close() }()
+				require.Equal(t, http.StatusOK, res.StatusCode)
+			} else {
+				require.Equal(t, "qr-payload", resp.QRCode)
+			}
+
+			var returnURL string
+			select {
+			case returnURL = <-returnURLs:
+			default:
+				t.Fatal("gateway did not receive return_url")
+			}
+			if tc.withSigning {
+				require.Equal(t, resultURL+"?resume_token="+resp.ResumeToken, returnURL)
+				claims, err := resume.ParseToken(resp.ResumeToken)
+				require.NoError(t, err)
+				require.Equal(t, order.ID, claims.OrderID)
+			} else {
+				require.Empty(t, resp.ResumeToken)
+				require.Equal(t, resultURL+"?order_id="+strconv.FormatInt(order.ID, 10), returnURL)
+			}
+		})
 	}
 }
 

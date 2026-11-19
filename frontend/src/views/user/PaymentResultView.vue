@@ -407,7 +407,8 @@ onMounted(async () => {
   const hasLegacyFallbackContext = readRouteQueryString('trade_status').trim() !== ''
   const shouldUsePublicOutTradeNo = outTradeNo !== '' && (hasLegacyFallbackContext || routeOrderId > 0 || orderId > 0)
 
-  if (!order.value && orderId && (!resumeToken || routeOrderId > 0)) {
+  // A token-only return can recover the order ID from a matching local snapshot.
+  if (!order.value && orderId) {
     try {
       setResolvedOrder(await paymentStore.pollOrderStatus(orderId))
     } catch (_err: unknown) {

@@ -307,6 +307,31 @@ describe('PaymentResultView', () => {
     expect(window.localStorage.getItem(PAYMENT_RECOVERY_STORAGE_KEY)).toBeNull()
   })
 
+  it.each([
+    { snapshotToken: 'resume-fail', matches: true, expectedStatus: 'success' },
+    { snapshotToken: 'resume-stale', matches: false, expectedStatus: 'failed' },
+  ])('uses only a matching snapshot when a token-only return fails ($matches)', async ({ snapshotToken, matches, expectedStatus }) => {
+    routeState.query = { resume_token: 'resume-fail' }
+    window.localStorage.setItem(
+      PAYMENT_RECOVERY_STORAGE_KEY,
+      JSON.stringify(recoverySnapshotFactory(snapshotToken)),
+    )
+    resolveOrderPublicByResumeToken.mockRejectedValueOnce(new Error('resume failed'))
+    pollOrderStatus.mockResolvedValueOnce(orderFactory('PAID'))
+
+    const wrapper = mount(PaymentResultView, {
+      global: { stubs: { OrderStatusBadge: true } },
+    })
+    await flushPromises()
+
+    if (matches) {
+      expect(pollOrderStatus).toHaveBeenCalledWith(42)
+    } else {
+      expect(pollOrderStatus).not.toHaveBeenCalled()
+    }
+    expect(wrapper.text()).toContain(`payment.result.${expectedStatus}`)
+  })
+
   it('falls back to public out_trade_no verification when resume_token recovery fails in legacy return flows', async () => {
     routeState.query = {
       resume_token: 'resume-fail',
