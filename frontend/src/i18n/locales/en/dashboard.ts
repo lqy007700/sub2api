@@ -566,9 +566,7 @@ export default {
 
   // Channel Status (user-facing read-only view)
   channelStatus: {
-    dailyHistory: 'Status over {n} days',
-    historyPlaceholder: 'Some days have no monitoring data',
-    noHistorySample: 'No monitoring data',
+    dailyHistory: '{n}-day timeline illustration',
     title: 'Channel Status',
     description: 'Inspect channel availability, latency and recent status',
     searchPlaceholder: 'Search channels...',

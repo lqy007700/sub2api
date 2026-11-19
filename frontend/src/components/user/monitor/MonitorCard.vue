@@ -68,7 +68,6 @@
 
     <!-- Timeline -->
     <MonitorTimeline
-      :buckets="item.daily_timeline"
       :days="parseInt(window, 10)"
       :countdown-seconds="countdownSeconds"
     />

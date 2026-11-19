@@ -63,7 +63,6 @@ type channelMonitorUserListItem struct {
 	Availability7d       float64                              `json:"availability_7d"`
 	ExtraModels          []dto.ChannelMonitorExtraModelStatus `json:"extra_models"`
 	Timeline             []channelMonitorUserTimelinePoint    `json:"timeline"`
-	DailyTimeline        []service.UserMonitorDailyStatus     `json:"daily_timeline,omitempty"`
 	// LatestQuota 主模型最近配额快照；channel_monitor_show_quota=false 时
 	// 由 userMonitorViewToItem 的调用方传入 false 剥离（服务端脱敏，非仅前端隐藏）。
 	LatestQuota *domain.MonitorQuotaSnapshot `json:"latest_quota,omitempty"`
@@ -126,7 +125,6 @@ func userMonitorViewToItem(v *service.UserMonitorView, includeQuota bool) channe
 		Availability7d:       v.Availability7d,
 		ExtraModels:          extras,
 		Timeline:             timeline,
-		DailyTimeline:        v.DailyTimeline,
 	}
 	if includeQuota {
 		item.LatestQuota = v.LatestQuota
@@ -158,13 +156,14 @@ func userMonitorDetailToResponse(d *service.UserMonitorDetail) *channelMonitorUs
 
 // --- Handlers ---
 
-// List GET /api/v1/channel-monitors
+// List GET /api/v1/channel-monitors. include_timeline=false skips recent check history.
 func (h *ChannelMonitorUserHandler) List(c *gin.Context) {
 	if !h.featureEnabled(c) {
 		response.Success(c, gin.H{"items": []channelMonitorUserListItem{}})
 		return
 	}
-	views, err := h.monitorService.ListUserView(c.Request.Context())
+	includeTimeline := c.Query("include_timeline") != "false"
+	views, err := h.monitorService.ListUserView(c.Request.Context(), includeTimeline)
 	if err != nil {
 		response.ErrorFrom(c, err)
 		return

@@ -456,46 +456,6 @@ func (r *channelMonitorRepository) ListLatestForMonitorIDs(ctx context.Context, 
 	return out, nil
 }
 
-// ListDailyStatusForMonitors reports the worst recorded status per UTC day and primary model.
-func (r *channelMonitorRepository) ListDailyStatusForMonitors(ctx context.Context, ids []int64, primaryModels map[int64]string, since time.Time) (map[int64][]service.UserMonitorDailyStatus, error) {
-	out := make(map[int64][]service.UserMonitorDailyStatus, len(ids))
-	pairIDs, pairModels := buildMonitorModelPairs(ids, primaryModels)
-	if len(pairIDs) == 0 {
-		return out, nil
-	}
-	const q = `
-		SELECT h.monitor_id,
-		       (h.checked_at AT TIME ZONE 'UTC')::date AS day,
-		       CASE
-		         WHEN BOOL_OR(h.status IN ('failed', 'error')) THEN 'failed'
-		         WHEN BOOL_OR(h.status = 'degraded') THEN 'degraded'
-		         ELSE 'operational'
-		       END AS status
-		FROM channel_monitor_histories h
-		JOIN unnest($1::bigint[], $2::text[]) t(monitor_id, model)
-		  ON t.monitor_id = h.monitor_id AND t.model = h.model
-		WHERE h.checked_at >= $3
-		GROUP BY h.monitor_id, day
-		ORDER BY h.monitor_id, day
-	`
-	rows, err := r.db.QueryContext(ctx, q, pq.Array(pairIDs), pq.Array(pairModels), since)
-	if err != nil {
-		return nil, fmt.Errorf("query daily monitor statuses: %w", err)
-	}
-	defer func() { _ = rows.Close() }()
-	for rows.Next() {
-		var id int64
-		var day time.Time
-		var point service.UserMonitorDailyStatus
-		if err := rows.Scan(&id, &day, &point.Status); err != nil {
-			return nil, fmt.Errorf("scan daily monitor status: %w", err)
-		}
-		point.Date = day.Format(time.DateOnly)
-		out[id] = append(out[id], point)
-	}
-	return out, rows.Err()
-}
-
 // ListRecentHistoryForMonitors 为多个 monitor 批量取各自"指定模型"最近 N 条历史（按 checked_at DESC，最新在前）。
 // primaryModels[monitorID] 指定该监控要过滤的模型名；monitor 不在 primaryModels 中的记录不返回。
 // 通过 CTE + unnest(两个 int8/text 数组) 构造 (monitor_id, model) 白名单，
