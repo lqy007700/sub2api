@@ -1506,6 +1506,7 @@
           <input
             v-model="apiKeyBaseUrl"
             type="text"
+            data-testid="create-apikey-base-url"
             class="input"
             :placeholder="apiKeyBaseUrlPlaceholder"
           />
@@ -1561,6 +1562,11 @@
           />
           <p v-if="apiKeyHint" class="input-hint">{{ apiKeyHint }}</p>
         </div>
+        <CPRIdentitySettings
+          v-if="form.platform === 'openai'"
+          v-model:enabled="cprTrustedIdentity"
+          v-model:send-token-name="cprSendTokenName"
+        />
 
         <!-- 上游倍率自动探测：全部 API-key 平台可用（所在区块已限定 apikey 类型） -->
         <div
@@ -4196,6 +4202,7 @@ import CnBaseUrlPresets from '@/components/account/CnBaseUrlPresets.vue'
 import { applyExplicitCacheUpstreamCredentials, isOfficialGeminiBaseUrl } from '@/utils/geminiExplicitCache'
 import OpenCodeGoProtocolRulesEditor from '@/components/account/OpenCodeGoProtocolRulesEditor.vue'
 import HeaderOverrideEditor from '@/components/account/HeaderOverrideEditor.vue'
+import CPRIdentitySettings from '@/components/account/CPRIdentitySettings.vue'
 import { allSelectedGroupsEnableLongContextPricing } from '@/components/account/longContextBilling'
 import {
   applyAntigravityProjectID,
@@ -4730,6 +4737,8 @@ const applyGrokOAuthUpstreamConfig = (credentials: Record<string, unknown>) => {
 const interceptWarmupRequests = ref(false)
 const autoPauseOnExpired = ref(true)
 const openaiPassthroughEnabled = ref(false)
+const cprTrustedIdentity = ref(false)
+const cprSendTokenName = ref(false)
 const openaiPassthroughModelFilterEnabled = ref(false)
 // OpenAI Codex namespace 工具摊平兼容开关（仅 OAuth），缺省关闭即原样保留
 const openaiFlattenNamespacesEnabled = ref(false)
@@ -5241,6 +5250,8 @@ watch(
     }
     if (newPlatform !== 'openai') {
       openaiPassthroughEnabled.value = false
+      cprTrustedIdentity.value = false
+      cprSendTokenName.value = false
       openaiPassthroughModelFilterEnabled.value = false
       openaiFlattenNamespacesEnabled.value = false
       openAIEndpointCapabilities.value = ['chat_completions', 'embeddings']
@@ -5702,6 +5713,8 @@ const resetForm = () => {
   interceptWarmupRequests.value = false
   autoPauseOnExpired.value = true
   openaiPassthroughEnabled.value = false
+  cprTrustedIdentity.value = false
+  cprSendTokenName.value = false
   openaiPassthroughModelFilterEnabled.value = false
   openaiFlattenNamespacesEnabled.value = false
   openAILongContextBillingEnabled.value = false
@@ -5776,6 +5789,12 @@ const buildOpenAIExtra = (base?: Record<string, unknown>): Record<string, unknow
   }
 
   const extra: Record<string, unknown> = { ...(base || {}) }
+  if (form.type === 'apikey' && cprTrustedIdentity.value) {
+    extra.cpr_trusted_identity = true
+    if (cprSendTokenName.value) {
+      extra.cpr_send_token_name = true
+    }
+  }
   if (accountCategory.value === 'oauth-based') {
     extra.openai_oauth_responses_websockets_v2_mode = openaiOAuthResponsesWebSocketV2Mode.value
     extra.openai_oauth_responses_websockets_v2_enabled = isOpenAIWSModeEnabled(openaiOAuthResponsesWebSocketV2Mode.value)
@@ -6144,6 +6163,10 @@ const handleSubmit = async () => {
   // For apikey type, create directly
   if (!apiKeyValue.value.trim()) {
     appStore.showError(t('admin.accounts.pleaseEnterApiKey'))
+    return
+  }
+  if (form.platform === 'openai' && cprTrustedIdentity.value && !apiKeyBaseUrl.value.trim()) {
+    appStore.showError(t('admin.accounts.openai.cprBaseUrlRequired'))
     return
   }
 

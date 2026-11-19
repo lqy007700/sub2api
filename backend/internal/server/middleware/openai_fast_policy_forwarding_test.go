@@ -131,6 +131,76 @@ func TestAPIKeyAuthForwardsUserScopedOpenAIFastPolicyToUpstream(t *testing.T) {
 	require.False(t, gjson.GetBytes(otherUserBody, "service_tier").Exists())
 }
 
+func TestAPIKeyAuthForwardsCPRIdentityPerTerminalKey(t *testing.T) {
+	for _, runMode := range []string{config.RunModeSimple, config.RunModeStandard} {
+		t.Run(runMode, func(t *testing.T) {
+			upstreamHeaders := make(chan http.Header, 2)
+			upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				upstreamHeaders <- r.Header.Clone()
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = io.WriteString(w, `{"id":"resp_test","object":"response","model":"gpt-5","status":"completed","usage":{"input_tokens":1,"output_tokens":1,"total_tokens":2}}`)
+			}))
+			defer upstream.Close()
+
+			cfg := &config.Config{RunMode: runMode}
+			cfg.Security.URLAllowlist.AllowInsecureHTTP = true
+			gateway := service.NewOpenAIGatewayService(
+				nil, nil, nil, nil, nil, nil, nil, cfg,
+				nil, nil, nil, nil, nil, &openAIFastPolicyForwardingHTTPUpstream{client: upstream.Client()},
+				nil, nil, nil, nil, nil, nil, nil, nil,
+			)
+			account := &service.Account{
+				ID:          900,
+				Platform:    service.PlatformOpenAI,
+				Type:        service.AccountTypeAPIKey,
+				Concurrency: 1,
+				Status:      service.StatusActive,
+				Schedulable: true,
+				Credentials: map[string]any{"api_key": "shared-cpr", "base_url": upstream.URL},
+				Extra:       map[string]any{service.AccountExtraCPRTrustedIdentity: true, "cpr_send_token_name": true},
+			}
+			group := &service.Group{ID: 1, Platform: service.PlatformOpenAI, Status: service.StatusActive, Hydrated: true}
+			first := newOpenAIFastPolicyForwardingAPIKey(101, "terminal-a", 42, group.ID, group)
+			first.Name = "团队/A"
+			second := newOpenAIFastPolicyForwardingAPIKey(102, "terminal-b", 42, group.ID, group)
+			apiKeys := map[string]*service.APIKey{first.Key: first, second.Key: second}
+			apiKeyService := service.NewAPIKeyService(&openAIFastPolicyForwardingAPIKeyRepo{apiKeys: apiKeys}, nil, nil, nil, nil, nil, cfg)
+			router := gin.New()
+			router.Use(gin.HandlerFunc(NewAPIKeyAuthMiddleware(apiKeyService, nil, cfg)))
+			router.POST("/v1/responses", func(c *gin.Context) {
+				service.SetOpenAIClientTransport(c, service.OpenAIClientTransportHTTP)
+				body, err := io.ReadAll(c.Request.Body)
+				require.NoError(t, err)
+				_, err = gateway.Forward(c.Request.Context(), c, account, body)
+				require.NoError(t, err)
+			})
+
+			for _, key := range []string{first.Key, second.Key} {
+				req := httptest.NewRequest(http.MethodPost, "/v1/responses", bytes.NewBufferString(`{"model":"gpt-5","stream":false,"input":"hi"}`))
+				req.Header.Set("Authorization", "Bearer "+key)
+				req.Header.Add("X-CPR-User-Id", "999")
+				req.Header.Add("X-CPR-Token-Id", "888")
+				req.Header.Add("X-CPR-Token-Id", "777")
+				req.Header.Set("X-CPR-Token-Name", "client-supplied")
+				res := httptest.NewRecorder()
+				router.ServeHTTP(res, req)
+				require.Equal(t, http.StatusOK, res.Code, res.Body.String())
+			}
+			require.Len(t, upstreamHeaders, 2)
+			a := <-upstreamHeaders
+			b := <-upstreamHeaders
+			for _, headers := range []http.Header{a, b} {
+				require.Equal(t, []string{"Bearer shared-cpr"}, headers.Values("Authorization"))
+				require.Equal(t, []string{"42"}, headers.Values("X-CPR-User-Id"))
+			}
+			require.Equal(t, []string{"101"}, a.Values("X-CPR-Token-Id"))
+			require.Equal(t, []string{"102"}, b.Values("X-CPR-Token-Id"))
+			require.Equal(t, "%E5%9B%A2%E9%98%9F%2FA", a.Get("X-CPR-Token-Name"))
+			require.Empty(t, b.Get("X-CPR-Token-Name"))
+		})
+	}
+}
+
 func newOpenAIFastPolicyForwardingAPIKey(id int64, key string, userID, groupID int64, group *service.Group) *service.APIKey {
 	return &service.APIKey{
 		ID:      id,

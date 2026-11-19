@@ -249,6 +249,11 @@
           />
           <p class="input-hint">{{ t('admin.accounts.leaveEmptyToKeep') }}</p>
         </div>
+        <CPRIdentitySettings
+          v-if="account.platform === 'openai'"
+          v-model:enabled="cprTrustedIdentity"
+          v-model:send-token-name="cprSendTokenName"
+        />
 
         <!-- Model Restriction Section (不适用于 Antigravity) -->
         <div
@@ -3454,6 +3459,7 @@ import {
 } from '@/utils/geminiExplicitCache'
 import OpenCodeGoProtocolRulesEditor from '@/components/account/OpenCodeGoProtocolRulesEditor.vue'
 import HeaderOverrideEditor from '@/components/account/HeaderOverrideEditor.vue'
+import CPRIdentitySettings from '@/components/account/CPRIdentitySettings.vue'
 import OllamaCloudUsageSettings from '@/components/account/OllamaCloudUsageSettings.vue'
 import {
   applyAntigravityProjectID,
@@ -4174,6 +4180,8 @@ const customBaseUrl = ref('')
 
 // OpenAI 自动透传开关（OAuth/API Key）
 const openaiPassthroughEnabled = ref(false)
+const cprTrustedIdentity = ref(false)
+const cprSendTokenName = ref(false)
 const openaiPassthroughModelFilterEnabled = ref(false)
 // OpenAI Codex namespace 工具摊平兼容开关（仅 OAuth），缺省关闭即原样保留
 const openaiFlattenNamespacesEnabled = ref(false)
@@ -4677,6 +4685,8 @@ const syncFormFromAccount = (newAccount: Account | null) => {
     upstreamBillingAutoProbeEnabled.value && extra?.upstream_billing_rate_sync_enabled === true
 
   // Load OpenAI passthrough toggle (OpenAI OAuth/SetupToken/API Key)
+  cprTrustedIdentity.value = newAccount.platform === 'openai' && newAccount.type === 'apikey' && extra?.cpr_trusted_identity === true
+  cprSendTokenName.value = cprTrustedIdentity.value && extra?.cpr_send_token_name === true
   openaiPassthroughEnabled.value = false
   openaiPassthroughModelFilterEnabled.value = false
   openaiFlattenNamespacesEnabled.value = false
@@ -5662,6 +5672,11 @@ const submitUpdateAccount = async (accountID: number, updatePayload: Record<stri
 const handleSubmit = async () => {
   if (!props.account) return
   const accountID = props.account.id
+  if (props.account.platform === 'openai' && props.account.type === 'apikey' &&
+      cprTrustedIdentity.value && !editBaseUrl.value.trim()) {
+    appStore.showError(t('admin.accounts.openai.cprBaseUrlRequired'))
+    return
+  }
 
   if (form.status !== 'active' && form.status !== 'inactive' && form.status !== 'error') {
     appStore.showError(t('admin.accounts.pleaseSelectStatus'))
@@ -6238,6 +6253,14 @@ const handleSubmit = async () => {
       }
       delete newExtra.responses_websockets_v2_enabled
       delete newExtra.openai_ws_enabled
+      delete newExtra.cpr_trusted_identity
+      delete newExtra.cpr_send_token_name
+      if (props.account.type === 'apikey' && cprTrustedIdentity.value) {
+        newExtra.cpr_trusted_identity = true
+        if (cprSendTokenName.value) {
+          newExtra.cpr_send_token_name = true
+        }
+      }
       if (openaiPassthroughEnabled.value) {
         newExtra.openai_passthrough = true
       } else {

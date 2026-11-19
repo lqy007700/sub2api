@@ -118,6 +118,10 @@ func (s *OpenAIGatewayService) ProxyResponsesWebSocketFromClient(
 	forceHTTPBridge := account.Platform == PlatformGrok ||
 		(s.pluginManager != nil && s.pluginManager.ShouldRouteOpenAIOAuth(account))
 	modeRouterV2Enabled := s != nil && s.cfg != nil && s.cfg.Gateway.OpenAIWS.ModeRouterV2Enabled
+	if account.usesCPRTrustedIdentity() && (!modeRouterV2Enabled ||
+		account.ResolveOpenAIResponsesWebSocketV2Mode(s.cfg.Gateway.OpenAIWS.IngressModeDefault) != OpenAIWSIngressModeHTTPBridge) {
+		return NewOpenAIWSClientCloseError(coderws.StatusPolicyViolation, "CPR identity forwarding requires HTTP bridge mode for WebSocket clients", nil)
+	}
 	ingressMode := OpenAIWSIngressModeCtxPool
 	if modeRouterV2Enabled && !forceHTTPBridge {
 		ingressMode = account.ResolveOpenAIResponsesWebSocketV2Mode(s.cfg.Gateway.OpenAIWS.IngressModeDefault)

@@ -639,6 +639,10 @@ export default {
       },
       // OpenAI specific hints
       openai: {
+        cprTrustedIdentity: 'Forward trusted identity to CPR',
+        cprTrustedIdentityDesc: 'Enable only when the Base URL points to CPR. Requests include the authenticated user ID and key ID so CPR can manage each key’s primary account.',
+        cprSendTokenName: 'Also send the key display name',
+        cprBaseUrlRequired: 'Enter the CPR Base URL',
         baseUrlHint: 'Leave default for official OpenAI API',
         apiKeyHint: 'Your OpenAI API Key',
         oauthPassthrough: 'Auto passthrough (auth only)',

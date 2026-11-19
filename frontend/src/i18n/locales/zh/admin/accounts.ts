@@ -767,6 +767,10 @@ export default {
       },
       // OpenAI specific hints
       openai: {
+        cprTrustedIdentity: '向 CPR 转发可信身份',
+        cprTrustedIdentityDesc: '仅在 Base URL 指向 CPR 时开启。业务请求会发送已认证的用户 ID 和 Key ID，供 CPR 分别管理每把 Key 的主账号。',
+        cprSendTokenName: '同时发送 Key 显示名',
+        cprBaseUrlRequired: '请填写 CPR 的 Base URL',
         baseUrlHint: '留空使用官方 OpenAI API',
         apiKeyHint: '您的 OpenAI API Key',
         oauthPassthrough: '自动透传（仅替换认证）',

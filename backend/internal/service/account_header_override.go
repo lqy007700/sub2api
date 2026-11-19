@@ -66,7 +66,7 @@ var headerOverrideBlockedNames = map[string]struct{}{
 
 func isHeaderOverrideBlockedName(lowerName string) bool {
 	_, blocked := headerOverrideBlockedNames[lowerName]
-	return blocked
+	return blocked || isCPRIdentityHeader(lowerName)
 }
 
 // IsHeaderOverrideEligible 报告账号类型是否支持请求头覆写。

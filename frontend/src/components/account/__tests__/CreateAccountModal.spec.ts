@@ -238,6 +238,31 @@ describe('CreateAccountModal OpenAI long-context billing', () => {
     wrapper.unmount()
   })
 
+  it('saves CPR identity forwarding and its optional display name', async () => {
+    const wrapper = mountModal()
+    await selectButtonByText(wrapper, 'OpenAI')
+    expect(wrapper.find('[data-testid="cpr-trusted-identity"]').exists()).toBe(false)
+    await selectButtonByText(wrapper, 'API Key')
+    await wrapper.get('form#create-account-form input[type="text"]').setValue('CPR pool')
+    await wrapper.get('form#create-account-form input[type="password"]').setValue('shared-cpr')
+    expect(wrapper.find('[data-testid="cpr-send-token-name"]').exists()).toBe(false)
+
+    await wrapper.get('[data-testid="create-apikey-base-url"]').setValue('')
+    await wrapper.get('[data-testid="cpr-trusted-identity"]').setValue(true)
+    await wrapper.get('form#create-account-form').trigger('submit.prevent')
+    expect(createAccountMock).not.toHaveBeenCalled()
+    await wrapper.get('[data-testid="create-apikey-base-url"]').setValue('https://cpr.example/v1')
+    await wrapper.get('[data-testid="cpr-send-token-name"]').setValue(true)
+    await wrapper.get('form#create-account-form').trigger('submit.prevent')
+    await flushPromises()
+
+    expect(createAccountMock).toHaveBeenCalledWith(expect.objectContaining({
+      credentials: expect.objectContaining({ base_url: 'https://cpr.example/v1', api_key: 'shared-cpr' }),
+      extra: expect.objectContaining({ cpr_trusted_identity: true, cpr_send_token_name: true })
+    }))
+    wrapper.unmount()
+  })
+
   it('sets month and year expiry presets without submitting the account form', async () => {
     vi.useFakeTimers({ toFake: ['Date'] })
     vi.setSystemTime(new Date('2026-01-31T12:34:00'))

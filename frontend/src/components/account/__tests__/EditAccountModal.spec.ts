@@ -336,6 +336,26 @@ describe('EditAccountModal', () => {
 
   afterEach(() => vi.useRealTimers())
 
+  it('loads CPR identity settings and removes both flags when disabled', async () => {
+    const account = buildAccount()
+    account.credentials = { ...account.credentials, base_url: 'https://cpr.example/v1' }
+    account.extra = { cpr_trusted_identity: true, cpr_send_token_name: true, openai_passthrough: true }
+    updateAccountMock.mockReset().mockResolvedValue(account)
+    const wrapper = mountModal(account)
+
+    expect((wrapper.get('[data-testid="cpr-trusted-identity"]').element as HTMLInputElement).checked).toBe(true)
+    expect((wrapper.get('[data-testid="cpr-send-token-name"]').element as HTMLInputElement).checked).toBe(true)
+    await wrapper.get('[data-testid="cpr-trusted-identity"]').setValue(false)
+    expect(wrapper.find('[data-testid="cpr-send-token-name"]').exists()).toBe(false)
+    await wrapper.get('form#edit-account-form').trigger('submit.prevent')
+
+    const payload = updateAccountMock.mock.calls[0]?.[1]
+    expect(payload.extra).not.toHaveProperty('cpr_trusted_identity')
+    expect(payload.extra).not.toHaveProperty('cpr_send_token_name')
+    expect(payload.extra.openai_passthrough).toBe(true)
+    wrapper.unmount()
+  })
+
   it.each(['apikey', 'oauth'])('can opt a passthrough %s account into model filtering without changing groups', async (type) => {
     const account = buildAccount()
     account.type = type
