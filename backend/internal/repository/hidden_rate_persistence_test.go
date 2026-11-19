@@ -74,12 +74,12 @@ func TestUsageDisplayRateSnapshotAllInsertPaths(t *testing.T) {
 
 		db, mock := newSQLMock(t)
 		repo := &usageLogRepository{sql: db}
-		mock.ExpectQuery("(?s)INSERT INTO usage_logs.*display_rate_multiplier.*\\$63").
+		mock.ExpectQuery("(?s)INSERT INTO usage_logs.*display_rate_multiplier.*\\$65").
 			WithArgs(anySliceToDriverValues(prepared.args)...).
 			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at"}).AddRow(int64(1), log.CreatedAt))
 		_, err := repo.Create(context.Background(), log)
 		require.NoError(t, err)
-		mock.ExpectExec("(?s)INSERT INTO usage_logs.*display_rate_multiplier.*\\$63").
+		mock.ExpectExec("(?s)INSERT INTO usage_logs.*display_rate_multiplier.*\\$65").
 			WithArgs(anySliceToDriverValues(prepared.args)...).
 			WillReturnResult(sqlmock.NewResult(0, 1))
 		require.NoError(t, execUsageLogInsertNoResult(context.Background(), db, prepared))

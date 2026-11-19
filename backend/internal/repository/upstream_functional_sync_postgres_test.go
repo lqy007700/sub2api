@@ -33,8 +33,8 @@ func TestForkFunctionalSyncPostgresMigrations(t *testing.T) {
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = base.Close() })
 
-	for _, upgrade := range []bool{false, true} {
-		t.Run(fmt.Sprintf("upgrade=%v", upgrade), func(t *testing.T) {
+	for _, baselineName := range []string{"fresh", "v0.2.18-lqy007700.4", "v0.2.18-lqy007700.5"} {
+		t.Run(baselineName, func(t *testing.T) {
 			name := fmt.Sprintf("fork_sync_%d", time.Now().UnixNano())
 			_, err := base.Exec("CREATE DATABASE " + name)
 			require.NoError(t, err)
@@ -48,12 +48,14 @@ func TestForkFunctionalSyncPostgresMigrations(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 			defer cancel()
 
-			if upgrade {
+			if baselineName != "fresh" {
 				baseline := fstest.MapFS{}
 				names, err := fs.Glob(migrations.FS, "*.sql")
 				require.NoError(t, err)
 				for _, filename := range names {
-					if filename > "247_group_hidden_rate_multiplier.sql" {
+					if filename > "249_group_auth_cache_image_count_billing.sql" ||
+						filename == "249_add_usage_logs_api_key_cost_index_notx.sql" ||
+						(baselineName == "v0.2.18-lqy007700.4" && filename > "247_group_hidden_rate_multiplier.sql") {
 						continue
 					}
 					data, err := migrations.FS.ReadFile(filename)
@@ -91,7 +93,7 @@ func TestForkFunctionalSyncPostgresMigrations(t *testing.T) {
 			}
 
 			// SQL-only changes must invalidate both new and existing snapshot fields.
-			for _, assignment := range []string{"image_count_billing=true", "hidden_rate_multiplier=3", "profit_control_enabled=true"} {
+			for _, assignment := range []string{"image_count_billing=true", "hidden_rate_multiplier=3", "profit_control_enabled=true", "force_openai_ultrafast=true"} {
 				_, err = db.ExecContext(ctx, "DELETE FROM auth_cache_invalidation_outbox")
 				require.NoError(t, err)
 				_, err = db.ExecContext(ctx, "UPDATE groups SET "+assignment+" WHERE id=$1", groupID)
@@ -115,6 +117,7 @@ func TestForkFunctionalSyncPostgresMigrations(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, 3.0, *group.HiddenRateMultiplier)
 			require.True(t, group.ImageCountBilling)
+			require.True(t, group.ForceOpenAIUltrafast)
 			group.HiddenRateMultiplier = nil
 			group.ImageCountBilling = false
 			require.NoError(t, repo.Update(ctx, group))
@@ -123,6 +126,7 @@ func TestForkFunctionalSyncPostgresMigrations(t *testing.T) {
 			require.NotNil(t, auth.Group)
 			require.Nil(t, auth.Group.HiddenRateMultiplier)
 			require.False(t, auth.Group.ImageCountBilling)
+			require.True(t, auth.Group.ForceOpenAIUltrafast)
 			require.Equal(t, service.PlatformOpenAI, auth.Group.Platform)
 		})
 	}
