@@ -34,6 +34,7 @@
         </div>
       </div>
       <span
+        v-if="item.primary_status !== STATUS_DEGRADED"
         class="px-2.5 py-1 rounded-full text-xs font-semibold flex-shrink-0"
         :class="statusBadgeClass(item.primary_status)"
       >
@@ -82,6 +83,7 @@ import {
   useChannelMonitorFormat,
   providerGradient,
 } from '@/composables/useChannelMonitorFormat'
+import { STATUS_DEGRADED } from '@/constants/channelMonitor'
 import { isChannelMonitorQuotaVisible } from '@/utils/featureFlags'
 import ProviderIcon from './ProviderIcon.vue'
 import MonitorMetricPair from './MonitorMetricPair.vue'

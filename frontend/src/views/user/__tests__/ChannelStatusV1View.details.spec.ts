@@ -24,24 +24,30 @@ beforeEach(() => {
   mocks.status.mockResolvedValue(detail(90))
 })
 
-function mountView() {
+function mountView(renderCards = false) {
   return shallowMount(ChannelStatusV1View, {
     global: { stubs: {
       AppLayout: { template: '<div><slot /></div>' },
       MonitorHero: false,
       MonitorCardGrid: false,
-      MonitorCard: { props: ['availabilityValue', 'item'], template: '<output :data-status="item.primary_status">{{ availabilityValue }}</output>' }
+      MonitorCard: renderCards ? false : { props: ['availabilityValue'], template: '<output>{{ availabilityValue }}</output>' }
     } }
   })
 }
 
-it('does not show an overall badge beside the tabs when a channel is degraded', async () => {
-  mocks.list.mockResolvedValue({ items: [{ id: 1, primary_status: 'degraded' }] })
-  const wrapper = mountView()
+it('hides degraded badges while retaining other card statuses', async () => {
+  mocks.list.mockResolvedValue({ items: [
+    { id: 1, name: 'Slow channel', provider: 'openai', primary_model: 'model', primary_status: 'degraded' },
+    { id: 2, name: 'Failed channel', provider: 'openai', primary_model: 'model', primary_status: 'failed' }
+  ] })
+  const wrapper = mountView(true)
   await flushPromises()
   expect(wrapper.findAll('[role="tab"]')).toHaveLength(3)
   expect(wrapper.text()).not.toContain('channelStatus.overall')
-  expect(wrapper.get('output').attributes('data-status')).toBe('degraded')
+  const [slowCard, failedCard] = wrapper.findAll('article')
+  expect(slowCard.text()).toContain('Slow channel')
+  expect(slowCard.text()).not.toContain('monitorCommon.status.degraded')
+  expect(failedCard.text()).toContain('monitorCommon.status.failed')
 })
 
 describe('channel monitor automatic detail refresh', () => {
