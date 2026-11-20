@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"reflect"
+	"sync/atomic"
 	"testing"
 
 	"github.com/Wei-Shaw/sub2api/internal/payment"
@@ -14,6 +16,9 @@ func TestEasyPayQueryOrderStatusMapping(t *testing.T) {
 	t.Parallel()
 
 	const orderID = "order-123"
+	wantQuery := url.Values{
+		"act": {"order"}, "pid": {"pid-1"}, "key": {"pkey-1"}, "out_trade_no": {orderID},
+	}
 	tests := []struct {
 		name        string
 		body        string
@@ -137,8 +142,9 @@ func TestEasyPayQueryOrderStatusMapping(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			var gotForm url.Values
+			var calls atomic.Int32
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				calls.Add(1)
 				if r.Method != http.MethodPost {
 					t.Errorf("method = %q, want %q", r.Method, http.MethodPost)
 				}
@@ -148,16 +154,8 @@ func TestEasyPayQueryOrderStatusMapping(t *testing.T) {
 				if err := r.ParseForm(); err != nil {
 					t.Errorf("ParseForm: %v", err)
 				}
-				// Parameters must be in the URL query (彩虹易支付 reads $_GET)
-				// and mirrored in the body for forks that read $_POST.
-				gotForm = r.URL.Query()
-				for key, values := range r.PostForm {
-					if got := gotForm.Get(key); got != values[0] {
-						t.Errorf("body[%s] = %q, query has %q", key, values[0], got)
-					}
-				}
-				if len(r.PostForm) != len(gotForm) {
-					t.Errorf("body params %v do not mirror query params %v", r.PostForm, gotForm)
+				if got := r.URL.Query(); !reflect.DeepEqual(got, wantQuery) || len(r.PostForm) != 0 {
+					t.Errorf("expected query-only params %v, got query %v and form %v", wantQuery, got, r.PostForm)
 				}
 				w.Header().Set("Content-Type", "application/json")
 				_, _ = w.Write([]byte(tt.body))
@@ -166,6 +164,9 @@ func TestEasyPayQueryOrderStatusMapping(t *testing.T) {
 
 			provider := newTestEasyPay(t, server.URL)
 			resp, err := provider.QueryOrder(context.Background(), orderID)
+			if count := calls.Load(); count != 1 {
+				t.Fatalf("query attempts = %d, want 1", count)
+			}
 			if tt.wantErr {
 				if err == nil {
 					t.Fatalf("QueryOrder succeeded, want error (response=%+v)", resp)
@@ -184,15 +185,46 @@ func TestEasyPayQueryOrderStatusMapping(t *testing.T) {
 			if resp.Amount != tt.wantAmount {
 				t.Fatalf("amount = %v, want %v", resp.Amount, tt.wantAmount)
 			}
-			for key, want := range map[string]string{
-				"act":          "order",
-				"pid":          "pid-1",
-				"key":          "pkey-1",
-				"out_trade_no": orderID,
-			} {
-				if got := gotForm.Get(key); got != want {
-					t.Fatalf("form[%s] = %q, want %q (form=%v)", key, got, want, gotForm)
+		})
+	}
+}
+
+func TestEasyPayQueryOrderRetriesWithFormOnlyWhenActionMissing(t *testing.T) {
+	const orderID = "order-123"
+	wantParams := url.Values{
+		"act": {"order"}, "pid": {"pid-1"}, "key": {"pkey-1"}, "out_trade_no": {orderID},
+	}
+	for _, tc := range []struct {
+		name     string
+		response string
+	}{
+		{name: "plain text", response: "No Act!"},
+		{name: "JSON failure", response: `{"code":-1,"msg":"No Act!"}`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var calls atomic.Int32
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if err := r.ParseForm(); err != nil {
+					t.Errorf("ParseForm: %v", err)
 				}
+				if calls.Add(1) == 1 {
+					_, _ = w.Write([]byte(tc.response))
+					return
+				}
+				if r.Method != http.MethodPost || r.URL.Path != "/api.php" || r.URL.RawQuery != "" || !reflect.DeepEqual(r.PostForm, wantParams) {
+					t.Errorf("expected form-only query retry, got %s %s form %v", r.Method, r.URL, r.PostForm)
+				}
+				_, _ = w.Write([]byte(`{"code":1,"out_trade_no":"order-123","money":"12.34","status":1}`))
+			}))
+			defer server.Close()
+
+			provider := newTestEasyPay(t, server.URL)
+			resp, err := provider.QueryOrder(context.Background(), orderID)
+			if err != nil || resp.Status != payment.ProviderStatusPaid {
+				t.Fatalf("QueryOrder = %+v, %v, want paid order", resp, err)
+			}
+			if count := calls.Load(); count != 2 {
+				t.Fatalf("query attempts = %d, want 2", count)
 			}
 		})
 	}

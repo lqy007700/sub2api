@@ -338,14 +338,18 @@ func (e *EasyPay) queryOrder(ctx context.Context, outTradeNo string) (*easyPayQu
 		"act": "order", "pid": e.config["pid"],
 		"key": e.config["pkey"], "out_trade_no": outTradeNo,
 	}
-	// 彩虹易支付 and ZPay read act=order parameters from $_GET only (a
-	// body-only request is answered with "No Act!"), while other forks read
-	// the form body; send them in both places.
+	// 彩虹易支付 and ZPay read the URL query. PerPay rejects duplicate keys
+	// across the query and form body. Retry with form-only parameters when
+	// a gateway explicitly reports that it could not read the action.
+	endpoint := e.apiBase() + "/api.php"
 	query := url.Values{}
 	for k, v := range params {
 		query.Set(k, v)
 	}
-	body, err := e.post(ctx, e.apiBase()+"/api.php?"+query.Encode(), params)
+	body, err := e.post(ctx, endpoint+"?"+query.Encode(), nil)
+	if err == nil && easyPayOrderQueryNeedsForm(body) {
+		body, err = e.post(ctx, endpoint, params)
+	}
 	if err != nil {
 		// The request URL carries the merchant key; never let it reach logs
 		// or audit records through *url.Error.
@@ -408,6 +412,20 @@ func (e *EasyPay) queryOrder(ctx context.Context, outTradeNo string) (*easyPayQu
 		money:   easyPayJSONScalar(pickEasyPayJSON(resp.Money, resp.Data.Money)),
 		tradeNo: easyPayJSONScalar(pickEasyPayJSON(resp.TradeNo, resp.Data.TradeNo)),
 	}, nil
+}
+
+func easyPayOrderQueryNeedsForm(body []byte) bool {
+	const noAction = "No Act!"
+	if strings.EqualFold(strings.TrimSpace(string(body)), noAction) {
+		return true
+	}
+	var response struct {
+		Code any    `json:"code"`
+		Msg  string `json:"msg"`
+	}
+	return json.Unmarshal(body, &response) == nil && response.Code != nil &&
+		!easyPayResponseCodeIsSuccess(response.Code, easypayCodeSuccess) &&
+		strings.EqualFold(strings.TrimSpace(response.Msg), noAction)
 }
 
 // ConfirmNotification checks a verified success notification against the

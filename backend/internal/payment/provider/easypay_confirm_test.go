@@ -24,6 +24,14 @@ func newConfirmTestEasyPay(t *testing.T, body string, status int) (*EasyPay, *at
 		if r.URL.Path != "/api.php" || q.Get("act") != "order" || q.Get("pid") != "1001" || q.Get("key") != "pkey-1" || q.Get("out_trade_no") != "sub2_ORDER1" {
 			t.Errorf("unexpected query request: path=%s query=%v", r.URL.Path, q)
 		}
+		// PerPay rejects a key repeated between the URL query and the POST body.
+		for key, values := range r.Form {
+			if len(values) > 1 {
+				t.Errorf("duplicate query parameter %q", key)
+				_, _ = w.Write([]byte(`{"code":-1,"msg":"参数名不能重复。"}`))
+				return
+			}
+		}
 		w.WriteHeader(status)
 		_, _ = w.Write([]byte(body))
 	}))
