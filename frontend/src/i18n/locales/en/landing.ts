@@ -14,13 +14,23 @@ export default {
     login: 'Login',
     getStarted: 'Get Started',
     goToDashboard: 'Go to Dashboard',
+    heroKicker: 'High-Speed AI API Gateway',
+    heroTitle: 'Faster responses, full model capability',
+    heroDescription: 'Route intelligently across upstream accounts to reduce waiting time while preserving model capability, context, and tool calls.',
+    terminal: {
+      routing: 'Fast route selected · Native model capability preserved',
+      success: '200 OK · 842ms',
+      response: '{ "model": "claude-sonnet-4", "stream": true }'
+    },
     // User-focused value proposition
     heroSubtitle: 'One Key, All AI Models',
-    heroDescription: 'No need to manage multiple subscriptions. Access Claude, GPT, Gemini and more with a single API key',
     tags: {
       subscriptionToApi: 'Subscription to API',
       stickySession: 'Session Persistence',
-      realtimeBilling: 'Pay As You Go'
+      realtimeBilling: 'Pay As You Go',
+      lowLatency: 'Low-Latency Response',
+      nativeQuality: 'Full Model Capability',
+      smartRouting: 'Smart Routing'
     },
     // Pain points section
     painPoints: {
@@ -56,6 +66,14 @@ export default {
       multiAccountDesc: 'Smart routing across multiple upstream accounts with automatic failover. Say goodbye to errors.',
       balanceQuota: 'Pay What You Use',
       balanceQuotaDesc: 'Usage-based billing with quota limits. Full visibility into team consumption.'
+    },
+    performance: {
+      fast: 'High-Speed Response',
+      fastDesc: 'Choose faster available routes to reduce queueing and switching delays.',
+      quality: 'Full Model Capability',
+      qualityDesc: 'Preserve the original model, context, and tool-calling behavior in every request.',
+      routing: 'Smart Routing',
+      routingDesc: 'Automatically schedule across account pools and fail over when needed for speed and stability.'
     },
     // Comparison section
     comparison: {

@@ -14,13 +14,23 @@ export default {
     login: '登录',
     getStarted: '立即开始',
     goToDashboard: '进入控制台',
+    heroKicker: '高速 AI API 网关',
+    heroTitle: '更快响应，保持模型原生能力',
+    heroDescription: '智能路由多个上游账号，缩短等待时间。完整保留模型能力、上下文和工具调用，让速度与效果同时在线。',
+    terminal: {
+      routing: '高速路由 · 保持模型原生能力',
+      success: '200 OK · 842ms',
+      response: '{ "model": "claude-sonnet-4", "stream": true }'
+    },
     // 新增：面向用户的价值主张
     heroSubtitle: '一个密钥，畅用多个 AI 模型',
-    heroDescription: '无需管理多个订阅账号，一站式接入 Claude、GPT、Gemini 等主流 AI 服务',
     tags: {
       subscriptionToApi: '订阅转 API',
       stickySession: '会话保持',
-      realtimeBilling: '按量计费'
+      realtimeBilling: '按量计费',
+      lowLatency: '低延迟响应',
+      nativeQuality: '不降级模型能力',
+      smartRouting: '智能路由'
     },
     // 用户痛点区块
     painPoints: {
@@ -56,6 +66,14 @@ export default {
       multiAccountDesc: '智能调度多个上游账号，自动切换和负载均衡，告别频繁报错。',
       balanceQuota: '用多少付多少',
       balanceQuotaDesc: '按实际使用量计费，支持设置配额上限，团队用量一目了然。'
+    },
+    performance: {
+      fast: '高速响应',
+      fastDesc: '智能选择更快的可用通道，减少排队与切换带来的等待时间。',
+      quality: '保持模型能力',
+      qualityDesc: '保留原模型、上下文和工具调用能力，完整传递你的请求意图。',
+      routing: '智能路由',
+      routingDesc: '多账号池自动调度与故障切换，让稳定性和响应速度同时在线。'
     },
     // 优势对比
     comparison: {
