@@ -1,8 +1,8 @@
 <template>
   <header class="glass sticky top-0 z-30 border-b border-slate-900/[0.06] dark:border-white/[0.07]">
     <div
-      class="flex h-[58px] items-center justify-between gap-2 px-3 sm:px-5 md:px-6"
-      :class="useTopNavMode ? 'mx-auto max-w-[1200px]' : ''"
+      class="flex h-[58px] items-center justify-between gap-3 px-3 sm:px-5 md:px-6"
+      :class="useTopNavMode ? 'mx-auto max-w-[1280px]' : ''"
     >
       <!-- Left: Mobile Menu Toggle + Brand (User Top-Nav) or Page Title (Admin) -->
       <div class="flex shrink-0 items-center gap-2 sm:gap-3">
@@ -55,18 +55,18 @@
         </div>
       </div>
 
-      <!-- Center: Floating Pill Navigation (Regular User Desktop Only) -->
+      <!-- Center: Floating Pill Navigation (Regular User Desktop Only — Show All Directly) -->
       <nav
         v-if="useTopNavMode && userTopNavItems.length > 0"
-        class="hidden items-center gap-0.5 rounded-full bg-slate-900/[0.045] p-1 dark:bg-white/[0.06] lg:flex"
+        class="scrollbar-hide hidden min-w-0 items-center gap-0.5 overflow-x-auto rounded-full bg-slate-900/[0.045] p-1 dark:bg-white/[0.06] lg:flex"
       >
         <router-link
-          v-for="item in primaryTopNavItems"
+          v-for="item in userTopNavItems"
           :key="item.path"
           :to="item.path"
           :data-tour="item.path === '/keys' ? 'sidebar-my-keys' : undefined"
           @click="handleTopNavClick(item.path)"
-          class="whitespace-nowrap rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-all duration-150"
+          class="shrink-0 whitespace-nowrap rounded-full px-3 py-1.5 text-[13px] font-medium transition-all duration-150"
           :class="
             isNavActive(item.path)
               ? 'bg-white text-[#111827] shadow-pill dark:bg-dark-700 dark:text-white dark:shadow-none'
@@ -75,42 +75,6 @@
         >
           {{ item.label }}
         </router-link>
-
-        <!-- Overflow Menu for additional enabled items -->
-        <div v-if="overflowTopNavItems.length > 0" ref="moreNavRef" class="relative">
-          <button
-            type="button"
-            @click="moreNavOpen = !moreNavOpen"
-            class="flex items-center gap-1 rounded-full px-2.5 py-1.5 text-[13px] font-medium transition-all duration-150"
-            :class="
-              isOverflowActive || moreNavOpen
-                ? 'bg-white text-[#111827] shadow-pill dark:bg-dark-700 dark:text-white dark:shadow-none'
-                : 'text-[#526071] hover:text-[#111827] dark:text-dark-300 dark:hover:text-white'
-            "
-            :title="t('common.more')"
-          >
-            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-              <circle cx="5" cy="12" r="1.75" />
-              <circle cx="12" cy="12" r="1.75" />
-              <circle cx="19" cy="12" r="1.75" />
-            </svg>
-          </button>
-
-          <transition name="dropdown">
-            <div v-if="moreNavOpen" class="dropdown right-0 mt-2 w-48">
-              <router-link
-                v-for="item in overflowTopNavItems"
-                :key="item.path"
-                :to="item.path"
-                @click="moreNavOpen = false; handleTopNavClick(item.path)"
-                class="dropdown-item"
-                :class="isNavActive(item.path) ? 'bg-slate-900/[0.05] font-medium text-[#111827] dark:bg-white/[0.08] dark:text-white' : ''"
-              >
-                <span class="truncate">{{ item.label }}</span>
-              </router-link>
-            </div>
-          </transition>
-        </div>
       </nav>
 
       <!-- Right: Announcements + Theme + Docs + Model Plaza + Subscriptions + Balance + User Dropdown -->
@@ -392,8 +356,6 @@ const siteLogo = computed(() => sanitizeUrl(appStore.siteLogo || '', { allowRela
 const dropdownOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
 const dropdownTriggerRef = ref<HTMLButtonElement | null>(null)
-const moreNavOpen = ref(false)
-const moreNavRef = ref<HTMLElement | null>(null)
 const isDark = ref(document.documentElement.classList.contains('dark'))
 const contactInfo = computed(() => appStore.contactInfo)
 const docUrl = computed(() => sanitizeUrl(appStore.docUrl))
@@ -460,18 +422,10 @@ const userTopNavItems = computed<TopNavItem[]>(() => {
   })
 })
 
-const MAX_PRIMARY_PILLS = 5
-const primaryTopNavItems = computed(() => userTopNavItems.value.slice(0, MAX_PRIMARY_PILLS))
-const overflowTopNavItems = computed(() => userTopNavItems.value.slice(MAX_PRIMARY_PILLS))
-
 function isNavActive(path: string): boolean {
   const current = route.path || ''
   return current === path || current.startsWith(path + '/')
 }
-
-const isOverflowActive = computed(() =>
-  overflowTopNavItems.value.some((item) => isNavActive(item.path))
-)
 
 function handleTopNavClick(itemPath: string) {
   if (itemPath === '/keys' && onboardingStore.isCurrentStep('[data-tour="sidebar-my-keys"]')) {
@@ -583,9 +537,6 @@ function formatHeaderMoney(value: number) {
 function handleClickOutside(event: MouseEvent) {
   if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
     closeDropdown()
-  }
-  if (moreNavRef.value && !moreNavRef.value.contains(event.target as Node)) {
-    moreNavOpen.value = false
   }
 }
 

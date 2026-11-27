@@ -20,7 +20,7 @@
       <!-- Main Content -->
       <main
         class="px-4 py-5 md:px-6 md:py-6 lg:px-8"
-        :class="useTopNavMode ? 'mx-auto w-full max-w-[1200px]' : ''"
+        :class="useTopNavMode ? 'mx-auto w-full max-w-[1280px]' : ''"
       >
         <slot />
       </main>
