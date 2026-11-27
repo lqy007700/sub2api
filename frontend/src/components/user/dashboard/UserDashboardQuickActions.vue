@@ -60,7 +60,7 @@
       </button>
 
       <button
-        @click="router.push('/redeem')"
+        @click="handleRedeemNavigate"
         class="group flex w-full items-center gap-3.5 rounded-xl bg-[#f8f9fb] px-3.5 py-3 text-left transition-colors hover:bg-[#f1f3f7] dark:bg-dark-900/60 dark:hover:bg-white/[0.06]"
       >
         <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-slate-900/[0.06] bg-white text-[#111827] shadow-glass-sm dark:border-white/[0.08] dark:bg-dark-800 dark:text-white">
@@ -86,9 +86,18 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import Icon from '@/components/icons/Icon.vue'
 import { useBatchImageAccess } from '@/composables/useBatchImageAccess'
+import { FeatureFlags, isFeatureFlagEnabled } from '@/utils/featureFlags'
 const router = useRouter()
 const { t } = useI18n()
 const { canUseBatchImage, refreshBatchImageAccess } = useBatchImageAccess()
+
+function handleRedeemNavigate() {
+  if (isFeatureFlagEnabled(FeatureFlags.payment)) {
+    router.push({ path: '/purchase', query: { tab: 'redeem' } })
+  } else {
+    router.push('/redeem')
+  }
+}
 
 onMounted(() => {
   void refreshBatchImageAccess()

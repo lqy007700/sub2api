@@ -329,6 +329,7 @@ import { FeatureFlags, isFeatureFlagEnabled, makeSidebarFlag } from '@/utils/fea
 import { resolveRouteMetaKeys } from '@/router/title'
 import { resolveSiteBillingMode } from '@/utils/siteBillingMode'
 import { useBatchImageAccess } from '@/composables/useBatchImageAccess'
+import { getStandaloneUserCustomMenuItems, getThirdPartyRechargeCustomMenuItems } from '@/utils/rechargeHub'
 
 interface TopNavItem {
   path: string
@@ -379,33 +380,45 @@ const flagBatchImageAccess = () => canUseBatchImage.value
 
 const purchaseNavLabel = computed(() => {
   switch (resolveSiteBillingMode(appStore.cachedPublicSettings)) {
-    case 'recharge_only':
-      return t('nav.recharge')
     case 'subscription_only':
       return t('nav.subscribe')
     default:
-      return t('nav.buySubscription')
+      return t('nav.recharge')
   }
 })
 
+const paymentEnabledForUser = computed(() => flagPayment() !== false)
+
+const mergedThirdPartyRechargeIds = computed(() => {
+  if (!paymentEnabledForUser.value) return new Set<string>()
+  return new Set(
+    getThirdPartyRechargeCustomMenuItems(appStore.cachedPublicSettings?.custom_menu_items).map((item) => item.id)
+  )
+})
+
 const customMenuItemsForUser = computed(() => {
-  const items = appStore.cachedPublicSettings?.custom_menu_items ?? []
-  return items
-    .filter((item) => item.visibility === 'user' && !item.hide_in_sidebar)
-    .sort((a, b) => a.sort_order - b.sort_order)
+  return getStandaloneUserCustomMenuItems(
+    appStore.cachedPublicSettings?.custom_menu_items,
+    paymentEnabledForUser.value
+  )
 })
 
 const userTopNavItems = computed<TopNavItem[]>(() => {
+  // Core 5-pill order: 概览 · 密钥 · 记录 · 充值 · 订单
+  // Built-in online recharge, third-party redeem-code store, and code redemption are unified under /purchase.
+  const rechargeEntry: TopNavItem = paymentEnabledForUser.value
+    ? { path: '/purchase', label: purchaseNavLabel.value, hideInSimpleMode: true }
+    : { path: '/redeem', label: t('nav.redeem'), hideInSimpleMode: true }
+
   const raw: TopNavItem[] = [
     { path: '/dashboard', label: t('nav.sidebar.overview') },
     { path: '/keys', label: t('nav.sidebar.keys') },
     { path: '/usage', label: t('nav.usage'), hideInSimpleMode: true },
-    { path: '/purchase', label: purchaseNavLabel.value, hideInSimpleMode: true, featureFlag: flagPayment },
+    rechargeEntry,
+    { path: '/orders', label: t('nav.myOrders') },
     { path: '/monitor', label: t('nav.sidebar.channels'), featureFlag: flagChannelMonitor },
     { path: '/available-channels', label: t('nav.availableChannels'), hideInSimpleMode: true, featureFlag: flagAvailableChannels },
     { path: '/subscriptions', label: t('nav.mySubscriptions'), hideInSimpleMode: true, featureFlag: flagSubscription },
-    { path: '/orders', label: t('nav.myOrders') },
-    { path: '/redeem', label: t('nav.redeem'), hideInSimpleMode: true },
     { path: '/affiliate', label: t('nav.affiliate'), hideInSimpleMode: true, featureFlag: flagAffiliate },
     { path: '/batch-image', label: t('nav.batchImage'), hideInSimpleMode: true, featureFlag: flagBatchImageAccess },
     { path: '/settings/mcp', label: t('mcp.title'), featureFlag: flagMCP },
@@ -424,7 +437,21 @@ const userTopNavItems = computed<TopNavItem[]>(() => {
 
 function isNavActive(path: string): boolean {
   const current = route.path || ''
-  return current === path || current.startsWith(path + '/')
+  if (current === path || current.startsWith(path + '/')) {
+    return true
+  }
+  if (path === '/purchase' && paymentEnabledForUser.value) {
+    if (current === '/redeem' || current.startsWith('/redeem/')) {
+      return true
+    }
+    if (current.startsWith('/custom/')) {
+      const customId = String(route.params?.id || current.slice('/custom/'.length))
+      if (mergedThirdPartyRechargeIds.value.has(customId)) {
+        return true
+      }
+    }
+  }
+  return false
 }
 
 function handleTopNavClick(itemPath: string) {

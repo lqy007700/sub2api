@@ -1,11 +1,14 @@
 <template>
-  <div class="card">
-    <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+  <div class="card overflow-hidden">
+    <div class="flex items-center justify-between border-b border-slate-900/[0.06] px-5 py-4 dark:border-white/[0.07] sm:px-6">
+      <h2 class="text-sm font-semibold tracking-tight text-[#111827] dark:text-white">
         {{ title }}
       </h2>
+      <span class="text-xs tabular-nums text-[#8d99a8] dark:text-dark-400">
+        {{ t('common.total') }}: {{ historyTotal }} {{ t('pagination.results') }}
+      </span>
     </div>
-    <div class="p-6">
+    <div class="p-5 sm:p-6">
       <!-- Loading State -->
       <div v-if="loadingHistory" class="flex items-center justify-center py-8">
         <svg class="h-6 w-6 animate-spin text-primary-500" fill="none" viewBox="0 0 24 24">
@@ -26,32 +29,32 @@
       </div>
 
       <!-- History List -->
-      <div v-else-if="history.length > 0" class="space-y-3">
+      <div v-else-if="history.length > 0" class="divide-y divide-slate-900/[0.06] dark:divide-white/[0.07]">
         <div
           v-for="item in history"
           :key="item.id"
-          class="flex items-center justify-between rounded-xl bg-gray-50 p-4 dark:bg-dark-800"
+          class="flex items-center justify-between gap-4 py-3.5 first:pt-0 last:pb-0"
         >
-          <div class="flex items-center gap-4">
+          <div class="flex min-w-0 items-center gap-3.5">
             <div
               :class="[
-                'flex h-10 w-10 items-center justify-center rounded-xl',
+                'flex h-9 w-9 shrink-0 items-center justify-center rounded-xl',
                 isBalanceType(item.type)
                   ? item.value >= 0
-                    ? 'bg-emerald-100 dark:bg-emerald-900/30'
-                    : 'bg-red-100 dark:bg-red-900/30'
+                    ? 'bg-emerald-500/10 dark:bg-emerald-400/15'
+                    : 'bg-red-500/10 dark:bg-red-400/15'
                   : isSubscriptionType(item.type)
-                    ? 'bg-purple-100 dark:bg-purple-900/30'
+                    ? 'bg-purple-500/10 dark:bg-purple-400/15'
                     : item.value >= 0
-                      ? 'bg-blue-100 dark:bg-blue-900/30'
-                      : 'bg-orange-100 dark:bg-orange-900/30'
+                      ? 'bg-primary-500/10 dark:bg-primary-400/15'
+                      : 'bg-amber-500/10 dark:bg-amber-400/15'
               ]"
             >
               <!-- 余额类型图标 -->
               <Icon
                 v-if="isBalanceType(item.type)"
                 name="dollar"
-                size="md"
+                size="sm"
                 :class="
                   item.value >= 0
                     ? 'text-emerald-600 dark:text-emerald-400'
@@ -62,34 +65,34 @@
               <Icon
                 v-else-if="isSubscriptionType(item.type)"
                 name="badge"
-                size="md"
+                size="sm"
                 class="text-purple-600 dark:text-purple-400"
               />
               <!-- 并发类型图标 -->
               <Icon
                 v-else
                 name="bolt"
-                size="md"
+                size="sm"
                 :class="
                   item.value >= 0
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-orange-600 dark:text-orange-400'
+                    ? 'text-primary-600 dark:text-primary-400'
+                    : 'text-amber-600 dark:text-amber-400'
                 "
               />
             </div>
-            <div>
-              <p class="text-sm font-medium text-gray-900 dark:text-white">
+            <div class="min-w-0">
+              <p class="truncate text-sm font-medium text-[#111827] dark:text-white">
                 {{ getHistoryItemTitle(item) }}
               </p>
-              <p class="text-xs text-gray-500 dark:text-dark-400">
+              <p class="mt-0.5 text-xs tabular-nums text-[#8d99a8] dark:text-dark-400">
                 {{ formatDateTime(item.used_at) }}
               </p>
             </div>
           </div>
-          <div class="text-right">
+          <div class="shrink-0 text-right">
             <p
               :class="[
-                'text-sm font-semibold',
+                'font-mono text-sm font-semibold tabular-nums',
                 isBalanceType(item.type)
                   ? item.value >= 0
                     ? 'text-emerald-600 dark:text-emerald-400'
@@ -97,25 +100,25 @@
                   : isSubscriptionType(item.type)
                     ? 'text-purple-600 dark:text-purple-400'
                     : item.value >= 0
-                      ? 'text-blue-600 dark:text-blue-400'
-                      : 'text-orange-600 dark:text-orange-400'
+                      ? 'text-primary-600 dark:text-primary-400'
+                      : 'text-amber-600 dark:text-amber-400'
               ]"
             >
               {{ formatHistoryValue(item) }}
             </p>
             <p
               v-if="!isAdminAdjustment(item.type)"
-              class="font-mono text-xs text-gray-400 dark:text-dark-500"
+              class="mt-0.5 font-mono text-xs text-[#8d99a8] dark:text-dark-500"
             >
               {{ item.code.slice(0, 8) }}...
             </p>
-            <p v-else class="text-xs text-gray-400 dark:text-dark-500">
+            <p v-else class="mt-0.5 text-xs text-[#8d99a8] dark:text-dark-500">
               {{ t('redeem.adminAdjustment') }}
             </p>
             <!-- Display notes for admin adjustments -->
             <p
               v-if="item.notes"
-              class="mt-1 text-xs text-gray-500 dark:text-dark-400 italic max-w-[200px] truncate"
+              class="mt-1 max-w-[200px] truncate text-xs italic text-[#526071] dark:text-dark-400"
               :title="item.notes"
             >
               {{ item.notes }}
@@ -127,37 +130,39 @@
       <!-- Empty State -->
       <div v-else class="empty-state py-8">
         <div
-          class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 dark:bg-dark-800"
+          class="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f4f5f8] dark:bg-dark-800"
         >
-          <Icon name="clock" size="xl" class="text-gray-400 dark:text-dark-500" />
+          <Icon name="clock" size="lg" class="text-[#8d99a8] dark:text-dark-500" />
         </div>
-        <p class="text-sm text-gray-500 dark:text-dark-400">
+        <p class="text-sm text-[#526071] dark:text-dark-400">
           {{ t('redeem.historyWillAppear') }}
         </p>
       </div>
-      <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
-        <span>{{ t('common.total') }}: {{ historyTotal }} {{ t('pagination.results') }}</span>
-        <label>
-          {{ t('pagination.perPage') }}
+
+      <div class="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-900/[0.06] pt-4 text-xs text-[#526071] dark:border-white/[0.07] dark:text-dark-300">
+        <label class="inline-flex items-center gap-2">
+          <span>{{ t('pagination.perPage') }}</span>
           <select
             v-model="historyPageSize"
-            class="input w-20"
+            class="input h-8 w-20 py-1 text-xs"
             :disabled="loadingHistory || submitting"
             @change="fetchHistory(1)"
           >
             <option v-for="size in [20, 50, 100]" :key="size" :value="size">{{ size }}</option>
           </select>
         </label>
-        <button
-          class="btn btn-secondary"
-          :disabled="loadingHistory || submitting || historyPage <= 1"
-          @click="fetchHistory(historyPage - 1)"
-        >{{ t('pagination.previous') }}</button>
-        <button
-          class="btn btn-secondary"
-          :disabled="loadingHistory || submitting || historyPage * historyPageSize >= historyTotal"
-          @click="fetchHistory(historyPage + 1)"
-        >{{ t('pagination.next') }}</button>
+        <div class="flex items-center gap-2">
+          <button
+            class="btn btn-secondary btn-sm"
+            :disabled="loadingHistory || submitting || historyPage <= 1"
+            @click="fetchHistory(historyPage - 1)"
+          >{{ t('pagination.previous') }}</button>
+          <button
+            class="btn btn-secondary btn-sm"
+            :disabled="loadingHistory || submitting || historyPage * historyPageSize >= historyTotal"
+            @click="fetchHistory(historyPage + 1)"
+          >{{ t('pagination.next') }}</button>
+        </div>
       </div>
     </div>
   </div>

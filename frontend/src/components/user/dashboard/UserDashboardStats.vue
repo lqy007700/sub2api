@@ -63,7 +63,7 @@
           <button
             type="button"
             class="btn btn-secondary rounded-full px-4 py-2 text-xs"
-            @click="emit('navigate', '/redeem')"
+            @click="emit('navigate', canPurchase ? '/purchase?tab=redeem' : '/redeem')"
           >
             {{ t('dashboard.redeemCode') }}
           </button>
