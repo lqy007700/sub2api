@@ -5,82 +5,82 @@ export default {
   theme: {
     extend: {
       colors: {
-        // 主色调 - 简洁蓝紫色系
+        // 主色调 - 苹果雾银克制蓝 (Apple Mist)
         primary: {
-          50: '#eef1ff',
-          100: '#dfe5ff',
-          200: '#c6d0ff',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#3857d6',
-          600: '#314dc4',
-          700: '#293fa3',
-          800: '#22347f',
-          900: '#1c2a61',
-          950: '#10183f'
+          50: '#eef6ff',
+          100: '#dbeafe',
+          200: '#bfdbfe',
+          300: '#93c5fd',
+          400: '#3b9eff',
+          500: '#0071e3',
+          600: '#0062c4',
+          700: '#004fa3',
+          800: '#073f7d',
+          900: '#0c3361',
+          950: '#081f3d'
         },
-        // 辅助色 - 深蓝灰
+        // 辅助色 - 中性雾灰
         accent: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
-          950: '#020617'
+          50: '#f8f9fb',
+          100: '#f1f3f7',
+          200: '#e2e6ee',
+          300: '#cbd2dc',
+          400: '#8d99a8',
+          500: '#526071',
+          600: '#3c4756',
+          700: '#2a3340',
+          800: '#1c232d',
+          900: '#111827',
+          950: '#0b0c0f'
         },
-        // 深色模式背景
+        // 深色模式背景 - 纯正曜石炭黑
         dark: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
-          950: '#020617'
+          50: '#f5f7fa',
+          100: '#e7ebf0',
+          200: '#cbd2dc',
+          300: '#9aa3b2',
+          400: '#6e788b',
+          500: '#475063',
+          600: '#2e3442',
+          700: '#222631',
+          800: '#161920',
+          900: '#101217',
+          950: '#0b0c0f'
         }
       },
       fontFamily: {
         sans: [
-          'system-ui',
           '-apple-system',
           'BlinkMacSystemFont',
+          '"SF Pro Display"',
+          '"SF Pro Text"',
+          'system-ui',
           'Segoe UI',
-          'Roboto',
-          'Helvetica Neue',
-          'Arial',
           'PingFang SC',
           'Hiragino Sans GB',
           'Microsoft YaHei',
           'sans-serif'
         ],
-        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+        mono: ['"SF Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
       },
       boxShadow: {
-        glass: '0 8px 28px rgba(30, 43, 70, 0.05)',
-        'glass-sm': '0 4px 14px rgba(30, 43, 70, 0.04)',
-        glow: '0 0 16px rgba(56, 87, 214, 0.16)',
-        'glow-lg': '0 0 30px rgba(56, 87, 214, 0.22)',
-        card: '0 8px 24px rgba(30, 43, 70, 0.04)',
-        'card-hover': '0 12px 30px rgba(30, 43, 70, 0.07)',
-        'inner-glow': 'inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+        glass: '0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 32px -8px rgba(15, 23, 42, 0.08)',
+        'glass-sm': '0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px -2px rgba(15, 23, 42, 0.05)',
+        glow: '0 0 16px rgba(0, 113, 227, 0.14)',
+        'glow-lg': '0 0 28px rgba(0, 113, 227, 0.2)',
+        card: '0 1px 2px rgba(15, 23, 42, 0.03), 0 8px 24px -8px rgba(15, 23, 42, 0.06)',
+        'card-hover': '0 2px 4px rgba(15, 23, 42, 0.04), 0 14px 32px -10px rgba(15, 23, 42, 0.09)',
+        pill: '0 1px 3px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(15, 23, 42, 0.04)',
+        'inner-glow': 'inset 0 1px 0 rgba(255, 255, 255, 0.85)'
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-primary': 'linear-gradient(135deg, #3857d6 0%, #314dc4 100%)',
-        'gradient-dark': 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+        'gradient-primary': 'linear-gradient(135deg, #0071e3 0%, #0062c4 100%)',
+        'gradient-dark': 'linear-gradient(135deg, #161920 0%, #0b0c0f 100%)',
         'gradient-glass':
-          'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+          'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%)',
         'mesh-gradient':
-          'radial-gradient(at 40% 20%, rgba(56, 87, 214, 0.05) 0px, transparent 48%), radial-gradient(at 80% 0%, rgba(129, 140, 248, 0.04) 0px, transparent 48%)'
+          'radial-gradient(920px 380px at 50% -120px, rgba(0, 113, 227, 0.075) 0px, transparent 70%)'
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',

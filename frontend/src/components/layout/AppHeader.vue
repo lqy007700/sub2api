@@ -1,8 +1,11 @@
 <template>
-  <header class="glass sticky top-0 z-30 border-b border-gray-200 dark:border-dark-700">
-    <div class="flex h-16 items-center justify-between gap-2 px-2 sm:px-4 md:px-6">
-      <!-- Left: Mobile Menu Toggle + Page Title -->
-      <div class="flex shrink-0 items-center gap-2 sm:gap-4">
+  <header class="glass sticky top-0 z-30 border-b border-slate-900/[0.06] dark:border-white/[0.07]">
+    <div
+      class="flex h-[58px] items-center justify-between gap-2 px-3 sm:px-5 md:px-6"
+      :class="useTopNavMode ? 'mx-auto max-w-[1200px]' : ''"
+    >
+      <!-- Left: Mobile Menu Toggle + Brand (User Top-Nav) or Page Title (Admin) -->
+      <div class="flex shrink-0 items-center gap-2 sm:gap-3">
         <button
           @click="toggleMobileSidebar"
           class="btn-ghost btn-icon lg:hidden"
@@ -11,18 +14,119 @@
           <Icon name="menu" size="md" />
         </button>
 
-        <div class="hidden lg:block">
-          <h1 class="text-lg font-semibold text-gray-900 dark:text-white">
+        <!-- Regular User Desktop Brand -->
+        <router-link
+          v-if="useTopNavMode"
+          to="/dashboard"
+          class="hidden items-center gap-2.5 transition-opacity hover:opacity-80 lg:flex"
+        >
+          <div
+            v-if="siteLogo"
+            class="flex h-7 w-7 items-center justify-center overflow-hidden rounded-lg border border-slate-900/[0.08] bg-white p-0.5 shadow-glass-sm dark:border-white/[0.1] dark:bg-dark-800"
+          >
+            <img
+              :src="siteLogo"
+              alt="Logo"
+              class="h-full w-full object-contain"
+            />
+          </div>
+          <span
+            v-else
+            class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[#111827] text-white shadow-sm dark:bg-white dark:text-[#0b0c0f]"
+          >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none">
+              <path d="M5 7h14M12 7v11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" />
+              <circle cx="17.5" cy="16.5" r="2.2" fill="#0071e3" />
+            </svg>
+          </span>
+          <span v-if="isDefaultBrand" class="text-[15px] tracking-tight">
+            <span class="font-bold text-[#111827] dark:text-white">Thisai</span><span class="font-medium text-primary-500 dark:text-primary-400">.site</span>
+          </span>
+          <span v-else class="text-[15px] font-semibold tracking-tight text-[#111827] dark:text-white">
+            {{ siteName }}
+          </span>
+        </router-link>
+
+        <!-- Admin / Backend Mode Page Title -->
+        <div v-else class="hidden lg:block">
+          <h1 class="text-[15px] font-semibold tracking-tight text-[#111827] dark:text-white">
             {{ pageTitle }}
           </h1>
-          <p v-if="pageDescription" class="text-xs text-gray-500 dark:text-dark-400">
-            {{ pageDescription }}
-          </p>
         </div>
       </div>
 
-      <!-- Right: Announcements + Docs + Subscriptions + Balance + User Dropdown -->
-      <div class="flex min-w-0 items-center gap-1 sm:gap-3">
+      <!-- Center: Floating Pill Navigation (Regular User Desktop Only) -->
+      <nav
+        v-if="useTopNavMode && userTopNavItems.length > 0"
+        class="hidden items-center gap-0.5 rounded-full bg-slate-900/[0.045] p-1 dark:bg-white/[0.06] lg:flex"
+      >
+        <router-link
+          v-for="item in primaryTopNavItems"
+          :key="item.path"
+          :to="item.path"
+          :data-tour="item.path === '/keys' ? 'sidebar-my-keys' : undefined"
+          @click="handleTopNavClick(item.path)"
+          class="whitespace-nowrap rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-all duration-150"
+          :class="
+            isNavActive(item.path)
+              ? 'bg-white text-[#111827] shadow-pill dark:bg-dark-700 dark:text-white dark:shadow-none'
+              : 'text-[#526071] hover:text-[#111827] dark:text-dark-300 dark:hover:text-white'
+          "
+        >
+          {{ item.label }}
+        </router-link>
+
+        <!-- Overflow Menu for additional enabled items -->
+        <div v-if="overflowTopNavItems.length > 0" ref="moreNavRef" class="relative">
+          <button
+            type="button"
+            @click="moreNavOpen = !moreNavOpen"
+            class="flex items-center gap-1 rounded-full px-2.5 py-1.5 text-[13px] font-medium transition-all duration-150"
+            :class="
+              isOverflowActive || moreNavOpen
+                ? 'bg-white text-[#111827] shadow-pill dark:bg-dark-700 dark:text-white dark:shadow-none'
+                : 'text-[#526071] hover:text-[#111827] dark:text-dark-300 dark:hover:text-white'
+            "
+            :title="t('common.more')"
+          >
+            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+              <circle cx="5" cy="12" r="1.75" />
+              <circle cx="12" cy="12" r="1.75" />
+              <circle cx="19" cy="12" r="1.75" />
+            </svg>
+          </button>
+
+          <transition name="dropdown">
+            <div v-if="moreNavOpen" class="dropdown right-0 mt-2 w-48">
+              <router-link
+                v-for="item in overflowTopNavItems"
+                :key="item.path"
+                :to="item.path"
+                @click="moreNavOpen = false; handleTopNavClick(item.path)"
+                class="dropdown-item"
+                :class="isNavActive(item.path) ? 'bg-slate-900/[0.05] font-medium text-[#111827] dark:bg-white/[0.08] dark:text-white' : ''"
+              >
+                <span class="truncate">{{ item.label }}</span>
+              </router-link>
+            </div>
+          </transition>
+        </div>
+      </nav>
+
+      <!-- Right: Announcements + Theme + Docs + Model Plaza + Subscriptions + Balance + User Dropdown -->
+      <div class="flex min-w-0 items-center gap-1 sm:gap-2">
+        <!-- Theme Toggle (visible on desktop when user top-nav hides sidebar footer) -->
+        <button
+          v-if="useTopNavMode"
+          type="button"
+          @click="toggleTheme"
+          class="hidden h-8 w-8 items-center justify-center rounded-full text-[#526071] transition-colors hover:bg-slate-900/[0.05] hover:text-[#111827] dark:text-dark-300 dark:hover:bg-white/[0.07] dark:hover:text-white lg:inline-flex"
+          :title="isDark ? t('nav.lightMode') : t('nav.darkMode')"
+        >
+          <Icon v-if="isDark" name="sun" size="sm" />
+          <Icon v-else name="moon" size="sm" />
+        </button>
+
         <!-- Announcement Bell -->
         <AnnouncementBell v-if="user" />
 
@@ -32,69 +136,58 @@
           :href="docUrl"
           target="_blank"
           rel="noopener noreferrer"
-          class="hidden items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-dark-400 dark:hover:bg-dark-800 dark:hover:text-white sm:flex"
+          class="hidden items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-medium text-[#526071] transition-colors hover:bg-slate-900/[0.05] hover:text-[#111827] dark:text-dark-300 dark:hover:bg-white/[0.07] dark:hover:text-white sm:flex"
+          :title="t('nav.docs')"
         >
           <Icon name="book" size="sm" />
-          <span class="hidden sm:inline">{{ t('nav.docs') }}</span>
+          <span class="hidden xl:inline">{{ t('nav.docs') }}</span>
         </a>
 
-        <!-- Model Plaza Entry (icon only below sm) -->
+        <!-- Model Plaza Entry (icon only below xl in top-nav mode to keep header airy) -->
         <router-link
           v-if="user && modelPlazaEnabled"
           :to="{ path: '/model-plaza', query: { embedded: '1' } }"
           :title="t('nav.modelPlaza')"
           :aria-label="t('nav.modelPlaza')"
-          class="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-dark-400 dark:hover:bg-dark-800 dark:hover:text-white"
+          class="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-medium text-[#526071] transition-colors hover:bg-slate-900/[0.05] hover:text-[#111827] dark:text-dark-300 dark:hover:bg-white/[0.07] dark:hover:text-white"
         >
           <Icon name="grid" size="sm" />
-          <span class="hidden sm:inline">{{ t('nav.modelPlaza') }}</span>
+          <span class="hidden xl:inline">{{ t('nav.modelPlaza') }}</span>
         </router-link>
 
         <!-- Subscription Progress (for users with active subscriptions; not mounted at all when the feature is off) -->
         <SubscriptionProgressMini v-if="user && subscriptionFeatureEnabled" />
 
-        <!-- Balance Display -->
+        <!-- Balance Display (Apple Mist Capsule) -->
         <div
           v-if="user"
-          class="group relative hidden items-center gap-2 rounded-xl bg-primary-50 px-3 py-1.5 dark:bg-primary-900/20 sm:flex"
+          class="group relative hidden items-center gap-2 rounded-full border border-slate-900/[0.08] bg-white px-3 py-1 shadow-glass-sm dark:border-white/[0.09] dark:bg-dark-800 sm:flex"
         >
-          <svg
-            class="h-4 w-4 text-primary-600 dark:text-primary-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="1.5"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
-            />
-          </svg>
-          <span class="text-sm font-semibold text-primary-700 dark:text-primary-300">
+          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20"></span>
+          <span class="font-mono text-xs font-semibold tabular-nums text-[#111827] dark:text-white">
             {{ formatHeaderMoney(availableBalance) }}
           </span>
           <span
             v-if="frozenBalance > 0"
-            class="rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-200"
+            class="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-200"
           >
             {{ balanceFrozenLabel }}
           </span>
           <div
-            class="pointer-events-none absolute right-0 top-full mt-2 hidden w-56 rounded-lg border border-gray-200 bg-white p-3 text-xs shadow-lg group-hover:block dark:border-dark-700 dark:bg-dark-800"
+            class="pointer-events-none absolute right-0 top-full mt-2 hidden w-56 rounded-2xl border border-slate-900/[0.08] bg-white/95 p-3.5 text-xs shadow-glass backdrop-blur-xl group-hover:block dark:border-white/[0.1] dark:bg-dark-800/95"
           >
             <div class="flex items-center justify-between">
-              <span class="text-gray-500 dark:text-dark-400">{{ balanceAvailableText }}</span>
-              <span class="font-medium text-gray-900 dark:text-white">{{ formatHeaderMoney(availableBalance) }}</span>
+              <span class="text-[#526071] dark:text-dark-300">{{ balanceAvailableText }}</span>
+              <span class="font-mono font-medium tabular-nums text-[#111827] dark:text-white">{{ formatHeaderMoney(availableBalance) }}</span>
             </div>
             <div class="mt-2 flex items-center justify-between">
-              <span class="text-gray-500 dark:text-dark-400">{{ balanceFrozenText }}</span>
-              <span class="font-medium text-amber-700 dark:text-amber-200">{{ formatHeaderMoney(frozenBalance) }}</span>
+              <span class="text-[#526071] dark:text-dark-300">{{ balanceFrozenText }}</span>
+              <span class="font-mono font-medium tabular-nums text-amber-700 dark:text-amber-200">{{ formatHeaderMoney(frozenBalance) }}</span>
             </div>
-            <div class="mt-2 border-t border-gray-100 pt-2 dark:border-dark-700">
+            <div class="mt-2.5 border-t border-slate-900/[0.06] pt-2.5 dark:border-white/[0.07]">
               <div class="flex items-center justify-between">
-                <span class="text-gray-500 dark:text-dark-400">{{ balanceTotalText }}</span>
-                <span class="font-semibold text-gray-900 dark:text-white">{{ formatHeaderMoney(totalBalance) }}</span>
+                <span class="text-[#526071] dark:text-dark-300">{{ balanceTotalText }}</span>
+                <span class="font-mono font-semibold tabular-nums text-[#111827] dark:text-white">{{ formatHeaderMoney(totalBalance) }}</span>
               </div>
             </div>
           </div>
@@ -114,11 +207,11 @@
             ref="dropdownTriggerRef"
             type="button"
             @click="toggleDropdown"
-            class="flex items-center gap-2 rounded-xl p-1.5 transition-colors hover:bg-gray-100 dark:hover:bg-dark-800"
+            class="flex items-center gap-2 rounded-full p-1 transition-colors hover:bg-slate-900/[0.05] dark:hover:bg-white/[0.07]"
             :aria-label="t('common.userMenu')"
             :aria-expanded="dropdownOpen"
           >
-            <div class="flex h-8 w-8 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 text-sm font-medium text-white shadow-sm">
+            <div class="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-slate-900/[0.08] bg-white text-xs font-semibold text-[#111827] shadow-glass-sm dark:border-white/[0.1] dark:bg-dark-800 dark:text-white">
               <img
                 v-if="avatarUrl"
                 :src="avatarUrl"
@@ -127,15 +220,14 @@
               >
               <span v-else>{{ userInitials }}</span>
             </div>
-            <div class="hidden text-left md:block">
-              <div class="text-sm font-medium text-gray-900 dark:text-white">
+            <div v-if="!useTopNavMode" class="hidden text-left md:block">
+              <div class="text-xs font-semibold text-[#111827] dark:text-white">
                 {{ displayName }}
               </div>
-              <div class="text-xs text-gray-500 dark:text-dark-400">
+              <div class="text-[11px] text-[#8d99a8] dark:text-dark-400">
                 {{ t('admin.users.roles.' + user.role) }}
               </div>
             </div>
-            <Icon name="chevronDown" size="sm" class="hidden text-gray-400 md:block" />
           </button>
 
           <!-- Dropdown Menu -->
@@ -269,9 +361,17 @@ import SubscriptionProgressMini from '@/components/common/SubscriptionProgressMi
 import AnnouncementBell from '@/components/common/AnnouncementBell.vue'
 import Icon from '@/components/icons/Icon.vue'
 import { sanitizeUrl } from '@/utils/url'
-import { FeatureFlags, isFeatureFlagEnabled } from '@/utils/featureFlags'
+import { FeatureFlags, isFeatureFlagEnabled, makeSidebarFlag } from '@/utils/featureFlags'
 import { resolveRouteMetaKeys } from '@/router/title'
 import { resolveSiteBillingMode } from '@/utils/siteBillingMode'
+import { useBatchImageAccess } from '@/composables/useBatchImageAccess'
+
+interface TopNavItem {
+  path: string
+  label: string
+  hideInSimpleMode?: boolean
+  featureFlag?: () => boolean | undefined
+}
 
 const router = useRouter()
 const route = useRoute()
@@ -280,11 +380,21 @@ const appStore = useAppStore()
 const authStore = useAuthStore()
 const adminSettingsStore = useAdminSettingsStore()
 const onboardingStore = useOnboardingStore()
+const { canUseBatchImage } = useBatchImageAccess()
 
 const user = computed(() => authStore.user)
+const isAdmin = computed(() => user.value?.role === 'admin')
+const useTopNavMode = computed(() => Boolean(user.value) && !isAdmin.value && !appStore.backendModeEnabled)
+const rawSiteName = computed(() => (appStore.siteName || '').trim())
+const isDefaultBrand = computed(() => !rawSiteName.value || rawSiteName.value === 'Sub2API' || rawSiteName.value.toLowerCase() === 'thisai.site')
+const siteName = computed(() => (isDefaultBrand.value ? 'Thisai.site' : rawSiteName.value))
+const siteLogo = computed(() => sanitizeUrl(appStore.siteLogo || '', { allowRelative: true, allowDataUrl: true }))
 const dropdownOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
 const dropdownTriggerRef = ref<HTMLButtonElement | null>(null)
+const moreNavOpen = ref(false)
+const moreNavRef = ref<HTMLElement | null>(null)
+const isDark = ref(document.documentElement.classList.contains('dark'))
 const contactInfo = computed(() => appStore.contactInfo)
 const docUrl = computed(() => sanitizeUrl(appStore.docUrl))
 const modelPlazaEnabled = computed(() => isFeatureFlagEnabled(FeatureFlags.modelPlaza))
@@ -296,6 +406,84 @@ const balanceAvailableText = computed(() => t('common.availableBalance') === 'co
 const balanceFrozenText = computed(() => t('common.frozenBalance') === 'common.frozenBalance' ? '冻结金额' : t('common.frozenBalance'))
 const balanceTotalText = computed(() => t('common.totalBalance') === 'common.totalBalance' ? '总余额' : t('common.totalBalance'))
 const balanceFrozenLabel = computed(() => `${balanceFrozenText.value} ${formatHeaderMoney(frozenBalance.value)}`)
+
+const flagChannelMonitor = makeSidebarFlag(FeatureFlags.channelMonitor)
+const flagPayment = makeSidebarFlag(FeatureFlags.payment)
+const flagAvailableChannels = makeSidebarFlag(FeatureFlags.availableChannels)
+const flagSubscription = makeSidebarFlag(FeatureFlags.subscription)
+const flagAffiliate = makeSidebarFlag(FeatureFlags.affiliate)
+const flagMCP = makeSidebarFlag(FeatureFlags.mcp)
+const flagBatchImageAccess = () => canUseBatchImage.value
+
+const purchaseNavLabel = computed(() => {
+  switch (resolveSiteBillingMode(appStore.cachedPublicSettings)) {
+    case 'recharge_only':
+      return t('nav.recharge')
+    case 'subscription_only':
+      return t('nav.subscribe')
+    default:
+      return t('nav.buySubscription')
+  }
+})
+
+const customMenuItemsForUser = computed(() => {
+  const items = appStore.cachedPublicSettings?.custom_menu_items ?? []
+  return items
+    .filter((item) => item.visibility === 'user' && !item.hide_in_sidebar)
+    .sort((a, b) => a.sort_order - b.sort_order)
+})
+
+const userTopNavItems = computed<TopNavItem[]>(() => {
+  const raw: TopNavItem[] = [
+    { path: '/dashboard', label: t('nav.sidebar.overview') },
+    { path: '/keys', label: t('nav.sidebar.keys') },
+    { path: '/usage', label: t('nav.usage'), hideInSimpleMode: true },
+    { path: '/purchase', label: purchaseNavLabel.value, hideInSimpleMode: true, featureFlag: flagPayment },
+    { path: '/monitor', label: t('nav.sidebar.channels'), featureFlag: flagChannelMonitor },
+    { path: '/available-channels', label: t('nav.availableChannels'), hideInSimpleMode: true, featureFlag: flagAvailableChannels },
+    { path: '/subscriptions', label: t('nav.mySubscriptions'), hideInSimpleMode: true, featureFlag: flagSubscription },
+    { path: '/orders', label: t('nav.myOrders') },
+    { path: '/redeem', label: t('nav.redeem'), hideInSimpleMode: true },
+    { path: '/affiliate', label: t('nav.affiliate'), hideInSimpleMode: true, featureFlag: flagAffiliate },
+    { path: '/batch-image', label: t('nav.batchImage'), hideInSimpleMode: true, featureFlag: flagBatchImageAccess },
+    { path: '/settings/mcp', label: t('mcp.title'), featureFlag: flagMCP },
+    ...customMenuItemsForUser.value.map((item) => ({
+      path: `/custom/${item.id}`,
+      label: item.label
+    }))
+  ]
+
+  return raw.filter((item) => {
+    if (item.featureFlag && item.featureFlag() === false) return false
+    if (authStore.isSimpleMode && item.hideInSimpleMode) return false
+    return true
+  })
+})
+
+const MAX_PRIMARY_PILLS = 5
+const primaryTopNavItems = computed(() => userTopNavItems.value.slice(0, MAX_PRIMARY_PILLS))
+const overflowTopNavItems = computed(() => userTopNavItems.value.slice(MAX_PRIMARY_PILLS))
+
+function isNavActive(path: string): boolean {
+  const current = route.path || ''
+  return current === path || current.startsWith(path + '/')
+}
+
+const isOverflowActive = computed(() =>
+  overflowTopNavItems.value.some((item) => isNavActive(item.path))
+)
+
+function handleTopNavClick(itemPath: string) {
+  if (itemPath === '/keys' && onboardingStore.isCurrentStep('[data-tour="sidebar-my-keys"]')) {
+    onboardingStore.nextStep(500)
+  }
+}
+
+function toggleTheme() {
+  isDark.value = !isDark.value
+  document.documentElement.classList.toggle('dark', isDark.value)
+  localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
+}
 
 // 只在标准模式的管理员下显示新手引导按钮
 const showOnboardingButton = computed(() => {
@@ -343,14 +531,6 @@ const pageTitle = computed(() => {
     return t(titleKey)
   }
   return (route.meta.title as string) || ''
-})
-
-const pageDescription = computed(() => {
-  const descKey = routeMetaKeys.value.descriptionKey
-  if (descKey) {
-    return t(descKey)
-  }
-  return (route.meta.description as string) || ''
 })
 
 function toggleMobileSidebar() {
@@ -404,14 +584,26 @@ function handleClickOutside(event: MouseEvent) {
   if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
     closeDropdown()
   }
+  if (moreNavRef.value && !moreNavRef.value.contains(event.target as Node)) {
+    moreNavOpen.value = false
+  }
 }
+
+let themeObserver: MutationObserver | null = null
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  if (typeof MutationObserver !== 'undefined') {
+    themeObserver = new MutationObserver(() => {
+      isDark.value = document.documentElement.classList.contains('dark')
+    })
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+  }
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
+  themeObserver?.disconnect()
 })
 </script>
 

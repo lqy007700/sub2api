@@ -3,7 +3,9 @@
     class="sidebar"
     :class="[
       sidebarCollapsed ? 'w-[72px]' : 'w-[232px]',
-      { '-translate-x-full lg:translate-x-0': !mobileOpen }
+      desktopHidden
+        ? { '-translate-x-full': !mobileOpen, 'lg:-translate-x-full lg:pointer-events-none': true }
+        : { '-translate-x-full lg:translate-x-0': !mobileOpen }
     ]"
   >
     <!-- Logo/Brand -->
@@ -12,17 +14,25 @@
       <router-link
         :to="homePath"
         class="sidebar-logo flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl shadow-sm transition-opacity hover:opacity-80"
+        :class="siteLogo ? '' : 'bg-[#111827] text-white dark:bg-white dark:text-[#0b0c0f]'"
         @click="handleMenuItemClick(homePath)"
       >
-        <img v-if="settingsLoaded" :src="siteLogo || '/logo.svg'" alt="Logo" class="h-full w-full object-contain" />
+        <img v-if="settingsLoaded && siteLogo" :src="siteLogo" alt="Logo" class="h-full w-full object-contain" />
+        <svg v-else-if="settingsLoaded" class="h-4 w-4" viewBox="0 0 24 24" fill="none">
+          <path d="M5 7h14M12 7v11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" />
+          <circle cx="17.5" cy="16.5" r="2.2" fill="#0071e3" />
+        </svg>
       </router-link>
       <div class="sidebar-brand" :class="{ 'sidebar-brand-collapsed': sidebarCollapsed }" :aria-hidden="sidebarCollapsed ? 'true' : 'false'">
         <router-link
           :to="homePath"
-          class="sidebar-brand-title text-lg font-bold text-gray-900 transition-colors hover:text-primary-600 dark:text-white dark:hover:text-primary-400"
+          class="sidebar-brand-title text-base font-bold tracking-tight text-gray-900 transition-colors hover:text-primary-600 dark:text-white dark:hover:text-primary-400"
           @click="handleMenuItemClick(homePath)"
         >
-          {{ siteName }}
+          <template v-if="isDefaultBrand">
+            <span>Thisai</span><span class="font-medium text-primary-500 dark:text-primary-400">.site</span>
+          </template>
+          <template v-else>{{ displaySiteName }}</template>
         </router-link>
         <!-- Version Badge -->
         <VersionBadge :version="siteVersion" />
@@ -236,6 +246,15 @@ function applyFeatureFlags(items: NavItem[]): NavItem[] {
   return out
 }
 
+withDefaults(
+  defineProps<{
+    desktopHidden?: boolean
+  }>(),
+  {
+    desktopHidden: false
+  }
+)
+
 const { t } = useI18n()
 
 const route = useRoute()
@@ -262,6 +281,11 @@ const groupExpandOverrides = ref<Map<string, boolean>>(new Map())
 
 // Site settings from appStore (cached, no flicker)
 const siteName = computed(() => appStore.siteName)
+const isDefaultBrand = computed(() => {
+  const n = (siteName.value || '').trim()
+  return !n || n === 'Sub2API' || n.toLowerCase() === 'thisai.site'
+})
+const displaySiteName = computed(() => (isDefaultBrand.value ? 'Thisai.site' : siteName.value))
 const siteLogo = computed(() => sanitizeUrl(appStore.siteLogo || '', { allowRelative: true, allowDataUrl: true }))
 const siteVersion = computed(() => appStore.siteVersion)
 const settingsLoaded = computed(() => appStore.publicSettingsLoaded)

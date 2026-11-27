@@ -1,21 +1,27 @@
 <template>
-  <div class="min-h-screen bg-[#f6f7f9] dark:bg-dark-950">
-    <!-- Background Decoration -->
-    <div class="pointer-events-none fixed inset-0 bg-white/20 dark:bg-transparent"></div>
-
-    <!-- Sidebar -->
-    <AppSidebar />
+  <div class="apple-mist-ambient min-h-screen bg-[#f4f5f8] dark:bg-dark-950">
+    <!-- Sidebar (always mounted for admin & mobile drawer; hidden on desktop for regular user top-nav) -->
+    <AppSidebar :desktop-hidden="useTopNavMode" />
 
     <!-- Main Content Area -->
     <div
       class="relative min-h-screen transition-all duration-300"
-      :class="[sidebarCollapsed ? 'lg:ml-[72px]' : 'lg:ml-[232px]']"
+      :class="[
+        useTopNavMode
+          ? 'lg:ml-0'
+          : sidebarCollapsed
+            ? 'lg:ml-[72px]'
+            : 'lg:ml-[232px]'
+      ]"
     >
       <!-- Header -->
       <AppHeader />
 
       <!-- Main Content -->
-      <main class="p-4 md:p-6 lg:p-8">
+      <main
+        class="px-4 py-5 md:px-6 md:py-6 lg:px-8"
+        :class="useTopNavMode ? 'mx-auto w-full max-w-[1200px]' : ''"
+      >
         <slot />
       </main>
     </div>
@@ -36,6 +42,7 @@ const appStore = useAppStore()
 const authStore = useAuthStore()
 const sidebarCollapsed = computed(() => appStore.sidebarCollapsed)
 const isAdmin = computed(() => authStore.user?.role === 'admin')
+const useTopNavMode = computed(() => !isAdmin.value && !appStore.backendModeEnabled)
 
 const { replayTour } = useOnboardingTour({
   storageKey: isAdmin.value ? 'admin_guide' : 'user_guide',

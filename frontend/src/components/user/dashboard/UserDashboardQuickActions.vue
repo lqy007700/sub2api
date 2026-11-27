@@ -1,66 +1,79 @@
 <template>
-  <div class="card">
-    <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('dashboard.quickActions') }}</h2>
+  <div class="card overflow-hidden">
+    <div class="border-b border-slate-900/[0.05] px-5 py-4 dark:border-white/[0.06]">
+      <h2 class="text-sm font-semibold tracking-tight text-[#111827] dark:text-white">{{ t('dashboard.quickActions') }}</h2>
     </div>
-    <div class="space-y-3 p-4">
-      <button @click="router.push('/keys')" class="group flex w-full items-center gap-4 rounded-xl bg-gray-50 p-4 text-left transition-all duration-200 hover:bg-gray-100 dark:bg-dark-800/50 dark:hover:bg-dark-800">
-        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary-100 transition-transform group-hover:scale-105 dark:bg-primary-900/30">
-          <Icon name="key" size="lg" class="text-primary-600 dark:text-primary-400" />
+    <div class="space-y-2 p-4">
+      <button
+        @click="router.push('/keys')"
+        class="group flex w-full items-center gap-3.5 rounded-xl bg-[#f8f9fb] px-3.5 py-3 text-left transition-colors hover:bg-[#f1f3f7] dark:bg-dark-900/60 dark:hover:bg-white/[0.06]"
+      >
+        <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-slate-900/[0.06] bg-white text-[#111827] shadow-glass-sm dark:border-white/[0.08] dark:bg-dark-800 dark:text-white">
+          <Icon name="key" size="sm" />
         </div>
         <div class="min-w-0 flex-1">
-          <p class="text-sm font-medium text-gray-900 dark:text-white">{{ t('dashboard.createApiKey') }}</p>
-          <p class="text-xs text-gray-500 dark:text-dark-400">{{ t('dashboard.generateNewKey') }}</p>
+          <p class="text-xs font-semibold text-[#111827] dark:text-white">{{ t('dashboard.createApiKey') }}</p>
+          <p class="mt-0.5 truncate text-[11px] text-[#8d99a8] dark:text-dark-400">{{ t('dashboard.generateNewKey') }}</p>
         </div>
         <Icon
           name="chevronRight"
-          size="md"
-          class="text-gray-400 transition-colors group-hover:text-primary-500 dark:text-dark-500"
+          size="sm"
+          class="text-[#8d99a8] transition-transform group-hover:translate-x-0.5 group-hover:text-[#111827] dark:text-dark-400 dark:group-hover:text-white"
         />
       </button>
 
-      <button @click="router.push('/usage')" class="group flex w-full items-center gap-4 rounded-xl bg-gray-50 p-4 text-left transition-all duration-200 hover:bg-gray-100 dark:bg-dark-800/50 dark:hover:bg-dark-800">
-        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-100 transition-transform group-hover:scale-105 dark:bg-emerald-900/30">
-          <Icon name="chart" size="lg" class="text-emerald-600 dark:text-emerald-400" />
+      <button
+        @click="router.push('/usage')"
+        class="group flex w-full items-center gap-3.5 rounded-xl bg-[#f8f9fb] px-3.5 py-3 text-left transition-colors hover:bg-[#f1f3f7] dark:bg-dark-900/60 dark:hover:bg-white/[0.06]"
+      >
+        <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-slate-900/[0.06] bg-white text-[#111827] shadow-glass-sm dark:border-white/[0.08] dark:bg-dark-800 dark:text-white">
+          <Icon name="chart" size="sm" />
         </div>
         <div class="min-w-0 flex-1">
-          <p class="text-sm font-medium text-gray-900 dark:text-white">{{ t('dashboard.viewUsage') }}</p>
-          <p class="text-xs text-gray-500 dark:text-dark-400">{{ t('dashboard.checkDetailedLogs') }}</p>
+          <p class="text-xs font-semibold text-[#111827] dark:text-white">{{ t('dashboard.viewUsage') }}</p>
+          <p class="mt-0.5 truncate text-[11px] text-[#8d99a8] dark:text-dark-400">{{ t('dashboard.checkDetailedLogs') }}</p>
         </div>
         <Icon
           name="chevronRight"
-          size="md"
-          class="text-gray-400 transition-colors group-hover:text-emerald-500 dark:text-dark-500"
+          size="sm"
+          class="text-[#8d99a8] transition-transform group-hover:translate-x-0.5 group-hover:text-[#111827] dark:text-dark-400 dark:group-hover:text-white"
         />
       </button>
 
-      <button v-if="canUseBatchImage" @click="router.push('/batch-image')" class="group flex w-full items-center gap-4 rounded-xl bg-gray-50 p-4 text-left transition-all duration-200 hover:bg-gray-100 dark:bg-dark-800/50 dark:hover:bg-dark-800">
-        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-sky-100 transition-transform group-hover:scale-105 dark:bg-sky-900/30">
-          <Icon name="sparkles" size="lg" class="text-sky-600 dark:text-sky-400" />
+      <button
+        v-if="canUseBatchImage"
+        @click="router.push('/batch-image')"
+        class="group flex w-full items-center gap-3.5 rounded-xl bg-[#f8f9fb] px-3.5 py-3 text-left transition-colors hover:bg-[#f1f3f7] dark:bg-dark-900/60 dark:hover:bg-white/[0.06]"
+      >
+        <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-slate-900/[0.06] bg-white text-[#111827] shadow-glass-sm dark:border-white/[0.08] dark:bg-dark-800 dark:text-white">
+          <Icon name="sparkles" size="sm" />
         </div>
         <div class="min-w-0 flex-1">
-          <p class="text-sm font-medium text-gray-900 dark:text-white">{{ t('dashboard.batchImageAgent') }}</p>
-          <p class="text-xs text-gray-500 dark:text-dark-400">{{ t('dashboard.batchImageAgentDesc') }}</p>
+          <p class="text-xs font-semibold text-[#111827] dark:text-white">{{ t('dashboard.batchImageAgent') }}</p>
+          <p class="mt-0.5 truncate text-[11px] text-[#8d99a8] dark:text-dark-400">{{ t('dashboard.batchImageAgentDesc') }}</p>
         </div>
         <Icon
           name="chevronRight"
-          size="md"
-          class="text-gray-400 transition-colors group-hover:text-sky-500 dark:text-dark-500"
+          size="sm"
+          class="text-[#8d99a8] transition-transform group-hover:translate-x-0.5 group-hover:text-[#111827] dark:text-dark-400 dark:group-hover:text-white"
         />
       </button>
 
-      <button @click="router.push('/redeem')" class="group flex w-full items-center gap-4 rounded-xl bg-gray-50 p-4 text-left transition-all duration-200 hover:bg-gray-100 dark:bg-dark-800/50 dark:hover:bg-dark-800">
-        <div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-amber-100 transition-transform group-hover:scale-105 dark:bg-amber-900/30">
-          <Icon name="gift" size="lg" class="text-amber-600 dark:text-amber-400" />
+      <button
+        @click="router.push('/redeem')"
+        class="group flex w-full items-center gap-3.5 rounded-xl bg-[#f8f9fb] px-3.5 py-3 text-left transition-colors hover:bg-[#f1f3f7] dark:bg-dark-900/60 dark:hover:bg-white/[0.06]"
+      >
+        <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-slate-900/[0.06] bg-white text-[#111827] shadow-glass-sm dark:border-white/[0.08] dark:bg-dark-800 dark:text-white">
+          <Icon name="gift" size="sm" />
         </div>
         <div class="min-w-0 flex-1">
-          <p class="text-sm font-medium text-gray-900 dark:text-white">{{ t('dashboard.redeemCode') }}</p>
-          <p class="text-xs text-gray-500 dark:text-dark-400">{{ t('dashboard.addBalanceWithCode') }}</p>
+          <p class="text-xs font-semibold text-[#111827] dark:text-white">{{ t('dashboard.redeemCode') }}</p>
+          <p class="mt-0.5 truncate text-[11px] text-[#8d99a8] dark:text-dark-400">{{ t('dashboard.addBalanceWithCode') }}</p>
         </div>
         <Icon
           name="chevronRight"
-          size="md"
-          class="text-gray-400 transition-colors group-hover:text-amber-500 dark:text-dark-500"
+          size="sm"
+          class="text-[#8d99a8] transition-transform group-hover:translate-x-0.5 group-hover:text-[#111827] dark:text-dark-400 dark:group-hover:text-white"
         />
       </button>
     </div>

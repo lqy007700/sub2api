@@ -1,39 +1,46 @@
 <template>
-  <div class="card">
-    <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4 dark:border-dark-700">
-      <h2 class="text-lg font-semibold text-gray-900 dark:text-white">{{ t('dashboard.recentUsage') }}</h2>
-      <span class="badge badge-gray">{{ t('dashboard.last7Days') }}</span>
+  <div class="card overflow-hidden">
+    <div class="flex items-center justify-between border-b border-slate-900/[0.05] px-5 py-4 dark:border-white/[0.06]">
+      <h2 class="text-sm font-semibold tracking-tight text-[#111827] dark:text-white">{{ t('dashboard.recentUsage') }}</h2>
+      <span class="rounded-full bg-[#f4f5f8] px-2.5 py-0.5 text-[11px] font-medium text-[#526071] dark:bg-white/[0.06] dark:text-dark-300">
+        {{ t('dashboard.last7Days') }}
+      </span>
     </div>
-    <div class="p-6">
+    <div class="p-4">
       <div v-if="loading" class="flex items-center justify-center py-12">
         <LoadingSpinner size="lg" />
       </div>
       <div v-else-if="data.length === 0" class="py-8">
         <EmptyState :title="t('dashboard.noUsageRecords')" :description="t('dashboard.startUsingApi')" />
       </div>
-      <div v-else class="space-y-3">
-        <div v-for="log in data" :key="log.id" class="flex items-center justify-between rounded-xl bg-gray-50 p-4 transition-colors hover:bg-gray-100 dark:bg-dark-800/50 dark:hover:bg-dark-800">
-          <div class="flex items-center gap-4">
-            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-100 dark:bg-primary-900/30">
-              <Icon name="beaker" size="md" class="text-primary-600 dark:text-primary-400" />
-            </div>
-            <div>
-              <p class="text-sm font-medium text-gray-900 dark:text-white">{{ log.model }}</p>
-              <p class="text-xs text-gray-500 dark:text-dark-400">{{ formatDateTime(log.created_at) }}</p>
+      <div v-else class="divide-y divide-slate-900/[0.045] dark:divide-white/[0.05]">
+        <div
+          v-for="log in data"
+          :key="log.id"
+          class="flex items-center justify-between gap-4 rounded-xl px-3 py-3 transition-colors hover:bg-[#f8f9fb] dark:hover:bg-white/[0.03]"
+        >
+          <div class="flex min-w-0 items-center gap-3">
+            <span class="h-2 w-2 shrink-0 rounded-full bg-emerald-500"></span>
+            <div class="min-w-0">
+              <p class="truncate font-mono text-xs font-medium text-[#111827] dark:text-white">{{ log.model }}</p>
+              <p class="mt-0.5 text-[11px] text-[#8d99a8] dark:text-dark-400 tabular-nums">{{ formatDateTime(log.created_at) }}</p>
             </div>
           </div>
-          <div class="text-right">
-            <p class="text-sm font-semibold">
-              <span class="text-green-600 dark:text-green-400" :title="t('dashboard.actual')">${{ formatCost(log.actual_cost) }}</span>
-              <span class="font-normal text-gray-400 dark:text-gray-500" :title="t('dashboard.standard')"> / ${{ formatCost(log.total_cost) }}</span>
+          <div class="shrink-0 text-right tabular-nums">
+            <p class="font-mono text-xs font-semibold">
+              <span class="text-[#111827] dark:text-white" :title="t('dashboard.actual')">${{ formatCost(log.actual_cost) }}</span>
+              <span class="font-normal text-[#8d99a8] dark:text-dark-400" :title="t('dashboard.standard')"> / ${{ formatCost(log.total_cost) }}</span>
             </p>
-            <p class="text-xs text-gray-500 dark:text-dark-400">{{ (log.input_tokens + log.output_tokens).toLocaleString() }} tokens</p>
+            <p class="mt-0.5 text-[11px] text-[#8d99a8] dark:text-dark-400">{{ (log.input_tokens + log.output_tokens).toLocaleString() }} tokens</p>
           </div>
         </div>
 
-        <router-link to="/usage" class="flex items-center justify-center gap-2 py-3 text-sm font-medium text-primary-600 transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
+        <router-link
+          to="/usage"
+          class="mt-1 flex items-center justify-center gap-1.5 pt-3.5 text-xs font-medium text-primary-600 transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
+        >
           {{ t('dashboard.viewAllUsage') }}
-          <Icon name="arrowRight" size="sm" />
+          <Icon name="arrowRight" size="xs" />
         </router-link>
       </div>
     </div>

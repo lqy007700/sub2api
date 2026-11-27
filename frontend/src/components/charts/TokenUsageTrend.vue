@@ -1,6 +1,6 @@
 <template>
-  <div class="card p-4">
-    <h3 class="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
+  <div class="card h-full p-5">
+    <h3 class="mb-4 text-sm font-semibold tracking-tight text-[#111827] dark:text-white">
       {{ t('admin.dashboard.tokenUsageTrend') }}
     </h3>
     <div v-if="loading" class="flex h-48 items-center justify-center">
@@ -11,7 +11,7 @@
     </div>
     <div
       v-else
-      class="flex h-48 items-center justify-center text-sm text-gray-500 dark:text-gray-400"
+      class="flex h-48 items-center justify-center text-sm text-[#8d99a8] dark:text-dark-400"
     >
       {{ t('admin.dashboard.noDataAvailable') }}
     </div>
@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   Chart as ChartJS,
@@ -54,18 +54,30 @@ const props = defineProps<{
   loading?: boolean
 }>()
 
-const isDarkMode = computed(() => {
-  return document.documentElement.classList.contains('dark')
+const isDarkMode = ref(document.documentElement.classList.contains('dark'))
+let observer: MutationObserver | null = null
+
+onMounted(() => {
+  if (typeof MutationObserver !== 'undefined') {
+    observer = new MutationObserver(() => {
+      isDarkMode.value = document.documentElement.classList.contains('dark')
+    })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+  }
+})
+
+onBeforeUnmount(() => {
+  observer?.disconnect()
 })
 
 const chartColors = computed(() => ({
-  text: isDarkMode.value ? '#e5e7eb' : '#374151',
-  grid: isDarkMode.value ? '#374151' : '#e5e7eb',
-  input: '#3b82f6',
-  output: '#10b981',
-  cacheCreation: '#f59e0b',
-  cacheRead: '#06b6d4',
-  cacheHitRate: '#8b5cf6'
+  text: isDarkMode.value ? '#9aa3b2' : '#8d99a8',
+  grid: isDarkMode.value ? 'rgba(255, 255, 255, 0.06)' : 'rgba(15, 23, 42, 0.055)',
+  input: isDarkMode.value ? '#3b9eff' : '#0071e3',
+  output: isDarkMode.value ? '#a78bfa' : '#5e5ce6',
+  cacheCreation: isDarkMode.value ? '#94a3b8' : '#64748b',
+  cacheRead: isDarkMode.value ? '#38bdf8' : '#0ea5e9',
+  cacheHitRate: isDarkMode.value ? '#34d399' : '#16a34a'
 }))
 
 const chartData = computed(() => {
@@ -78,33 +90,45 @@ const chartData = computed(() => {
         label: 'Input',
         data: props.trendData.map((d) => d.input_tokens),
         borderColor: chartColors.value.input,
-        backgroundColor: `${chartColors.value.input}20`,
+        backgroundColor: `${chartColors.value.input}1c`,
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 4,
         fill: true,
-        tension: 0.3
+        tension: 0.36
       },
       {
         label: 'Output',
         data: props.trendData.map((d) => d.output_tokens),
         borderColor: chartColors.value.output,
-        backgroundColor: `${chartColors.value.output}20`,
+        backgroundColor: `${chartColors.value.output}18`,
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 4,
         fill: true,
-        tension: 0.3
+        tension: 0.36
       },
       {
         label: 'Cache Creation',
         data: props.trendData.map((d) => d.cache_creation_tokens),
         borderColor: chartColors.value.cacheCreation,
-        backgroundColor: `${chartColors.value.cacheCreation}20`,
+        backgroundColor: `${chartColors.value.cacheCreation}14`,
+        borderWidth: 1.5,
+        pointRadius: 0,
+        pointHoverRadius: 3.5,
         fill: true,
-        tension: 0.3
+        tension: 0.36
       },
       {
         label: 'Cache Read',
         data: props.trendData.map((d) => d.cache_read_tokens),
         borderColor: chartColors.value.cacheRead,
-        backgroundColor: `${chartColors.value.cacheRead}20`,
+        backgroundColor: `${chartColors.value.cacheRead}16`,
+        borderWidth: 1.5,
+        pointRadius: 0,
+        pointHoverRadius: 3.5,
         fill: true,
-        tension: 0.3
+        tension: 0.36
       },
       {
         label: 'Cache Hit Rate',
@@ -113,10 +137,13 @@ const chartData = computed(() => {
           return totalPromptTokens > 0 ? (d.cache_read_tokens / totalPromptTokens) * 100 : 0
         }),
         borderColor: chartColors.value.cacheHitRate,
-        backgroundColor: `${chartColors.value.cacheHitRate}20`,
-        borderDash: [5, 5],
+        backgroundColor: `${chartColors.value.cacheHitRate}18`,
+        borderWidth: 1.5,
+        borderDash: [4, 4],
+        pointRadius: 0,
+        pointHoverRadius: 3.5,
         fill: false,
-        tension: 0.3,
+        tension: 0.36,
         yAxisID: 'yPercent'
       }
     ]

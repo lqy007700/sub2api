@@ -1,64 +1,98 @@
 <template>
-  <div class="space-y-6">
-    <!-- Date Range Filter -->
-    <div class="card p-4">
-      <div class="flex flex-wrap items-center gap-4">
-        <div class="flex items-center gap-2">
-          <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('dashboard.timeRange') }}:</span>
-          <DateRangePicker :start-date="startDate" :end-date="endDate" @update:startDate="$emit('update:startDate', $event)" @update:endDate="$emit('update:endDate', $event)" @change="$emit('dateRangeChange', $event)" />
-        </div>
-        <button @click="$emit('refresh')" :disabled="loading" class="btn btn-secondary">
+  <div class="space-y-4">
+    <!-- Compact Inline Controls Strip -->
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex flex-wrap items-center gap-2.5">
+        <DateRangePicker
+          :start-date="startDate"
+          :end-date="endDate"
+          @update:startDate="$emit('update:startDate', $event)"
+          @update:endDate="$emit('update:endDate', $event)"
+          @change="$emit('dateRangeChange', $event)"
+        />
+        <button @click="$emit('refresh')" :disabled="loading" class="btn btn-secondary btn-sm rounded-full px-3.5">
           {{ t('common.refresh') }}
         </button>
-        <div class="ml-auto flex items-center gap-2">
-          <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('dashboard.granularity') }}:</span>
-          <div class="w-28">
-            <Select :model-value="granularity" :options="[{value:'day', label:t('dashboard.day')}, {value:'hour', label:t('dashboard.hour')}]" @update:model-value="$emit('update:granularity', $event)" @change="$emit('granularityChange')" />
-          </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-medium text-[#526071] dark:text-dark-300">{{ t('dashboard.granularity') }}</span>
+        <div class="w-28">
+          <Select
+            :model-value="granularity"
+            :options="[{ value: 'day', label: t('dashboard.day') }, { value: 'hour', label: t('dashboard.hour') }]"
+            @update:model-value="$emit('update:granularity', $event)"
+            @change="$emit('granularityChange')"
+          />
         </div>
       </div>
     </div>
 
     <!-- Charts Grid -->
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <!-- Model Distribution Chart -->
-      <div class="card relative overflow-hidden p-4">
-        <div v-if="loading" class="absolute inset-0 z-10 flex items-center justify-center bg-white/50 backdrop-blur-sm dark:bg-dark-800/50">
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
+      <!-- Token Usage Trend Chart (Primary Wide Card) -->
+      <div class="lg:col-span-7">
+        <TokenUsageTrend :trend-data="trend" :loading="loading" />
+      </div>
+
+      <!-- Model Distribution Card (Apple Mist Segmented Bar + Tabular Breakdown) -->
+      <div class="card relative flex flex-col justify-between overflow-hidden p-5 lg:col-span-5">
+        <div v-if="loading" class="absolute inset-0 z-10 flex items-center justify-center bg-white/60 backdrop-blur-sm dark:bg-dark-800/60">
           <LoadingSpinner size="md" />
         </div>
-        <h3 class="mb-4 text-sm font-semibold text-gray-900 dark:text-white">{{ t('dashboard.modelDistribution') }}</h3>
-        <div class="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
-          <div class="h-48 w-48 shrink-0">
-            <Doughnut v-if="modelData" :data="modelData" :options="doughnutOptions" />
-            <div v-else class="flex h-full items-center justify-center text-sm text-gray-500 dark:text-gray-400">{{ t('dashboard.noDataAvailable') }}</div>
+        <div class="mb-3.5 flex items-center justify-between">
+          <h3 class="text-sm font-semibold tracking-tight text-[#111827] dark:text-white">{{ t('dashboard.modelDistribution') }}</h3>
+          <span v-if="models.length > 0" class="text-[11px] text-[#8d99a8] dark:text-dark-400">
+            {{ models.length }} {{ t('dashboard.model') }}
+          </span>
+        </div>
+
+        <div v-if="modelSegments.length > 0" class="flex flex-1 flex-col">
+          <!-- Proportional Segmented Bar -->
+          <div class="mb-4 flex h-2 w-full gap-1 overflow-hidden rounded-full">
+            <div
+              v-for="seg in modelSegments"
+              :key="seg.model"
+              class="h-full rounded-full transition-all duration-300"
+              :style="{ width: `${Math.max(seg.percent, 2)}%`, backgroundColor: seg.color }"
+              :title="`${seg.model}: ${seg.percent.toFixed(1)}%`"
+            />
           </div>
+
+          <!-- Clean Breakdown Table -->
           <div class="max-h-48 w-full min-w-0 flex-1 overflow-auto">
-            <table class="w-full text-xs">
+            <table class="w-full text-xs tabular-nums">
               <thead>
-                <tr class="text-gray-500 dark:text-gray-400">
-                  <th class="pb-2 text-left">{{ t('dashboard.model') }}</th>
-                  <th class="pb-2 text-right">{{ t('dashboard.requests') }}</th>
-                  <th class="pb-2 text-right">{{ t('dashboard.tokens') }}</th>
-                  <th class="pb-2 text-right">{{ t('dashboard.actual') }}</th>
-                  <th class="pb-2 text-right">{{ t('dashboard.standard') }}</th>
+                <tr class="text-[#8d99a8] dark:text-dark-400">
+                  <th class="pb-2 text-left font-medium">{{ t('dashboard.model') }}</th>
+                  <th class="pb-2 text-right font-medium">{{ t('dashboard.tokens') }}</th>
+                  <th class="pb-2 text-right font-medium">{{ t('dashboard.actual') }}</th>
+                  <th class="pb-2 text-right font-medium">{{ t('dashboard.standard') }}</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="model in models" :key="model.model" class="border-t border-gray-100 dark:border-dark-700">
-                  <td class="max-w-[100px] truncate py-1.5 font-medium text-gray-900 dark:text-white" :title="model.model">{{ model.model }}</td>
-                  <td class="py-1.5 text-right text-gray-600 dark:text-gray-400">{{ formatNumber(model.requests) }}</td>
-                  <td class="py-1.5 text-right text-gray-600 dark:text-gray-400">{{ formatTokens(model.total_tokens) }}</td>
-                  <td class="py-1.5 text-right text-green-600 dark:text-green-400">${{ formatCost(model.actual_cost) }}</td>
-                  <td class="py-1.5 text-right text-gray-400 dark:text-gray-500">${{ formatCost(model.cost) }}</td>
+                <tr
+                  v-for="seg in modelSegments"
+                  :key="seg.model"
+                  class="border-t border-slate-900/[0.045] dark:border-white/[0.05]"
+                >
+                  <td class="max-w-[140px] py-2 font-medium text-[#111827] dark:text-white" :title="seg.model">
+                    <div class="flex items-center gap-2">
+                      <span class="h-2 w-2 shrink-0 rounded-full" :style="{ backgroundColor: seg.color }"></span>
+                      <span class="truncate font-mono text-[11.5px]">{{ seg.model }}</span>
+                    </div>
+                  </td>
+                  <td class="py-2 text-right text-[#526071] dark:text-dark-300">{{ formatTokens(seg.total_tokens) }}</td>
+                  <td class="py-2 text-right font-medium text-[#111827] dark:text-white">${{ formatCost(seg.actual_cost) }}</td>
+                  <td class="py-2 text-right text-[#8d99a8] dark:text-dark-400">${{ formatCost(seg.cost) }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
+        <div v-else class="flex h-48 items-center justify-center text-sm text-[#8d99a8] dark:text-dark-400">
+          {{ t('dashboard.noDataAvailable') }}
+        </div>
       </div>
-
-      <!-- Token Usage Trend Chart -->
-      <TokenUsageTrend :trend-data="trend" :loading="loading" />
     </div>
   </div>
 </template>
@@ -69,35 +103,23 @@ import { useI18n } from 'vue-i18n'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import DateRangePicker from '@/components/common/DateRangePicker.vue'
 import Select from '@/components/common/Select.vue'
-import { Doughnut } from 'vue-chartjs'
 import TokenUsageTrend from '@/components/charts/TokenUsageTrend.vue'
 import type { TrendDataPoint, ModelStat } from '@/types'
-import { formatCostFixed as formatCost, formatNumberLocaleString as formatNumber, formatTokensK as formatTokens } from '@/utils/format'
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, Filler } from 'chart.js'
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, Filler)
+import { formatCostFixed as formatCost, formatTokensK as formatTokens } from '@/utils/format'
 
 const props = defineProps<{ loading: boolean, startDate: string, endDate: string, granularity: string, trend: TrendDataPoint[], models: ModelStat[] }>()
 defineEmits(['update:startDate', 'update:endDate', 'update:granularity', 'dateRangeChange', 'granularityChange', 'refresh'])
 const { t } = useI18n()
 
-const modelData = computed(() => !props.models?.length ? null : {
-  labels: props.models.map((m: ModelStat) => m.model),
-  datasets: [{
-    data: props.models.map((m: ModelStat) => m.total_tokens),
-    backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
-  }]
-})
+const MIST_PALETTE = ['#0071e3', '#5e5ce6', '#64748b', '#0ea5e9', '#16a34a', '#94a3b8', '#cbd5e1', '#38bdf8']
 
-const doughnutOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: { display: false },
-    tooltip: {
-      callbacks: {
-        label: (context: any) => `${context.label}: ${formatTokens(context.parsed)} tokens`
-      }
-    }
-  }
-}
+const modelSegments = computed(() => {
+  if (!props.models?.length) return []
+  const total = props.models.reduce((sum, m) => sum + (m.total_tokens || 0), 0)
+  return props.models.map((m, idx) => ({
+    ...m,
+    percent: total > 0 ? ((m.total_tokens || 0) / total) * 100 : 0,
+    color: MIST_PALETTE[idx % MIST_PALETTE.length]
+  }))
+})
 </script>

@@ -16,17 +16,30 @@
   <div
     v-else-if="compactHomeEnabled"
     data-testid="compact-home"
-    class="flex min-h-screen flex-col bg-gray-50 text-gray-900 dark:bg-dark-950 dark:text-white"
+    class="apple-mist-ambient flex min-h-screen flex-col bg-[#f4f5f8] text-[#111827] dark:bg-dark-950 dark:text-white"
   >
-    <header class="border-b border-gray-200 px-4 py-4 sm:px-6 dark:border-dark-800">
+    <header class="glass sticky top-0 z-20 border-b border-slate-900/[0.06] px-4 py-3 sm:px-6 dark:border-white/[0.07]">
       <nav class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 sm:gap-4">
-        <div class="flex min-w-0 flex-1 items-center gap-3">
+        <div class="flex min-w-0 flex-1 items-center gap-2.5">
           <img
-            :src="siteLogo || '/logo.svg'"
+            v-if="siteLogo"
+            :src="siteLogo"
             alt="Logo"
-            class="h-9 w-9 shrink-0 rounded-lg object-contain"
+            class="h-8 w-8 shrink-0 rounded-lg border border-slate-900/[0.08] bg-white object-contain p-0.5 shadow-glass-sm dark:border-white/[0.1] dark:bg-dark-800"
           />
-          <span class="min-w-0 truncate text-base font-semibold">{{ siteName }}</span>
+          <span
+            v-else
+            class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#111827] text-white shadow-sm dark:bg-white dark:text-[#0b0c0f]"
+          >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none">
+              <path d="M5 7h14M12 7v11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" />
+              <circle cx="17.5" cy="16.5" r="2.2" fill="#0071e3" />
+            </svg>
+          </span>
+          <span v-if="isDefaultBrand" class="min-w-0 truncate text-[15px] tracking-tight">
+            <span class="font-bold text-[#111827] dark:text-white">Thisai</span><span class="font-medium text-primary-500 dark:text-primary-400">.site</span>
+          </span>
+          <span v-else class="min-w-0 truncate text-[15px] font-semibold tracking-tight">{{ displaySiteName }}</span>
         </div>
         <div class="flex max-w-full shrink-0 flex-wrap items-center justify-end gap-2">
           <a
@@ -34,31 +47,31 @@
             :href="docUrl"
             target="_blank"
             rel="noopener noreferrer"
-            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 dark:text-dark-400 dark:hover:bg-dark-800"
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#526071] transition-colors hover:bg-slate-900/[0.05] hover:text-[#111827] dark:text-dark-300 dark:hover:bg-white/[0.07] dark:hover:text-white"
             :title="t('home.viewDocs')"
           >
-            <Icon name="book" size="md" />
+            <Icon name="book" size="sm" />
           </a>
           <router-link
             v-if="showModelPlazaEntry"
             to="/model-plaza"
-            class="flex h-10 shrink-0 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-dark-400 dark:hover:bg-dark-800 dark:hover:text-white"
+            class="flex h-9 shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-medium text-[#526071] transition-colors hover:bg-slate-900/[0.05] hover:text-[#111827] dark:text-dark-300 dark:hover:bg-white/[0.07] dark:hover:text-white"
             :title="t('nav.modelPlaza')"
           >
-            <Icon name="grid" size="md" />
+            <Icon name="grid" size="sm" />
             <span class="hidden sm:inline">{{ t('nav.modelPlaza') }}</span>
           </router-link>
           <button
-            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 dark:text-dark-400 dark:hover:bg-dark-800"
+            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[#526071] transition-colors hover:bg-slate-900/[0.05] hover:text-[#111827] dark:text-dark-300 dark:hover:bg-white/[0.07] dark:hover:text-white"
             :title="isDark ? t('home.switchToLight') : t('home.switchToDark')"
             @click="toggleTheme"
           >
-            <Icon v-if="isDark" name="sun" size="md" />
-            <Icon v-else name="moon" size="md" />
+            <Icon v-if="isDark" name="sun" size="sm" />
+            <Icon v-else name="moon" size="sm" />
           </button>
           <router-link
             :to="isAuthenticated ? dashboardPath : '/login'"
-            class="inline-flex min-h-10 shrink-0 items-center justify-center rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
+            class="inline-flex min-h-9 shrink-0 items-center justify-center rounded-full bg-[#111827] px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-[#1f2937] dark:bg-white dark:text-[#0b0c0f] dark:hover:bg-gray-200"
           >
             {{ isAuthenticated ? t('home.dashboard') : t('home.login') }}
           </router-link>
@@ -69,116 +82,124 @@
     <main class="flex min-w-0 flex-1 items-center justify-center px-4 py-16 sm:px-6">
       <div class="min-w-0 max-w-2xl text-center">
         <img
-          :src="siteLogo || '/logo.svg'"
+          v-if="siteLogo"
+          :src="siteLogo"
           alt="Logo"
-          class="mx-auto mb-6 h-20 w-20 rounded-2xl object-contain"
+          class="mx-auto mb-6 h-16 w-16 rounded-2xl border border-slate-900/[0.08] bg-white object-contain p-2 shadow-card dark:border-white/[0.1] dark:bg-dark-800"
         />
-        <h1 class="[overflow-wrap:anywhere] text-3xl font-bold md:text-4xl">{{ siteName }}</h1>
-        <p class="mt-4 whitespace-pre-wrap [overflow-wrap:anywhere] text-base text-gray-600 dark:text-dark-300">{{ siteSubtitle }}</p>
+        <span
+          v-else
+          class="mx-auto mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#111827] text-white shadow-card dark:bg-white dark:text-[#0b0c0f]"
+        >
+          <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none">
+            <path d="M5 7h14M12 7v11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" />
+            <circle cx="17.5" cy="16.5" r="2.2" fill="#0071e3" />
+          </svg>
+        </span>
+        <h1 class="[overflow-wrap:anywhere] text-3xl font-semibold tracking-tight md:text-4xl">
+          <template v-if="isDefaultBrand">
+            <span>Thisai</span><span class="text-primary-500 dark:text-primary-400">.site</span>
+          </template>
+          <template v-else>{{ displaySiteName }}</template>
+        </h1>
+        <p class="mt-3 whitespace-pre-wrap [overflow-wrap:anywhere] text-base text-[#526071] dark:text-dark-300">{{ siteSubtitle }}</p>
         <router-link
           :to="isAuthenticated ? dashboardPath : '/login'"
-          class="mt-8 inline-flex min-h-10 items-center justify-center rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-700"
+          class="btn btn-primary mt-8 inline-flex min-h-10 rounded-full px-6 py-2.5 text-sm"
         >
           {{ isAuthenticated ? t('home.goToDashboard') : t('home.login') }}
         </router-link>
       </div>
     </main>
 
-    <footer class="min-w-0 border-t border-gray-200 px-4 py-5 text-center text-sm text-gray-500 [overflow-wrap:anywhere] sm:px-6 dark:border-dark-800 dark:text-dark-400">
-      &copy; {{ currentYear }} {{ siteName }}
+    <footer class="min-w-0 border-t border-slate-900/[0.06] px-4 py-5 text-center text-xs text-[#8d99a8] [overflow-wrap:anywhere] sm:px-6 dark:border-white/[0.07] dark:text-dark-400">
+      &copy; {{ currentYear }} {{ displaySiteName }}
     </footer>
   </div>
 
-  <!-- Default Home Page -->
+  <!-- Default Home Page (Apple Mist · Thisai.site) -->
   <div
     v-else
-    class="relative flex min-h-screen flex-col overflow-hidden bg-[#f6f7f9] dark:bg-dark-950"
+    class="apple-mist-ambient relative flex min-h-screen flex-col overflow-hidden bg-[#f4f5f8] text-[#111827] dark:bg-dark-950 dark:text-white"
   >
-    <!-- Background Decorations -->
-    <div class="pointer-events-none absolute inset-0 overflow-hidden">
-      <div
-        class="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-primary-400/10 blur-3xl"
-      ></div>
-      <div
-        class="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-primary-500/5 blur-3xl"
-      ></div>
-    </div>
-
     <!-- Header -->
-    <header class="relative z-20 border-b border-gray-200/80 bg-white/80 px-6 py-4 backdrop-blur-sm dark:border-dark-800 dark:bg-dark-950/80">
-      <nav class="mx-auto flex max-w-6xl items-center justify-between">
-        <!-- Logo -->
-        <div class="flex items-center">
-          <div class="h-10 w-10 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-dark-700 dark:bg-dark-800">
-            <img :src="siteLogo || '/logo.svg'" alt="Logo" class="h-full w-full object-contain" />
+    <header class="glass sticky top-0 z-20 border-b border-slate-900/[0.06] px-5 py-3 sm:px-6 dark:border-white/[0.07]">
+      <nav class="mx-auto flex max-w-5xl items-center justify-between">
+        <!-- Brand Lockup -->
+        <div class="flex items-center gap-2.5">
+          <div
+            v-if="siteLogo"
+            class="h-8 w-8 overflow-hidden rounded-lg border border-slate-900/[0.08] bg-white p-0.5 shadow-glass-sm dark:border-white/[0.1] dark:bg-dark-800"
+          >
+            <img :src="siteLogo" alt="Logo" class="h-full w-full object-contain" />
           </div>
+          <span
+            v-else
+            class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-[#111827] text-white shadow-sm dark:bg-white dark:text-[#0b0c0f]"
+          >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none">
+              <path d="M5 7h14M12 7v11" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" />
+              <circle cx="17.5" cy="16.5" r="2.2" fill="#0071e3" />
+            </svg>
+          </span>
+          <span v-if="isDefaultBrand" class="text-[15px] tracking-tight">
+            <span class="font-bold text-[#111827] dark:text-white">Thisai</span><span class="font-medium text-primary-500 dark:text-primary-400">.site</span>
+          </span>
+          <span v-else class="text-[15px] font-semibold tracking-tight text-[#111827] dark:text-white">{{ displaySiteName }}</span>
         </div>
 
         <!-- Nav Actions -->
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
           <!-- Doc Link -->
           <a
             v-if="docUrl"
             :href="docUrl"
             target="_blank"
             rel="noopener noreferrer"
-            class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-dark-400 dark:hover:bg-dark-800 dark:hover:text-white"
+            class="rounded-full p-2 text-[#526071] transition-colors hover:bg-slate-900/[0.05] hover:text-[#111827] dark:text-dark-300 dark:hover:bg-white/[0.07] dark:hover:text-white"
             :title="t('home.viewDocs')"
           >
-            <Icon name="book" size="md" />
+            <Icon name="book" size="sm" />
           </a>
 
           <!-- Model Plaza Link -->
           <router-link
             v-if="showModelPlazaEntry"
             to="/model-plaza"
-            class="inline-flex items-center gap-1.5 rounded-lg p-2 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-dark-400 dark:hover:bg-dark-800 dark:hover:text-white"
+            class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[#526071] transition-colors hover:bg-slate-900/[0.05] hover:text-[#111827] dark:text-dark-300 dark:hover:bg-white/[0.07] dark:hover:text-white"
             :title="t('nav.modelPlaza')"
           >
-            <Icon name="grid" size="md" />
+            <Icon name="grid" size="sm" />
             <span class="hidden sm:inline">{{ t('nav.modelPlaza') }}</span>
           </router-link>
 
           <!-- Theme Toggle -->
           <button
             @click="toggleTheme"
-            class="rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-dark-400 dark:hover:bg-dark-800 dark:hover:text-white"
+            class="rounded-full p-2 text-[#526071] transition-colors hover:bg-slate-900/[0.05] hover:text-[#111827] dark:text-dark-300 dark:hover:bg-white/[0.07] dark:hover:text-white"
             :title="isDark ? t('home.switchToLight') : t('home.switchToDark')"
           >
-            <Icon v-if="isDark" name="sun" size="md" />
-            <Icon v-else name="moon" size="md" />
+            <Icon v-if="isDark" name="sun" size="sm" />
+            <Icon v-else name="moon" size="sm" />
           </button>
 
           <!-- Login / Dashboard Button -->
           <router-link
             v-if="isAuthenticated"
             :to="dashboardPath"
-            class="inline-flex items-center gap-1.5 rounded-full bg-gray-900 py-1 pl-1 pr-2.5 transition-colors hover:bg-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700"
+            class="inline-flex items-center gap-1.5 rounded-full bg-[#111827] py-1.5 pl-1.5 pr-3.5 text-xs font-medium text-white transition-colors hover:bg-[#1f2937] dark:bg-white dark:text-[#0b0c0f] dark:hover:bg-gray-200"
           >
             <span
-              class="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-primary-400 to-primary-600 text-[10px] font-semibold text-white"
+              class="flex h-5 w-5 items-center justify-center rounded-full bg-white/15 text-[10px] font-semibold dark:bg-black/10"
             >
               {{ userInitial }}
             </span>
-            <span class="text-xs font-medium text-white">{{ t('home.dashboard') }}</span>
-            <svg
-              class="h-3 w-3 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"
-              />
-            </svg>
+            <span>{{ t('home.dashboard') }}</span>
           </router-link>
           <router-link
             v-else
             to="/login"
-            class="inline-flex items-center rounded-full bg-gray-900 px-3 py-1 text-xs font-medium text-white transition-colors hover:bg-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700"
+            class="inline-flex items-center rounded-full bg-[#111827] px-4 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#1f2937] dark:bg-white dark:text-[#0b0c0f] dark:hover:bg-gray-200"
           >
             {{ t('home.login') }}
           </router-link>
@@ -187,300 +208,265 @@
     </header>
 
     <!-- Main Content -->
-    <main class="relative z-10 flex-1 px-6 py-20">
-      <div class="mx-auto max-w-6xl">
-        <!-- Hero Section - Left/Right Layout -->
-        <div class="mb-14 flex flex-col items-center justify-between gap-14 lg:flex-row lg:gap-20">
-          <!-- Left: Text Content -->
-          <div class="flex-1 text-center lg:text-left">
-            <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-primary-200 bg-primary-50 px-3 py-1.5 text-xs font-semibold text-primary-700 dark:border-primary-800 dark:bg-primary-950/40 dark:text-primary-300">
-              <span class="h-1.5 w-1.5 rounded-full bg-primary-500"></span>
-              {{ t('home.heroKicker') }}
-            </div>
-            <h1
-              class="mb-5 max-w-2xl text-4xl font-bold tracking-tight text-gray-900 dark:text-white md:text-5xl lg:text-6xl"
-            >
-              {{ t('home.heroTitle') }}
-            </h1>
-            <p class="mb-3 max-w-xl text-lg leading-relaxed text-gray-600 dark:text-dark-300 md:text-xl">
-              {{ t('home.heroDescription') }}
-            </p>
-            <p class="mb-8 max-w-xl text-sm text-gray-500 dark:text-dark-400">
-              {{ siteSubtitle }}
-            </p>
+    <main class="relative z-10 flex-1 px-5 py-12 sm:px-6 md:py-16">
+      <div class="mx-auto max-w-5xl">
+        <!-- Centered Editorial Hero -->
+        <section class="mx-auto mb-10 max-w-2xl text-center">
+          <div class="mb-5 inline-flex items-center gap-2 rounded-full border border-slate-900/[0.08] bg-white px-3.5 py-1.5 text-xs font-medium text-[#526071] shadow-pill dark:border-white/[0.1] dark:bg-dark-800 dark:text-dark-200">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 ring-2 ring-emerald-500/20"></span>
+            <span class="font-mono font-semibold text-[#111827] dark:text-white">{{ domainBadge }}</span>
+            <span class="h-2.5 w-px bg-slate-900/[0.12] dark:bg-white/[0.14]"></span>
+            <span>{{ t('home.heroKicker') }}</span>
+          </div>
 
-            <!-- CTA Button -->
+          <h1 class="mb-4 text-4xl font-semibold tracking-tight text-[#111827] dark:text-white md:text-5xl">
+            <span>{{ t('home.heroTitleLead') }}</span><span class="text-primary-500 dark:text-primary-400">{{ t('home.heroTitleAccent') }}</span><span>。</span>
+          </h1>
+
+          <p class="mx-auto mb-7 max-w-xl text-sm leading-relaxed text-[#526071] dark:text-dark-300 md:text-base">
+            {{ t('home.heroDescription') }}
+          </p>
+
+          <!-- CTA Buttons -->
+          <div class="flex flex-wrap items-center justify-center gap-3">
+            <router-link
+              :to="isAuthenticated ? dashboardPath : '/login'"
+              class="btn btn-primary rounded-full px-7 py-2.5 text-sm"
+            >
+              {{ isAuthenticated ? t('home.goToDashboard') : t('home.getStarted') }}
+              <Icon name="arrowRight" size="sm" :stroke-width="2" />
+            </router-link>
+            <router-link
+              v-if="showModelPlazaEntry"
+              to="/model-plaza"
+              class="btn btn-secondary rounded-full px-6 py-2.5 text-sm"
+            >
+              {{ t('home.welcome.browseModels') }}
+            </router-link>
+          </div>
+        </section>
+
+        <!-- Core Dual Bento: 01 不降智 + 02 速度快 -->
+        <section class="mb-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <!-- Card 01: Native Fidelity (不降智) -->
+          <div class="card flex flex-col justify-between gap-4 p-6">
             <div>
-              <router-link
-                :to="isAuthenticated ? dashboardPath : '/login'"
-                class="btn btn-primary px-8 py-3 text-base shadow-md shadow-primary-500/20"
-              >
-                {{ isAuthenticated ? t('home.goToDashboard') : t('home.getStarted') }}
-                <Icon name="arrowRight" size="md" class="ml-2" :stroke-width="2" />
-              </router-link>
+              <div class="flex min-h-[26px] items-center justify-between gap-2">
+                <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-300">
+                  {{ t('home.welcome.fidelityTag') }}
+                </span>
+                <span class="font-mono text-[11px] text-[#8d99a8] dark:text-dark-400">01</span>
+              </div>
+              <h2 class="mt-3 text-base font-semibold tracking-tight text-[#111827] dark:text-white">
+                {{ t('home.welcome.fidelityTitle') }}
+              </h2>
+              <p class="mt-1.5 text-xs leading-relaxed text-[#526071] dark:text-dark-300">
+                {{ t('home.welcome.fidelityDesc') }}
+              </p>
+            </div>
+
+            <div class="flex flex-1 flex-col justify-between rounded-xl border border-slate-900/[0.05] bg-[#f8f9fb] px-4 py-3 dark:border-white/[0.06] dark:bg-dark-900/70">
+              <div class="divide-y divide-slate-900/[0.05] dark:divide-white/[0.06]">
+                <div class="flex items-center justify-between gap-3 py-2 first:pt-0.5 text-xs">
+                  <span class="text-[#526071] dark:text-dark-300">{{ t('home.welcome.fidelityModelLabel') }}</span>
+                  <span class="font-medium text-[#111827] dark:text-white">
+                    <span class="mr-1 text-emerald-600 dark:text-emerald-400">✓</span>{{ t('home.welcome.fidelityModelValue') }}
+                  </span>
+                </div>
+                <div class="flex items-center justify-between gap-3 py-2 text-xs">
+                  <span class="text-[#526071] dark:text-dark-300">{{ t('home.welcome.fidelityThinkingLabel') }}</span>
+                  <span class="font-medium text-[#111827] dark:text-white">
+                    <span class="mr-1 text-emerald-600 dark:text-emerald-400">✓</span>{{ t('home.welcome.fidelityThinkingValue') }}
+                  </span>
+                </div>
+                <div class="flex items-center justify-between gap-3 py-2 text-xs">
+                  <span class="text-[#526071] dark:text-dark-300">{{ t('home.welcome.fidelityCacheLabel') }}</span>
+                  <span class="font-medium text-[#111827] dark:text-white">
+                    <span class="mr-1 text-emerald-600 dark:text-emerald-400">✓</span>{{ t('home.welcome.fidelityCacheValue') }}
+                  </span>
+                </div>
+                <div class="flex items-center justify-between gap-3 py-2 text-xs">
+                  <span class="text-[#526071] dark:text-dark-300">{{ t('home.welcome.fidelityToolsLabel') }}</span>
+                  <span class="font-medium text-[#111827] dark:text-white">
+                    <span class="mr-1 text-emerald-600 dark:text-emerald-400">✓</span>{{ t('home.welcome.fidelityToolsValue') }}
+                  </span>
+                </div>
+              </div>
+              <p class="mt-2 border-t border-slate-900/[0.05] pt-2.5 text-[11px] text-[#8d99a8] dark:border-white/[0.06] dark:text-dark-400">
+                {{ t('home.welcome.fidelityNote') }}
+              </p>
             </div>
           </div>
 
-          <!-- Right: Terminal Animation -->
-          <div class="flex flex-1 justify-center lg:justify-end">
-            <div class="terminal-container">
-              <div class="terminal-window">
-                <!-- Window header -->
-                <div class="terminal-header">
-                  <div class="terminal-buttons">
-                    <span class="btn-close"></span>
-                    <span class="btn-minimize"></span>
-                    <span class="btn-maximize"></span>
-                  </div>
-                  <span class="terminal-title">terminal</span>
+          <!-- Card 02: Fast Low-Latency Streaming (速度快 · 动态适配后台已开启模型) -->
+          <div class="terminal-container card flex flex-col justify-between gap-4 p-6">
+            <div>
+              <div class="flex min-h-[26px] items-center justify-between gap-2">
+                <span class="inline-flex items-center rounded-full bg-primary-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary-600 dark:bg-primary-400/15 dark:text-primary-300">
+                  {{ t('home.welcome.speedTag') }}
+                </span>
+
+                <!-- Only show protocol tabs when 2+ platforms are enabled in backend -->
+                <div
+                  v-if="speedTabs.length > 1"
+                  class="inline-flex items-center gap-0.5 rounded-full bg-[#f1f3f7] p-0.5 dark:bg-dark-900"
+                >
+                  <button
+                    v-for="tab in speedTabs"
+                    :key="tab.key"
+                    type="button"
+                    @click="activeProtoKey = tab.key"
+                    class="rounded-full px-2.5 py-0.5 text-[11px] font-medium transition-all"
+                    :class="
+                      activeProto.key === tab.key
+                        ? 'bg-white text-[#111827] shadow-pill dark:bg-dark-700 dark:text-white dark:shadow-none'
+                        : 'text-[#526071] hover:text-[#111827] dark:text-dark-300 dark:hover:text-white'
+                    "
+                  >
+                    {{ tab.label }}
+                  </button>
                 </div>
-                <!-- Terminal content -->
-                <div class="terminal-body">
-                  <div class="code-line line-1">
-                    <span class="code-prompt">$</span>
-                    <span class="code-cmd">curl</span>
-                    <span class="code-flag">-X POST</span>
-                    <span class="code-url">/v1/messages</span>
+                <span v-else class="font-mono text-[11px] text-[#8d99a8] dark:text-dark-400">02</span>
+              </div>
+
+              <h2 class="mt-3 text-base font-semibold tracking-tight text-[#111827] dark:text-white">
+                {{ t('home.welcome.speedTitle') }}
+              </h2>
+              <p class="mt-1.5 text-xs leading-relaxed text-[#526071] dark:text-dark-300">
+                {{ t('home.welcome.speedDesc') }}
+              </p>
+            </div>
+
+            <div class="flex flex-1 flex-col justify-between gap-3 rounded-xl border border-slate-900/[0.05] bg-[#f8f9fb] px-4 py-3 dark:border-white/[0.06] dark:bg-dark-900/70">
+              <div class="flex items-center justify-between border-b border-slate-900/[0.05] pb-2.5 font-mono text-[11.5px] dark:border-white/[0.06]">
+                <span class="font-medium text-[#111827] dark:text-white">{{ activeProto.path }}</span>
+                <span class="font-semibold text-emerald-600 dark:text-emerald-400">{{ t('home.terminal.success') }}</span>
+              </div>
+
+              <div class="space-y-3">
+                <div class="space-y-1.5">
+                  <div class="flex items-center justify-between text-[11.5px]">
+                    <span class="text-[#526071] dark:text-dark-300">{{ t('home.welcome.speedRouteLabel') }}</span>
+                    <span class="font-mono font-semibold tabular-nums text-[#111827] dark:text-white">{{ activeProto.route }}</span>
                   </div>
-                  <div class="code-line line-2">
-                    <span class="code-comment"># {{ t('home.terminal.routing') }}</span>
+                  <div class="h-1.5 w-full overflow-hidden rounded-full bg-[#e8ebf0] dark:bg-white/[0.08]">
+                    <div class="h-full rounded-full bg-primary-500 transition-all duration-300 dark:bg-primary-400" :style="{ width: activeProto.routeWidth }"></div>
                   </div>
-                  <div class="code-line line-3">
-                    <span class="code-success">{{ t('home.terminal.success') }}</span>
-                    <span class="code-response">{{ t('home.terminal.response') }}</span>
+                </div>
+
+                <div class="space-y-1.5">
+                  <div class="flex items-center justify-between text-[11.5px]">
+                    <span class="text-[#526071] dark:text-dark-300">{{ t('home.welcome.speedTtftLabel') }}</span>
+                    <span class="font-mono font-semibold tabular-nums text-[#111827] dark:text-white">{{ activeProto.ttft }}</span>
                   </div>
-                  <div class="code-line line-4">
-                    <span class="code-prompt">$</span>
-                    <span class="cursor"></span>
+                  <div class="h-1.5 w-full overflow-hidden rounded-full bg-[#e8ebf0] dark:bg-white/[0.08]">
+                    <div class="h-full rounded-full bg-primary-500 transition-all duration-300 dark:bg-primary-400" :style="{ width: activeProto.ttftWidth }"></div>
+                  </div>
+                </div>
+
+                <div class="space-y-1.5">
+                  <div class="flex items-center justify-between text-[11.5px]">
+                    <span class="text-[#526071] dark:text-dark-300">{{ t('home.welcome.speedFailoverLabel') }}</span>
+                    <span class="font-semibold text-emerald-600 dark:text-emerald-400">{{ t('home.welcome.speedFailoverValue') }}</span>
+                  </div>
+                  <div class="h-1.5 w-full overflow-hidden rounded-full bg-[#e8ebf0] dark:bg-white/[0.08]">
+                    <div class="h-full w-[92%] rounded-full bg-emerald-500 dark:bg-emerald-400"></div>
                   </div>
                 </div>
               </div>
+
+              <p class="border-t border-slate-900/[0.05] pt-2.5 text-[11px] text-[#8d99a8] dark:border-white/[0.06] dark:text-dark-400">
+                <template v-if="enabledPlatforms.length > 0">
+                  {{ t('home.welcome.speedChannelPrefix') }}<span class="font-mono text-[#526071] dark:text-dark-200">{{ activeProto.label }}</span> · {{ activeProto.protocolHint }}
+                </template>
+                <template v-else>
+                  {{ t('home.welcome.speedGenericNote') }}
+                </template>
+              </p>
             </div>
           </div>
-        </div>
+        </section>
 
-        <!-- Feature Tags - Centered -->
-        <div class="mb-12 flex flex-wrap items-center justify-center gap-4 md:gap-6">
-          <div
-            class="inline-flex items-center gap-2.5 rounded-full border border-gray-200/50 bg-white/80 px-5 py-2.5 shadow-sm backdrop-blur-sm dark:border-dark-700/50 dark:bg-dark-800/80"
-          >
-            <Icon name="swap" size="sm" class="text-primary-500" />
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{
-              t('home.tags.lowLatency')
-            }}</span>
-          </div>
-          <div
-            class="inline-flex items-center gap-2.5 rounded-full border border-gray-200/50 bg-white/80 px-5 py-2.5 shadow-sm backdrop-blur-sm dark:border-dark-700/50 dark:bg-dark-800/80"
-          >
-            <Icon name="shield" size="sm" class="text-primary-500" />
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{
-              t('home.tags.nativeQuality')
-            }}</span>
-          </div>
-          <div
-            class="inline-flex items-center gap-2.5 rounded-full border border-gray-200/50 bg-white/80 px-5 py-2.5 shadow-sm backdrop-blur-sm dark:border-dark-700/50 dark:bg-dark-800/80"
-          >
-            <Icon name="chart" size="sm" class="text-primary-500" />
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{
-              t('home.tags.smartRouting')
-            }}</span>
-          </div>
-        </div>
-
-        <!-- Features Grid -->
-        <div class="mb-12 grid gap-6 md:grid-cols-3">
-          <!-- Feature 1: Unified Gateway -->
-          <div
-            class="group rounded-xl border border-gray-200 bg-white p-6 shadow-card transition-shadow duration-200 hover:shadow-card-hover dark:border-dark-700 dark:bg-dark-800"
-          >
-            <div
-              class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-300"
-            >
-              <Icon name="server" size="lg" class="text-white" />
+        <!-- One-Line Endpoint Bar -->
+        <section class="mb-6">
+          <div class="card flex flex-wrap items-center justify-between gap-3 px-5 py-3.5">
+            <div class="flex min-w-0 flex-wrap items-center gap-2.5 text-xs text-[#526071] dark:text-dark-300">
+              <span class="font-semibold text-[#111827] dark:text-white">{{ t('home.welcome.endpointLabel') }}</span>
+              <code class="rounded-lg bg-[#f1f3f7] px-2.5 py-1 font-mono text-xs font-medium text-[#111827] dark:bg-dark-900 dark:text-gray-100">
+                {{ apiEndpoint }}
+              </code>
+              <span class="truncate">{{ compatDescription }}</span>
             </div>
-            <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-              {{ t('home.performance.fast') }}
-            </h3>
-            <p class="text-sm leading-relaxed text-gray-600 dark:text-dark-400">
-              {{ t('home.performance.fastDesc') }}
-            </p>
-          </div>
-
-          <!-- Feature 2: Account Pool -->
-          <div
-            class="group rounded-xl border border-gray-200 bg-white p-6 shadow-card transition-shadow duration-200 hover:shadow-card-hover dark:border-dark-700 dark:bg-dark-800"
-          >
-            <div
-              class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-300"
+            <button
+              type="button"
+              @click="copyEndpoint"
+              class="shrink-0 rounded-full bg-primary-500/10 px-3.5 py-1.5 text-xs font-semibold text-primary-600 transition-colors hover:bg-primary-500/15 dark:bg-primary-400/15 dark:text-primary-300 dark:hover:bg-primary-400/20"
             >
-              <svg
-                class="h-6 w-6 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="1.5"
+              {{ copiedEndpoint ? t('home.welcome.copiedEndpoint') : t('home.welcome.copyEndpoint') }}
+            </button>
+          </div>
+        </section>
+
+        <!-- Dynamic Enabled Platforms Strip (never shows disabled Claude/Gemini) -->
+        <section class="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <template v-if="enabledPlatforms.length > 0">
+              <div
+                v-for="p in enabledPlatforms"
+                :key="p"
+                class="inline-flex items-center gap-2 rounded-full border border-slate-900/[0.08] bg-white px-3.5 py-1.5 text-xs font-medium text-[#111827] shadow-glass-sm dark:border-white/[0.09] dark:bg-dark-800 dark:text-white"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
-                />
-              </svg>
+                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                <span>{{ platformDisplayName(p) }}</span>
+                <span
+                  v-if="enabledPlatforms.length === 1"
+                  class="text-[11px] text-[#8d99a8] dark:text-dark-400"
+                >
+                  · {{ t('home.welcome.enabledBadge') }}
+                </span>
+              </div>
+            </template>
+            <div
+              v-else
+              class="inline-flex items-center gap-2 rounded-full border border-slate-900/[0.08] bg-white px-3.5 py-1.5 text-xs font-medium text-[#526071] shadow-glass-sm dark:border-white/[0.09] dark:bg-dark-800 dark:text-dark-200"
+            >
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+              <span>{{ t('home.welcome.privatePlatformsNote') }}</span>
             </div>
-            <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-              {{ t('home.performance.quality') }}
-            </h3>
-            <p class="text-sm leading-relaxed text-gray-600 dark:text-dark-400">
-              {{ t('home.performance.qualityDesc') }}
-            </p>
           </div>
 
-          <!-- Feature 3: Billing & Quota -->
-          <div
-            class="group rounded-xl border border-gray-200 bg-white p-6 shadow-card transition-shadow duration-200 hover:shadow-card-hover dark:border-dark-700 dark:bg-dark-800"
-          >
-            <div
-              class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-300"
-            >
-              <svg
-                class="h-6 w-6 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="1.5"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
-                />
-              </svg>
-            </div>
-            <h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
-              {{ t('home.performance.routing') }}
-            </h3>
-            <p class="text-sm leading-relaxed text-gray-600 dark:text-dark-400">
-              {{ t('home.performance.routingDesc') }}
-            </p>
-          </div>
-        </div>
-
-        <!-- Supported Providers -->
-        <div class="mb-8 text-center">
-          <h2 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">
-            {{ t('home.providers.title') }}
-          </h2>
-          <p class="text-sm text-gray-600 dark:text-dark-400">
-            {{ t('home.providers.description') }}
-          </p>
-        </div>
-
-        <div class="mb-16 flex flex-wrap items-center justify-center gap-4">
-          <!-- Claude - Supported -->
-          <div
-            class="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 shadow-card dark:border-dark-700 dark:bg-dark-800"
-          >
-            <div
-              class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-orange-400 to-orange-500"
-            >
-              <span class="text-xs font-bold text-white">C</span>
-            </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{ t('home.providers.claude') }}</span>
-            <span
-              class="rounded bg-primary-100 px-1.5 py-0.5 text-[10px] font-medium text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
-              >{{ t('home.providers.supported') }}</span
-            >
-          </div>
-          <!-- GPT - Supported -->
-          <div
-            class="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 shadow-card dark:border-dark-700 dark:bg-dark-800"
-          >
-            <div
-              class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-green-500 to-green-600"
-            >
-              <span class="text-xs font-bold text-white">G</span>
-            </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">GPT</span>
-            <span
-              class="rounded bg-primary-100 px-1.5 py-0.5 text-[10px] font-medium text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
-              >{{ t('home.providers.supported') }}</span
-            >
-          </div>
-          <!-- Gemini - Supported -->
-          <div
-            class="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 shadow-card dark:border-dark-700 dark:bg-dark-800"
-          >
-            <div
-              class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-blue-600"
-            >
-              <span class="text-xs font-bold text-white">G</span>
-            </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{ t('home.providers.gemini') }}</span>
-            <span
-              class="rounded bg-primary-100 px-1.5 py-0.5 text-[10px] font-medium text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
-              >{{ t('home.providers.supported') }}</span
-            >
-          </div>
-          <!-- Antigravity - Supported -->
-          <div
-            class="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 shadow-card dark:border-dark-700 dark:bg-dark-800"
-          >
-            <div
-              class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-rose-500 to-pink-600"
-            >
-              <span class="text-xs font-bold text-white">A</span>
-            </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{ t('home.providers.antigravity') }}</span>
-            <span
-              class="rounded bg-primary-100 px-1.5 py-0.5 text-[10px] font-medium text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
-              >{{ t('home.providers.supported') }}</span
-            >
-          </div>
-          <!-- More - Coming Soon -->
-          <div
-            class="flex items-center gap-2 rounded-xl border border-gray-200/50 bg-white/40 px-5 py-3 opacity-60 backdrop-blur-sm dark:border-dark-700/50 dark:bg-dark-800/40"
-          >
-            <div
-              class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-gray-500 to-gray-600"
-            >
-              <span class="text-xs font-bold text-white">+</span>
-            </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-dark-200">{{ t('home.providers.more') }}</span>
-            <span
-              class="rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-500 dark:bg-dark-700 dark:text-dark-400"
-              >{{ t('home.providers.soon') }}</span
-            >
-          </div>
-        </div>
+          <span class="text-xs text-[#8d99a8] dark:text-dark-400">
+            {{ t('home.welcome.transparentBilling') }}
+          </span>
+        </section>
       </div>
     </main>
 
     <!-- Footer -->
-    <footer class="relative z-10 border-t border-gray-200/50 px-6 py-8 dark:border-dark-800/50">
+    <footer class="relative z-10 border-t border-slate-900/[0.06] px-6 py-5 dark:border-white/[0.07]">
       <div
-        class="mx-auto flex max-w-6xl flex-col items-center justify-center gap-4 text-center sm:flex-row sm:text-left"
+        class="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 text-center sm:flex-row sm:text-left"
       >
-        <p class="text-sm text-gray-500 dark:text-dark-400">
-          &copy; {{ currentYear }} {{ siteName }}. {{ t('home.footer.allRightsReserved') }}
+        <p class="text-xs text-[#8d99a8] dark:text-dark-400">
+          &copy; {{ currentYear }} {{ displaySiteName }}. {{ t('home.footer.allRightsReserved') }}
         </p>
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-5">
           <a
             v-if="docUrl"
             :href="docUrl"
             target="_blank"
             rel="noopener noreferrer"
-            class="text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-dark-400 dark:hover:text-white"
+            class="text-xs text-[#526071] transition-colors hover:text-[#111827] dark:text-dark-300 dark:hover:text-white"
           >
             {{ t('home.docs') }}
           </a>
-          <a
-            :href="githubUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-dark-400 dark:hover:text-white"
+          <router-link
+            v-if="showModelPlazaEntry"
+            to="/model-plaza"
+            class="text-xs text-[#526071] transition-colors hover:text-[#111827] dark:text-dark-300 dark:hover:text-white"
           >
-            GitHub
-          </a>
+            {{ t('nav.modelPlaza') }}
+          </router-link>
         </div>
       </div>
     </footer>
@@ -488,12 +474,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore, useAppStore } from '@/stores'
+import { getModelPlaza } from '@/api/modelPlaza'
 import Icon from '@/components/icons/Icon.vue'
 import { sanitizeUrl } from '@/utils/url'
 import { FeatureFlags, isFeatureFlagEnabled } from '@/utils/featureFlags'
+
+interface ProtoPreview {
+  key: string
+  label: string
+  path: string
+  route: string
+  routeWidth: string
+  ttft: string
+  ttftWidth: string
+  protocolHint: string
+}
 
 const { t } = useI18n()
 
@@ -501,7 +499,23 @@ const authStore = useAuthStore()
 const appStore = useAppStore()
 
 // Site settings - directly from appStore (already initialized from injected config)
-const siteName = computed(() => appStore.cachedPublicSettings?.site_name || appStore.siteName || 'Sub2API')
+const rawSiteName = computed(() => (appStore.cachedPublicSettings?.site_name || appStore.siteName || '').trim())
+const isDefaultBrand = computed(() => {
+  const n = rawSiteName.value
+  return !n || n === 'Sub2API' || n.toLowerCase() === 'thisai.site'
+})
+const displaySiteName = computed(() => (isDefaultBrand.value ? 'Thisai.site' : rawSiteName.value))
+const domainBadge = computed(() => {
+  if (!isDefaultBrand.value) return displaySiteName.value
+  if (typeof window !== 'undefined' && window.location?.hostname) {
+    const host = window.location.hostname
+    if (host && host !== 'localhost' && host !== '127.0.0.1') {
+      return host
+    }
+  }
+  return 'thisai.site'
+})
+
 const siteLogo = computed(() => sanitizeUrl(appStore.cachedPublicSettings?.site_logo || appStore.siteLogo || '', { allowRelative: true, allowDataUrl: true }))
 const siteSubtitle = computed(() => appStore.cachedPublicSettings?.site_subtitle || 'AI API Gateway Platform')
 const docUrl = computed(() => sanitizeUrl(appStore.cachedPublicSettings?.doc_url || appStore.docUrl || ''))
@@ -519,9 +533,6 @@ const isHomeContentUrl = computed(() => {
 // Theme
 const isDark = ref(document.documentElement.classList.contains('dark'))
 
-// GitHub URL
-const githubUrl = 'https://github.com/Wei-Shaw/sub2api'
-
 // Auth state
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 const modelPlazaRequiresAuth = computed(
@@ -536,6 +547,181 @@ const userInitial = computed(() => {
   const user = authStore.user
   if (!user || !user.email) return ''
   return user.email.charAt(0).toUpperCase()
+})
+
+// Endpoint bar
+const apiEndpoint = computed(() => {
+  const configured = (appStore.cachedPublicSettings?.api_base_url || '').trim().replace(/\/+$/, '')
+  if (configured) {
+    return configured.endsWith('/v1') ? configured : `${configured}/v1`
+  }
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    const origin = window.location.origin
+    if (!origin.startsWith('http://localhost') && !origin.startsWith('http://127.0.0.1')) {
+      return `${origin}/v1`
+    }
+  }
+  return 'https://thisai.site/v1'
+})
+
+const copiedEndpoint = ref(false)
+let copyTimer: ReturnType<typeof setTimeout> | null = null
+
+async function copyEndpoint() {
+  try {
+    if (navigator?.clipboard?.writeText) {
+      await navigator.clipboard.writeText(apiEndpoint.value)
+    }
+  } catch {
+    // Ignore clipboard permission errors in restricted contexts
+  }
+  copiedEndpoint.value = true
+  if (copyTimer) clearTimeout(copyTimer)
+  copyTimer = setTimeout(() => {
+    copiedEndpoint.value = false
+  }, 1500)
+}
+
+// Dynamic enabled platforms loaded from /model-plaza when publicly available
+const PLATFORM_ORDER = ['openai', 'anthropic', 'gemini', 'antigravity', 'grok', 'deepseek', 'kimi', 'zhipu', 'minimax']
+const PLATFORM_NAMES: Record<string, string> = {
+  openai: 'OpenAI',
+  anthropic: 'Claude',
+  gemini: 'Gemini',
+  antigravity: 'Antigravity',
+  grok: 'Grok',
+  deepseek: 'DeepSeek',
+  kimi: 'Kimi',
+  zhipu: 'GLM',
+  minimax: 'MiniMax'
+}
+
+const PROTO_PRESETS: Record<string, ProtoPreview> = {
+  openai: {
+    key: 'openai',
+    label: 'OpenAI',
+    path: 'POST /v1/responses',
+    route: '~19ms',
+    routeWidth: '16%',
+    ttft: '~0.5s',
+    ttftWidth: '38%',
+    protocolHint: 'Responses / Chat'
+  },
+  anthropic: {
+    key: 'anthropic',
+    label: 'Claude',
+    path: 'POST /v1/messages',
+    route: '~22ms',
+    routeWidth: '19%',
+    ttft: '~0.6s',
+    ttftWidth: '44%',
+    protocolHint: 'Messages · Thinking & Cache'
+  },
+  gemini: {
+    key: 'gemini',
+    label: 'Gemini',
+    path: 'POST /v1beta/models',
+    route: '~25ms',
+    routeWidth: '22%',
+    ttft: '~0.5s',
+    ttftWidth: '40%',
+    protocolHint: 'GenerateContent · Stream'
+  },
+  antigravity: {
+    key: 'antigravity',
+    label: 'Antigravity',
+    path: 'POST /v1/messages',
+    route: '~24ms',
+    routeWidth: '20%',
+    ttft: '~0.6s',
+    ttftWidth: '42%',
+    protocolHint: 'Native Passthrough'
+  },
+  generic: {
+    key: 'generic',
+    label: 'API',
+    path: 'POST /v1/chat/completions',
+    route: '~20ms',
+    routeWidth: '17%',
+    ttft: '~0.5s',
+    ttftWidth: '40%',
+    protocolHint: 'Native Stream'
+  }
+}
+
+const enabledPlatforms = ref<string[]>([])
+const activeProtoKey = ref<string>('generic')
+let plazaAbortController: AbortController | null = null
+
+function platformDisplayName(p: string): string {
+  return PLATFORM_NAMES[p] || p.toUpperCase()
+}
+
+const speedTabs = computed<ProtoPreview[]>(() => {
+  const seen = new Set<string>()
+  const list: ProtoPreview[] = []
+  for (const p of enabledPlatforms.value) {
+    const preset = PROTO_PRESETS[p]
+    if (preset && !seen.has(preset.key)) {
+      seen.add(preset.key)
+      list.push(preset)
+    }
+    if (list.length >= 3) break
+  }
+  return list
+})
+
+const activeProto = computed<ProtoPreview>(() => {
+  if (speedTabs.value.length === 0) return PROTO_PRESETS.generic
+  return speedTabs.value.find((item) => item.key === activeProtoKey.value) || speedTabs.value[0]
+})
+
+const compatDescription = computed(() => {
+  if (enabledPlatforms.value.length === 0) {
+    return t('home.welcome.compatGeneric')
+  }
+  const clients: string[] = []
+  if (enabledPlatforms.value.includes('anthropic')) clients.push('Claude Code')
+  if (enabledPlatforms.value.includes('openai')) clients.push('Codex')
+  clients.push('Cursor')
+  return `${t('home.welcome.compatPrefix')}${clients.join('、')}${t('home.welcome.compatSuffix')}`
+})
+
+async function loadEnabledPlatforms() {
+  if (!showModelPlazaEntry.value || hasHomeContent.value || compactHomeEnabled.value) {
+    enabledPlatforms.value = []
+    return
+  }
+  plazaAbortController?.abort()
+  plazaAbortController = new AbortController()
+  try {
+    const res = await getModelPlaza({ signal: plazaAbortController.signal })
+    const set = new Set<string>()
+    for (const group of res?.groups || []) {
+      const p = (group.platform || '').trim().toLowerCase()
+      if (p) set.add(p)
+    }
+    const sorted = Array.from(set).sort((a, b) => {
+      const ai = PLATFORM_ORDER.indexOf(a)
+      const bi = PLATFORM_ORDER.indexOf(b)
+      if (ai === -1 && bi === -1) return a.localeCompare(b)
+      if (ai === -1) return 1
+      if (bi === -1) return -1
+      return ai - bi
+    })
+    enabledPlatforms.value = sorted
+    if (sorted.length > 0 && PROTO_PRESETS[sorted[0]]) {
+      activeProtoKey.value = sorted[0]
+    }
+  } catch {
+    // Gracefully stay in neutral generic mode if plaza is disabled or unreachable
+  }
+}
+
+watch(showModelPlazaEntry, (enabled) => {
+  if (enabled && enabledPlatforms.value.length === 0) {
+    void loadEnabledPlatforms()
+  }
 })
 
 // Current year for footer
@@ -570,168 +756,20 @@ onMounted(() => {
   if (!appStore.publicSettingsLoaded) {
     appStore.fetchPublicSettings()
   }
+
+  if (showModelPlazaEntry.value) {
+    void loadEnabledPlatforms()
+  }
+})
+
+onBeforeUnmount(() => {
+  plazaAbortController?.abort()
+  if (copyTimer) clearTimeout(copyTimer)
 })
 </script>
 
 <style scoped>
-/* Terminal Container */
 .terminal-container {
   position: relative;
-  display: inline-block;
-}
-
-/* Terminal Window */
-.terminal-window {
-  width: 420px;
-  background: linear-gradient(145deg, #202a43 0%, #111827 100%);
-  border-radius: 14px;
-  box-shadow:
-    0 20px 42px -16px rgba(24, 36, 67, 0.5),
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-  transform: translateY(0);
-  transition: transform 0.3s ease;
-}
-
-.terminal-window:hover {
-  transform: translateY(-4px);
-}
-
-/* Terminal Header */
-.terminal-header {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  background: rgba(30, 41, 59, 0.8);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.terminal-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.terminal-buttons span {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-}
-
-.btn-close {
-  background: #ef4444;
-}
-.btn-minimize {
-  background: #eab308;
-}
-.btn-maximize {
-  background: #22c55e;
-}
-
-.terminal-title {
-  flex: 1;
-  text-align: center;
-  font-size: 12px;
-  font-family: ui-monospace, monospace;
-  color: #64748b;
-  margin-right: 52px;
-}
-
-/* Terminal Body */
-.terminal-body {
-  padding: 20px 24px;
-  font-family: ui-monospace, 'Fira Code', monospace;
-  font-size: 14px;
-  line-height: 2;
-}
-
-.code-line {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  opacity: 0;
-  animation: line-appear 0.5s ease forwards;
-}
-
-.line-1 {
-  animation-delay: 0.3s;
-}
-.line-2 {
-  animation-delay: 1s;
-}
-.line-3 {
-  animation-delay: 1.8s;
-}
-.line-4 {
-  animation-delay: 2.5s;
-}
-
-@keyframes line-appear {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.code-prompt {
-  color: #22c55e;
-  font-weight: bold;
-}
-.code-cmd {
-  color: #38bdf8;
-}
-.code-flag {
-  color: #a78bfa;
-}
-.code-url {
-  color: #60a5fa;
-}
-.code-comment {
-  color: #64748b;
-  font-style: italic;
-}
-.code-success {
-  color: #22c55e;
-  background: rgba(34, 197, 94, 0.15);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-weight: 600;
-}
-.code-response {
-  color: #fbbf24;
-}
-
-/* Blinking Cursor */
-.cursor {
-  display: inline-block;
-  width: 8px;
-  height: 16px;
-  background: #22c55e;
-  animation: blink 1s step-end infinite;
-}
-
-@keyframes blink {
-  0%,
-  50% {
-    opacity: 1;
-  }
-  51%,
-  100% {
-    opacity: 0;
-  }
-}
-
-/* Dark mode adjustments */
-:deep(.dark) .terminal-window {
-  box-shadow:
-    0 20px 42px -16px rgba(0, 0, 0, 0.65),
-    0 0 0 1px rgba(96, 165, 250, 0.2),
-    0 0 32px rgba(56, 87, 214, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 </style>
