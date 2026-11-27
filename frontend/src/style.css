@@ -391,32 +391,32 @@
     @apply w-full;
     @apply max-h-[95vh] sm:max-h-[90vh];
     @apply bg-white dark:bg-dark-800;
-    @apply rounded-2xl shadow-glass;
+    @apply rounded-[20px] shadow-glass;
     @apply border border-slate-900/[0.08] dark:border-white/[0.1];
-    @apply flex flex-col;
+    @apply flex flex-col overflow-hidden;
   }
 
   .modal-header {
-    @apply border-b border-gray-200 px-4 py-3 dark:border-dark-700;
+    @apply border-b border-slate-900/[0.06] px-5 py-4 dark:border-white/[0.07];
     @apply sm:px-6 sm:py-4;
     @apply flex items-center justify-between;
     @apply flex-shrink-0;
   }
 
   .modal-title {
-    @apply text-lg font-semibold text-gray-900 dark:text-white;
+    @apply text-base font-semibold tracking-tight text-[#111827] dark:text-white;
   }
 
   .modal-body {
-    @apply px-4 py-3;
-    @apply sm:px-6 sm:py-4;
+    @apply px-5 py-4;
+    @apply sm:px-6 sm:py-5;
     @apply flex-1 overflow-y-auto;
   }
 
   .modal-footer {
-    @apply border-t border-gray-200 px-4 py-3 dark:border-dark-700;
+    @apply border-t border-slate-900/[0.06] bg-[#f8f9fb]/80 px-5 py-3.5 dark:border-white/[0.07] dark:bg-dark-900/50;
     @apply sm:px-6 sm:py-4;
-    @apply flex items-center justify-end gap-3;
+    @apply flex items-center justify-end gap-2.5;
     @apply flex-shrink-0;
   }
 
@@ -476,30 +476,29 @@
   /* ============ Dialog ============ */
   .dialog-overlay {
     @apply fixed inset-0 z-50;
-    @apply bg-black/40 dark:bg-black/60;
+    @apply bg-slate-950/35 backdrop-blur-md dark:bg-black/60;
     @apply flex items-center justify-center p-4;
   }
 
   .dialog-container {
-    @apply flex w-full flex-col;
+    @apply flex w-full flex-col overflow-hidden;
     @apply max-h-[90vh];
-    @apply rounded-xl bg-white dark:bg-dark-800;
-    @apply shadow-lg;
+    @apply rounded-[20px] border border-slate-900/[0.08] bg-white shadow-glass dark:border-white/[0.1] dark:bg-dark-800;
   }
 
   .dialog-header {
-    @apply border-b border-gray-100 px-6 py-4 dark:border-dark-700;
+    @apply border-b border-slate-900/[0.06] px-6 py-4 dark:border-white/[0.07];
     @apply flex items-center justify-between;
   }
 
   .dialog-body {
-    @apply overflow-y-auto px-6 py-4;
+    @apply overflow-y-auto px-6 py-5;
   }
 
   .dialog-footer {
-    @apply border-t border-gray-100 px-6 py-4 dark:border-dark-700;
-    @apply bg-gray-50/60 dark:bg-dark-900/40;
-    @apply flex items-center justify-end gap-3;
+    @apply border-t border-slate-900/[0.06] px-6 py-4 dark:border-white/[0.07];
+    @apply bg-[#f8f9fb]/80 dark:bg-dark-900/50;
+    @apply flex items-center justify-end gap-2.5;
   }
 
   /* ============ Toast 通知 ============ */

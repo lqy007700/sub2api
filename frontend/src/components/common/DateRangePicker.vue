@@ -324,38 +324,38 @@ onUnmounted(() => {
 <style scoped>
 .date-picker-trigger {
   @apply flex items-center gap-2;
-  @apply rounded-lg px-3 py-2 text-sm;
-  @apply bg-white dark:bg-dark-800;
-  @apply border border-gray-200 dark:border-dark-600;
-  @apply text-gray-700 dark:text-gray-300;
-  @apply transition-all duration-200;
-  @apply focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30;
-  @apply hover:border-gray-300 dark:hover:border-dark-500;
+  @apply rounded-xl px-3.5 py-2 text-sm;
+  @apply bg-[#f8f9fb] dark:bg-dark-900;
+  @apply border border-slate-900/[0.09] dark:border-white/[0.1];
+  @apply text-[#111827] dark:text-gray-100;
+  @apply transition-all duration-150;
+  @apply focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:focus:bg-dark-800;
+  @apply hover:border-slate-900/[0.16] hover:bg-white dark:hover:border-white/[0.16] dark:hover:bg-dark-800;
   @apply cursor-pointer;
 }
 
 .date-picker-trigger-open {
-  @apply border-primary-500 ring-2 ring-primary-500/30;
+  @apply border-primary-500 bg-white ring-2 ring-primary-500/20 dark:bg-dark-800;
 }
 
 .date-picker-icon {
-  @apply text-gray-400 dark:text-dark-400;
+  @apply text-[#8d99a8] dark:text-dark-400;
 }
 
 .date-picker-value {
-  @apply font-medium;
+  @apply font-medium tabular-nums;
 }
 
 .date-picker-chevron {
-  @apply text-gray-400 dark:text-dark-400;
+  @apply text-[#8d99a8] dark:text-dark-400;
 }
 
 .date-picker-dropdown {
   @apply absolute left-0 z-[100] mt-2;
-  @apply bg-white dark:bg-dark-800;
-  @apply rounded-xl;
-  @apply border border-gray-200 dark:border-dark-700;
-  @apply shadow-lg shadow-black/10 dark:shadow-black/30;
+  @apply bg-white/95 backdrop-blur-xl dark:bg-dark-800/95;
+  @apply rounded-2xl;
+  @apply border border-slate-900/[0.08] dark:border-white/[0.1];
+  @apply shadow-glass;
   @apply overflow-hidden;
   @apply min-w-[320px];
 }
@@ -365,19 +365,18 @@ onUnmounted(() => {
 }
 
 .date-picker-preset {
-  @apply rounded-md px-3 py-1.5 text-xs font-medium;
-  @apply text-gray-600 dark:text-gray-400;
-  @apply hover:bg-gray-100 dark:hover:bg-dark-700;
+  @apply rounded-xl px-3 py-1.5 text-xs font-medium;
+  @apply text-[#526071] dark:text-dark-300;
+  @apply hover:bg-slate-900/[0.045] hover:text-[#111827] dark:hover:bg-white/[0.06] dark:hover:text-white;
   @apply transition-colors duration-150;
 }
 
 .date-picker-preset-active {
-  @apply bg-primary-100 dark:bg-primary-900/30;
-  @apply text-primary-700 dark:text-primary-300;
+  @apply bg-[#111827] text-white dark:bg-white dark:text-[#0b0c0f];
 }
 
 .date-picker-divider {
-  @apply border-t border-gray-100 dark:border-dark-700;
+  @apply border-t border-slate-900/[0.06] dark:border-white/[0.07];
 }
 
 .date-picker-custom {
@@ -389,15 +388,15 @@ onUnmounted(() => {
 }
 
 .date-picker-label {
-  @apply mb-1 block text-xs font-medium text-gray-500 dark:text-gray-400;
+  @apply mb-1 block text-xs font-medium text-[#526071] dark:text-dark-300;
 }
 
 .date-picker-input {
-  @apply w-full rounded-md px-2 py-1.5 text-sm;
-  @apply bg-gray-50 dark:bg-dark-700;
-  @apply border border-gray-200 dark:border-dark-600;
-  @apply text-gray-900 dark:text-gray-100;
-  @apply focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30;
+  @apply w-full rounded-xl px-2.5 py-1.5 text-sm tabular-nums;
+  @apply bg-[#f8f9fb] dark:bg-dark-900;
+  @apply border border-slate-900/[0.09] dark:border-white/[0.1];
+  @apply text-[#111827] dark:text-gray-100;
+  @apply focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:focus:bg-dark-800;
 }
 
 .date-picker-input::-webkit-calendar-picker-indicator {
@@ -414,13 +413,13 @@ onUnmounted(() => {
 }
 
 .date-picker-actions {
-  @apply flex justify-end p-2 pt-0;
+  @apply flex justify-end p-2.5 pt-0;
 }
 
 .date-picker-apply {
-  @apply rounded-lg px-4 py-1.5 text-sm font-medium;
-  @apply bg-primary-600 text-white;
-  @apply hover:bg-primary-700;
+  @apply rounded-full px-4 py-1.5 text-xs font-medium;
+  @apply bg-[#111827] text-white dark:bg-white dark:text-[#0b0c0f];
+  @apply hover:bg-[#1f2937] dark:hover:bg-gray-100;
   @apply transition-colors duration-150;
 }
 

@@ -1,13 +1,19 @@
 <template>
   <div class="table-page-layout" :class="{ 'mobile-mode': isMobile }">
-    <!-- 固定区域：操作按钮 -->
-    <div v-if="$slots.actions" class="layout-section-fixed">
-      <slot name="actions" />
-    </div>
-
-    <!-- 固定区域：搜索和过滤器 -->
-    <div v-if="$slots.filters" class="layout-section-fixed">
-      <slot name="filters" />
+    <!-- 统一苹果雾银工具栏容器：操作按钮 + 搜索和过滤器 -->
+    <div v-if="$slots.actions || $slots.filters" class="layout-section-fixed">
+      <div class="card flex flex-col gap-3.5 px-4 py-3.5 sm:px-5">
+        <div v-if="$slots.actions" class="w-full">
+          <slot name="actions" />
+        </div>
+        <div
+          v-if="$slots.filters"
+          class="w-full"
+          :class="$slots.actions ? 'border-t border-slate-900/[0.05] pt-3.5 dark:border-white/[0.06]' : ''"
+        >
+          <slot name="filters" />
+        </div>
+      </div>
     </div>
 
     <!-- 滚动区域：表格 -->

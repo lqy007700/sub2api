@@ -387,6 +387,36 @@
           </div>
         </section>
 
+        <!-- ModelTrace Public Model Attribution Verification Banner -->
+        <section class="mb-5">
+          <div class="card flex flex-wrap items-center justify-between gap-4 px-5 py-4">
+            <div class="flex min-w-0 items-start gap-3 sm:items-center">
+              <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/15 dark:text-emerald-300 sm:mt-0">
+                <Icon name="shield" size="sm" />
+              </span>
+              <div class="min-w-0">
+                <p class="text-xs font-semibold text-[#111827] dark:text-white sm:text-[13px]">
+                  {{ t('home.welcome.modelTraceTitle') }}
+                </p>
+                <p class="mt-0.5 text-xs text-[#526071] dark:text-dark-300">
+                  {{ t('home.welcome.modelTraceDesc') }}
+                </p>
+              </div>
+            </div>
+            <a
+              href="https://xqy2006.github.io/ModelTrace/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-emerald-600/20 bg-emerald-500/10 px-4 py-1.5 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-500/15 dark:border-emerald-400/25 dark:bg-emerald-400/15 dark:text-emerald-300 dark:hover:bg-emerald-400/20"
+            >
+              <span>{{ t('home.welcome.modelTraceAction') }}</span>
+              <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M9 7h8v8" />
+              </svg>
+            </a>
+          </div>
+        </section>
+
         <!-- One-Line Endpoint Bar -->
         <section class="mb-6">
           <div class="card flex flex-wrap items-center justify-between gap-3 px-5 py-3.5">
